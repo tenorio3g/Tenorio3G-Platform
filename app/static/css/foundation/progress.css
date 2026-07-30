@@ -1,0 +1,95 @@
+/* ==================================================
+   TENORIO3G FOUNDATION UI
+   Primitive: Progress
+   Version: 1.0
+================================================== */
+
+
+/* --------------------------------------------------
+   Contenedor principal
+-------------------------------------------------- */
+
+.progress {
+    width: 100%;
+}
+
+
+/* --------------------------------------------------
+   Pista o fondo
+-------------------------------------------------- */
+
+.progress__track {
+    width: 100%;
+    height: 12px;
+
+    overflow: hidden;
+
+    background-color: var(
+        --color-border,
+        #e5e7eb
+    );
+
+    border-radius: 999px;
+}
+
+
+/* --------------------------------------------------
+   Barra de avance
+-------------------------------------------------- */
+
+.progress__bar {
+    height: 100%;
+
+    border-radius: 999px;
+
+    transition: width 350ms ease;
+}
+
+
+/* --------------------------------------------------
+   Información inferior
+-------------------------------------------------- */
+
+.progress__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: var(--space-sm, 8px);
+
+    margin-top: var(--space-sm, 8px);
+
+    color: var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size: var(
+        --font-size-sm,
+        0.875rem
+    );
+}
+
+
+/* --------------------------------------------------
+   Variantes
+-------------------------------------------------- */
+
+.progress--success .progress__bar {
+    background-color: #22c55e;
+}
+
+
+.progress--warning .progress__bar {
+    background-color: #f59e0b;
+}
+
+
+.progress--danger .progress__bar {
+    background-color: #ef4444;
+}
+
+
+.progress--info .progress__bar {
+    background-color: #2563eb;
+}

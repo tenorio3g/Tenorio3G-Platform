@@ -1,0 +1,118 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Foundation Showcase | Tenorio3G
+{% endblock %}
+
+{% block content %}
+
+<!-- ==================================================
+     FOUNDATION SHOWCASE
+================================================== -->
+
+<section class="panel panel--highlighted">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <p class="asset-label">
+                TENORIO3G FOUNDATION
+            </p>
+
+            <h1 class="panel__title">
+                Foundation Showcase
+            </h1>
+
+            <p class="panel__subtitle">
+                Catálogo oficial de componentes reutilizables del
+                Foundation Framework.
+            </p>
+
+        </div>
+
+    </header>
+
+</section>
+
+
+<!-- ==================================================
+     COMPONENTES
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+
+                Componentes disponibles
+
+            </h2>
+
+            <p class="panel__subtitle">
+
+                Cada componente del Foundation debe
+                aparecer aquí antes de utilizarse en
+                cualquier módulo del sistema.
+
+            </p>
+
+        </div>
+
+    </header>
+
+    <div class="panel__body">
+
+        <div class="status-grid">
+
+            {% for section in sections %}
+
+                <article
+                    class="smart-card"
+                    id="{{ section.id }}"
+                >
+
+                    <header class="smart-card-header">
+
+                        <div>
+
+                            <h3 class="smart-card-title">
+
+                                {{ section.title }}
+
+                            </h3>
+
+                            <p>
+
+                                {{ section.description }}
+
+                            </p>
+
+                        </div>
+
+                    </header>
+
+                    <footer class="smart-card-actions">
+
+                        <span class="button button-small">
+
+                            {{ section.component_name }}
+
+                        </span>
+
+                    </footer>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

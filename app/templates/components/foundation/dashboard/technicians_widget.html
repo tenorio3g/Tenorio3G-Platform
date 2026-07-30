@@ -1,0 +1,91 @@
+<section class="dashboard-widget">
+
+    <div class="dashboard-widget-header">
+
+        <div>
+            <p class="dashboard-widget-label">
+                PERSONAL
+            </p>
+
+            <h2 class="dashboard-widget-title">
+                👷 Técnicos y carga de trabajo
+            </h2>
+        </div>
+
+        <a class="dashboard-widget-link" href="#">
+            Ver personal →
+        </a>
+
+    </div>
+
+    {% if tecnicos %}
+
+        <div class="technicians-list">
+
+            {% for tecnico in tecnicos %}
+
+                <article class="technician-item">
+
+                    <div class="technician-avatar">
+                        {{ tecnico.nombre[0] }}
+                    </div>
+
+                    <div class="technician-main">
+
+                        <div class="technician-heading">
+
+                            <div>
+                                <h3 class="technician-name">
+                                    {{ tecnico.nombre }}
+                                </h3>
+
+                                <p class="technician-role">
+                                    No. {{ tecnico.numero }} · {{ tecnico.rol }}
+                                </p>
+                            </div>
+
+                            {% with categoria=tecnico.estado %}
+                                {% include "components/shared/category_badge.html" %}
+                            {% endwith %}
+
+                        </div>
+
+                        <div class="technician-load-row">
+
+                            <span>
+                                {{ tecnico.ordenes_asignadas }}
+                                órdenes asignadas
+                            </span>
+
+                            <strong>
+                                {{ tecnico.carga }}%
+                            </strong>
+
+                        </div>
+
+                        <div class="technician-load-track">
+
+                            <div
+                                class="technician-load-value"
+                                style="--load-width: {{ tecnico.carga }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="dashboard-empty">
+            No hay técnicos registrados.
+        </div>
+
+    {% endif %}
+
+</section>

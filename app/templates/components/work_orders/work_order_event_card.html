@@ -1,0 +1,23 @@
+<div class="event-card">
+
+    <div class="event-card-header">
+        <strong>{{ evento.titulo }}</strong>
+
+        <span class="event-card-date">
+            {{ evento.fecha.strftime("%d/%m/%Y %H:%M") }}
+        </span>
+    </div>
+
+    <p class="event-card-type">
+        {{ evento.tipo }}
+    </p>
+
+    {% if evento.descripcion %}
+        <p>{{ evento.descripcion }}</p>
+    {% endif %}
+
+    <small>
+        Registrado por: {{ evento.usuario }}
+    </small>
+
+</div>

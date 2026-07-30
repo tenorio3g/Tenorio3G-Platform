@@ -1,0 +1,44 @@
+<div class="status-box">
+
+    <h4>{{ actividad.titulo }}</h4>
+
+    {% if actividad.descripcion %}
+        <p>{{ actividad.descripcion }}</p>
+    {% endif %}
+
+    <hr>
+
+    <strong>Estado</strong><br>
+
+    {% with estado=actividad.estado %}
+        {% include "components/shared/status_badge.html" %}
+    {% endwith %}
+
+    <br><br>
+
+    <strong>Responsable</strong><br>
+
+    {% if actividad.responsable %}
+        {{ actividad.responsable.nombre }}<br>
+
+        <small>
+            No. {{ actividad.responsable.numero_empleado }}
+            · {{ actividad.responsable.rol }}
+        </small>
+    {% else %}
+        Sin responsable asignado
+    {% endif %}
+
+    {% if actividad.tiempo_estimado %}
+        <br><br>
+        <strong>Tiempo estimado</strong><br>
+        {{ actividad.tiempo_estimado }}
+    {% endif %}
+
+    {% if actividad.tiempo_real %}
+        <br><br>
+        <strong>Tiempo real</strong><br>
+        {{ actividad.tiempo_real }}
+    {% endif %}
+
+</div>

@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Agregar Actividad
+{% endblock %}
+
+{% block content %}
+
+<div class="asset-card">
+
+    <p class="asset-label">
+        WORK ORDERS
+    </p>
+
+    <h1>
+        📋 Agregar Actividad
+    </h1>
+
+    <p>
+        Orden OT-{{ orden.numero }} · {{ orden.titulo }}
+    </p>
+
+    <hr>
+
+    {% if error %}
+        <div class="form-alert form-alert-error">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST" class="work-order-form">
+
+        <div class="form-grid">
+
+            <div class="form-field form-field-full">
+
+                <label for="titulo">
+                    Título de la actividad
+                </label>
+
+                <input
+                    id="titulo"
+                    name="titulo"
+                    type="text"
+                    required
+                    value="{{ datos.get('titulo', '') if datos else '' }}"
+                    placeholder="Ej. Verificar torque de conexiones"
+                >
+
+            </div>
+
+            <div class="form-field form-field-full">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    rows="5"
+                    placeholder="Describa el trabajo que debe realizarse"
+                >{{ datos.get('descripcion', '') if datos else '' }}</textarea>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="numero_responsable">
+                    Número del responsable
+                </label>
+
+                <input
+                    id="numero_responsable"
+                    name="numero_responsable"
+                    type="text"
+                    required
+                    value="{{ datos.get('numero_responsable', '') if datos else '' }}"
+                    placeholder="Ej. 0003"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                Agregar Actividad
+            </button>
+
+            <a
+                href="{{ url_for(
+                    'work_orders.detalle',
+                    numero=orden.numero
+                ) }}"
+                class="button button-secondary"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

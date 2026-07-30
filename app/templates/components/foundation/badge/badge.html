@@ -1,0 +1,40 @@
+{#
+    Foundation UI — Badge v1.0
+
+    Variables:
+    - text: texto visible
+    - type: success, warning, danger, info o neutral
+    - size: small, normal o large
+    - icon: icono o emoji opcional
+    - show_dot: muestra un punto de estado
+#}
+
+{% set badge_type = type|default("neutral") %}
+{% set badge_size = size|default("normal") %}
+
+<span
+    class="
+        badge
+        badge--{{ badge_type }}
+        {% if badge_size != 'normal' %}
+            badge--{{ badge_size }}
+        {% endif %}
+    "
+>
+    {% if show_dot|default(false) %}
+        <span
+            class="badge__dot"
+            aria-hidden="true"
+        ></span>
+    {% endif %}
+
+    {% if icon %}
+        <span aria-hidden="true">
+            {{ icon }}
+        </span>
+    {% endif %}
+
+    <span>
+        {{ text }}
+    </span>
+</span>

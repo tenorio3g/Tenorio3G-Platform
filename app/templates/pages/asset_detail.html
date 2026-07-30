@@ -1,0 +1,15 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+{{ activo.nombre }}
+{% endblock %}
+
+{% block content %}
+
+{% include "components/assets/asset_card.html" %}
+
+{% include "components/assets/status_panel.html" %}
+
+{% include "components/assets/event_timeline.html" %}
+
+{% endblock %}

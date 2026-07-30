@@ -1,0 +1,276 @@
+/* =====================================================
+   TENORIO3G PLATFORM
+   FOUNDATION UI — TYPOGRAPHY
+===================================================== */
+
+
+/* =====================================================
+   BASE
+===================================================== */
+
+html {
+    font-size: 16px;
+}
+
+body {
+    margin: 0;
+
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-md);
+
+    color: var(--color-text);
+    background-color: var(--color-background);
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* =====================================================
+   HEADINGS
+===================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: var(--space-md);
+
+    color: var(--color-text-strong);
+
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-sm);
+}
+
+h1 {
+    font-size: var(--font-size-2xl);
+}
+
+h2 {
+    font-size: var(--font-size-xl);
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+}
+
+h4 {
+    font-size: var(--font-size-md);
+}
+
+h5 {
+    font-size: var(--font-size-sm);
+}
+
+h6 {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+
+/* =====================================================
+   PARAGRAPHS
+===================================================== */
+
+p {
+    margin-top: 0;
+    margin-bottom: var(--space-md);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =====================================================
+   LINKS
+===================================================== */
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+
+    transition:
+        color var(--transition-fast),
+        opacity var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-primary-light);
+}
+
+a:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+
+/* =====================================================
+   TEXT UTILITIES
+===================================================== */
+
+.text-xs {
+    font-size: var(--font-size-xs);
+}
+
+.text-sm {
+    font-size: var(--font-size-sm);
+}
+
+.text-md {
+    font-size: var(--font-size-md);
+}
+
+.text-lg {
+    font-size: var(--font-size-lg);
+}
+
+.text-xl {
+    font-size: var(--font-size-xl);
+}
+
+.text-2xl {
+    font-size: var(--font-size-2xl);
+}
+
+
+.text-normal {
+    font-weight: var(--font-weight-normal);
+}
+
+.text-medium {
+    font-weight: var(--font-weight-medium);
+}
+
+.text-semibold {
+    font-weight: var(--font-weight-semibold);
+}
+
+.text-bold {
+    font-weight: var(--font-weight-bold);
+}
+
+.text-extra-bold {
+    font-weight: var(--font-weight-extra-bold);
+}
+
+
+/* =====================================================
+   TEXT COLORS
+===================================================== */
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-success {
+    color: var(--color-success-dark);
+}
+
+.text-warning {
+    color: var(--color-warning-dark);
+}
+
+.text-danger {
+    color: var(--color-danger-dark);
+}
+
+.text-info {
+    color: var(--color-info-dark);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-strong {
+    color: var(--color-text-strong);
+}
+
+.text-inverse {
+    color: var(--color-text-inverse);
+}
+
+
+/* =====================================================
+   ALIGNMENT
+===================================================== */
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+
+/* =====================================================
+   SPECIAL TEXT
+===================================================== */
+
+.page-title {
+    margin-bottom: var(--space-sm);
+
+    color: var(--color-text-strong);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-extra-bold);
+}
+
+.page-subtitle {
+    margin-bottom: var(--space-lg);
+
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+}
+
+.section-title {
+    margin-bottom: var(--space-md);
+
+    color: var(--color-text-strong);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+.section-description {
+    margin-bottom: var(--space-lg);
+
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-lg);
+}
+
+.label-text {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.helper-text {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.metric-value {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-extra-bold);
+    line-height: var(--line-height-sm);
+}
+
+.metric-label {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}

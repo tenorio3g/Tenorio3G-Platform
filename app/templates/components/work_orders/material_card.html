@@ -1,0 +1,165 @@
+{% set costo = material.costo_total %}
+
+{% if costo < 500 %}
+    {% set impacto = "Bajo costo" %}
+    {% set impacto_clase = "cost-low" %}
+{% elif costo < 2000 %}
+    {% set impacto = "Costo medio" %}
+    {% set impacto_clase = "cost-medium" %}
+{% elif costo < 10000 %}
+    {% set impacto = "Costo alto" %}
+    {% set impacto_clase = "cost-high" %}
+{% else %}
+    {% set impacto = "Costo crítico" %}
+    {% set impacto_clase = "cost-critical" %}
+{% endif %}
+
+
+<article class="smart-card {{ impacto_clase }}">
+
+    <header class="smart-card-header">
+
+        <div>
+            <span class="smart-card-type">
+                MATERIAL
+            </span>
+
+            <h3 class="smart-card-title">
+                📦 {{ material.nombre }}
+            </h3>
+        </div>
+
+        <div class="smart-card-cost">
+            <span>Costo total</span>
+
+            <strong>
+                ${{ "%.2f"|format(material.costo_total) }}
+            </strong>
+        </div>
+
+    </header>
+
+
+    <div class="smart-card-badges">
+
+        <span class="cost-badge {{ impacto_clase }}">
+            {{ impacto }}
+        </span>
+
+        {% if material.codigo %}
+            <span class="info-badge">
+                {{ material.codigo }}
+            </span>
+        {% endif %}
+
+    </div>
+
+
+    <div class="smart-card-grid">
+
+        <div class="smart-card-field">
+            <span class="smart-card-label">
+                Cantidad
+            </span>
+
+            <strong>
+                {{ material.cantidad }}
+                {{ material.unidad }}
+            </strong>
+        </div>
+
+
+        <div class="smart-card-field">
+            <span class="smart-card-label">
+                Costo unitario
+            </span>
+
+            <strong>
+                ${{ "%.2f"|format(material.costo_unitario) }}
+            </strong>
+        </div>
+
+
+        <div class="smart-card-field">
+            <span class="smart-card-label">
+                Marca
+            </span>
+
+            <strong>
+                {{ material.marca or "Sin marca" }}
+            </strong>
+        </div>
+
+
+        <div class="smart-card-field">
+            <span class="smart-card-label">
+                Fecha de registro
+            </span>
+
+            <strong>
+                {% if material.fecha_registro %}
+                    {{ material.fecha_registro.strftime("%d/%m/%Y") }}
+                {% else %}
+                    Sin fecha
+                {% endif %}
+            </strong>
+        </div>
+
+    </div>
+
+
+    {% if material.descripcion %}
+
+        <div class="smart-card-section">
+
+            <span class="smart-card-label">
+                Descripción
+            </span>
+
+            <p>
+                {{ material.descripcion }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    {% if material.observaciones %}
+
+        <div class="smart-card-section">
+
+            <span class="smart-card-label">
+                Observaciones
+            </span>
+
+            <p>
+                {{ material.observaciones }}
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <footer class="smart-card-actions">
+
+        <a
+            class="button button-small"
+            href="#"
+        >
+            ✏ Editar
+        </a>
+
+        <button
+            class="button button-danger button-small"
+            type="button"
+            disabled
+            title="La eliminación se implementará en HU-5.3"
+        >
+            🗑 Eliminar
+        </button>
+
+    </footer>
+
+</article>

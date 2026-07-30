@@ -1,0 +1,71 @@
+/* ==========================================================
+   T3G-FND-012
+
+   Component : Empty State
+   Module    : Foundation UI
+   Version   : 0.1.0
+   Status    : Development
+
+========================================================== */
+
+.foundation-empty-state {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 1rem;
+
+    padding: 3rem 2rem;
+
+    text-align: center;
+
+    border: 1px dashed var(--foundation-border-color);
+
+    border-radius: var(--foundation-radius-lg);
+
+    background: var(--foundation-surface);
+
+}
+
+.foundation-empty-state__icon {
+
+    font-size: 4rem;
+
+    line-height: 1;
+
+}
+
+.foundation-empty-state__title {
+
+    margin: 0;
+
+    font-size: 1.5rem;
+
+    font-weight: 700;
+
+    color: var(--foundation-text-color);
+
+}
+
+.foundation-empty-state__description {
+
+    margin: 0;
+
+    max-width: 42rem;
+
+    color: var(--foundation-text-muted);
+
+    line-height: 1.6;
+
+}
+
+.foundation-empty-state .button {
+
+    margin-top: .5rem;
+
+}

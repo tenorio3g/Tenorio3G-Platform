@@ -1,0 +1,674 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Foundation Lab
+{% endblock %}
+
+
+{% block content %}
+
+<section class="panel panel--highlighted">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <p class="asset-label">
+                TENORIO3G PLATFORM
+            </p>
+
+            <h1 class="panel__title">
+                Foundation Lab
+            </h1>
+
+            <p class="panel__subtitle">
+                Laboratorio visual para desarrollar, probar y documentar
+                los componentes oficiales de Foundation UI.
+            </p>
+
+        </div>
+
+
+        <div class="panel__actions">
+
+            <span class="badge badge--info">
+                Foundation UI {{ foundation_version }}
+            </span>
+
+            <a
+            class="button button-primary"
+            href="{{ url_for('foundation.explorer') }}"
+            >
+            Abrir Explorer
+            </a>
+
+
+
+        </div>
+
+    </header>
+
+</section>
+
+
+<!-- ==================================================
+     ESTADO GENERAL
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Estado de Foundation UI
+            </h2>
+
+            <p class="panel__subtitle">
+                Catálogo actual de primitivas y componentes reutilizables.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <span>🧱</span>
+                <strong>Primitivas</strong>
+                <p>{{ primitives|length }}</p>
+            </div>
+
+            <div class="summary-card">
+                <span>🧩</span>
+                <strong>Componentes</strong>
+                <p>{{ components|length }}</p>
+            </div>
+
+            <div class="summary-card">
+                <span>✅</span>
+                <strong>Estables</strong>
+
+                <p>
+                    {{
+                        (
+                            primitives
+                            | selectattr("status", "equalto", "stable")
+                            | list
+                            | length
+                        )
+                        +
+                        (
+                            components
+                            | selectattr("status", "equalto", "stable")
+                            | list
+                            | length
+                        )
+                    }}
+                </p>
+            </div>
+
+            <div class="summary-card">
+                <span>🚧</span>
+                <strong>En desarrollo</strong>
+
+                <p>
+                    {{
+                        (
+                            primitives
+                            | selectattr(
+                                "status",
+                                "equalto",
+                                "development"
+                            )
+                            | list
+                            | length
+                        )
+                        +
+                        (
+                            components
+                            | selectattr(
+                                "status",
+                                "equalto",
+                                "development"
+                            )
+                            | list
+                            | length
+                        )
+                    }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     PRIMITIVAS
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Primitivas
+            </h2>
+
+            <p class="panel__subtitle">
+                Elementos visuales básicos independientes de los dominios.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <div class="status-grid">
+
+            {% for primitive in primitives %}
+
+                <article class="summary-card">
+
+                    <strong>
+                        {{ primitive.name }}
+                    </strong>
+
+
+                    <p>
+                        {% if primitive.version %}
+
+                            Versión {{ primitive.version }}
+
+                        {% else %}
+
+                            Sin versión
+
+                        {% endif %}
+                    </p>
+
+
+                    {% if primitive.status == "stable" %}
+
+
+
+                        {% with
+                            text="Estable",
+                            type="success",
+                            icon="✅"
+                        %}
+                            {% include
+                                "components/foundation/badge/badge.html"
+                            %}
+                        {% endwith %}
+
+
+
+                    {% elif primitive.status == "development" %}
+
+                        {% with
+                            text="En desarrollo",
+                            type="warning",
+                            icon="🚧"
+                        %}
+                            {% include
+                                "components/foundation/badge/badge.html"
+                            %}
+                        {% endwith %}
+
+                    {% else %}
+
+                        {% with
+                            text="Pendiente",
+                            type="neutral",
+                            icon="⏳"
+                        %}
+                            {% include
+                                "components/foundation/badge/badge.html"
+                            %}
+                        {% endwith %}
+
+                    {% endif %}
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     COMPONENTES
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Componentes
+            </h2>
+
+            <p class="panel__subtitle">
+                Composiciones reutilizables construidas con primitivas
+                de Foundation UI.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <div class="status-grid">
+
+            {% for component in components %}
+
+                <article class="summary-card">
+
+                    <strong>
+                        {{ component.name }}
+                    </strong>
+
+
+                    <p>
+                        {% if component.version %}
+
+                            Versión {{ component.version }}
+
+                        {% else %}
+
+                            Sin versión
+
+                        {% endif %}
+                    </p>
+
+
+                    {% if component.status == "stable" %}
+
+                        {% with
+                        text="Estable",
+                        type="success",
+                        icon="✅"
+                    %}
+                        {% include
+                            "components/foundation/badge/badge.html"
+                        %}
+                    {% endwith %}
+
+                {% elif component.status == "development" %}
+
+                    {% with
+                        text="En desarrollo",
+                        type="warning",
+                        icon="🚧"
+                    %}
+                        {% include
+                            "components/foundation/badge/badge.html"
+                        %}
+                    {% endwith %}
+
+                {% else %}
+
+                    {% with
+                        text="Pendiente",
+                        type="neutral",
+                        icon="⏳"
+                    %}
+                        {% include
+                            "components/foundation/badge/badge.html"
+                        %}
+                    {% endwith %}
+
+                {% endif %}
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     PANEL
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Panel
+            </h2>
+
+            <p class="panel__subtitle">
+                Contenedor visual genérico para organizar contenido.
+            </p>
+
+        </div>
+
+
+        <div class="panel__actions">
+
+            <button class="button button-primary" type="button">
+                Acción principal
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <p>
+            Este es un ejemplo del componente base Panel.
+            Puede contener formularios, listas, tablas, indicadores,
+            actividades o cualquier otro contenido.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     BADGES
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Badge
+            </h2>
+
+            <p class="panel__subtitle">
+                Indicadores visuales para estados, prioridades y categorías.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+    <div class="foundation-demo-row">
+
+        {% with
+            text="Operando",
+            type="success",
+            show_dot=true
+        %}
+            {% include
+                "components/foundation/badge/badge.html"
+            %}
+        {% endwith %}
+
+
+        {% with
+            text="En proceso",
+            type="warning",
+            show_dot=true
+        %}
+            {% include
+                "components/foundation/badge/badge.html"
+            %}
+        {% endwith %}
+
+
+        {% with
+            text="Crítico",
+            type="danger",
+            icon="🔥"
+        %}
+            {% include
+                "components/foundation/badge/badge.html"
+            %}
+        {% endwith %}
+
+
+        {% with
+            text="Información",
+            type="info",
+            icon="ℹ️"
+        %}
+            {% include
+                "components/foundation/badge/badge.html"
+            %}
+        {% endwith %}
+
+
+        {% with
+            text="Pendiente",
+            type="neutral",
+            show_dot=true
+        %}
+            {% include
+                "components/foundation/badge/badge.html"
+            %}
+        {% endwith %}
+
+    </div>
+
+</div>
+
+</section>
+
+
+
+
+
+
+
+<!-- ==================================================
+     PROGRESS
+================================================== -->
+
+
+<section class="panel">
+
+<header class="panel__header">
+
+<div class="panel__heading">
+
+<h2 class="panel__title">
+
+Progress
+
+</h2>
+
+<p class="panel__subtitle">
+
+Indicador reutilizable de porcentaje.
+
+</p>
+
+</div>
+
+</header>
+
+<div class="panel__body">
+
+{% with
+value=15,
+color="danger",
+label="Crítico"
+%}
+
+{% include
+"components/foundation/progress/progress.html"
+%}
+
+{% endwith %}
+
+<br><br>
+
+{% with
+value=45,
+color="warning",
+label="En proceso"
+%}
+
+{% include
+"components/foundation/progress/progress.html"
+%}
+
+{% endwith %}
+
+<br><br>
+
+{% with
+value=75,
+color="info",
+label="Avance"
+%}
+
+{% include
+"components/foundation/progress/progress.html"
+%}
+
+{% endwith %}
+
+<br><br>
+
+{% with
+value=100,
+color="success",
+label="Completado"
+%}
+
+{% include
+"components/foundation/progress/progress.html"
+%}
+
+{% endwith %}
+
+</div>
+
+</section>
+
+
+<!-- ==================================================
+     HERO PANEL
+================================================== -->
+
+
+
+<section class="foundation-section">
+
+    <header class="foundation-section__header">
+        <div>
+            <p class="foundation-section__eyebrow">
+                T3G-FND-004
+            </p>
+
+            <h2 class="foundation-section__title">
+                Hero Panel
+            </h2>
+
+            <p class="foundation-section__description">
+                Componente principal para presentar el estado general,
+                progreso, detalles y acciones de una entidad.
+            </p>
+        </div>
+
+        <span class="badge badge--warning">
+            Development
+        </span>
+    </header>
+
+    <div class="foundation-section__demo">
+        {% include "components/foundation/hero_panel/hero_panel.html" %}
+    </div>
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+<!-- ==================================================
+     BOTONES
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Buttons
+            </h2>
+
+            <p class="panel__subtitle">
+                Acciones visuales reutilizables de la plataforma.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <div class="panel__actions">
+
+            <button
+                class="button button-primary"
+                type="button"
+            >
+                Primary
+            </button>
+
+            <button
+                class="button"
+                type="button"
+            >
+                Default
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

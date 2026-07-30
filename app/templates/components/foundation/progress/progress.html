@@ -1,0 +1,60 @@
+{#
+    TENORIO3G FOUNDATION UI
+    Primitive: Progress
+    Version: 1.0
+
+    Variables:
+    - value: porcentaje de 0 a 100
+    - color: success, warning, danger o info
+    - label: texto descriptivo
+#}
+
+
+{% set progress_value = value|default(0)|int %}
+{% set progress_color = color|default("info") %}
+{% set progress_label = label|default("") %}
+
+
+{# Evita porcentajes menores que 0 o mayores que 100 #}
+
+{% if progress_value < 0 %}
+    {% set progress_value = 0 %}
+{% elif progress_value > 100 %}
+    {% set progress_value = 100 %}
+{% endif %}
+
+
+<div
+    class="progress progress--{{ progress_color }}"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="{{ progress_value }}"
+    {% if progress_label %}
+        aria-label="{{ progress_label }}"
+    {% endif %}
+>
+
+    <div class="progress__track">
+
+        <div
+            class="progress__bar"
+            style="width: {{ progress_value }}%;"
+        ></div>
+
+    </div>
+
+
+    <div class="progress__footer">
+
+        <span>
+            {{ progress_label }}
+        </span>
+
+        <strong>
+            {{ progress_value }}%
+        </strong>
+
+    </div>
+
+</div>

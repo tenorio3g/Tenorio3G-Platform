@@ -1,0 +1,539 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Foundation Explorer | Tenorio3G
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==================================================
+     ENCABEZADO DEL EXPLORER
+================================================== -->
+
+<section class="panel panel--highlighted">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <p class="asset-label">
+                TENORIO3G PLATFORM
+            </p>
+
+            <h1 class="panel__title">
+                {{ explorer.framework_name }}
+            </h1>
+
+            <p class="panel__subtitle">
+                Catálogo técnico y estado estructural de los elementos
+                registrados en Foundation.
+            </p>
+
+        </div>
+
+        <div class="panel__actions">
+
+            {% with
+                text="Versión " ~ explorer.framework_version,
+                type="info",
+                icon="📦"
+            %}
+                {% include
+                    "components/foundation/badge/badge.html"
+                %}
+            {% endwith %}
+
+        </div>
+
+    </header>
+
+</section>
+
+
+<!-- ==================================================
+     SEARCH
+================================================== -->
+
+<section class="panel">
+
+    <div class="panel__body">
+
+        {% set search = explorer.search_box %}
+
+        {% include
+            "components/foundation/search_box/search_box.html"
+        %}
+
+    </div>
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ==================================================
+     RESUMEN DEL REGISTRY
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Resumen del Registry
+            </h2>
+
+            <p class="panel__subtitle">
+                Indicadores calculados automáticamente desde
+                RegistryService.
+            </p>
+
+        </div>
+
+    </header>
+
+    <div class="panel__body">
+
+        <div class="summary-grid">
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    📦
+                </span>
+
+                <strong class="summary-card__label">
+                    Total
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.total }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🧱
+                </span>
+
+                <strong class="summary-card__label">
+                    Primitivas
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.primitives }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🧩
+                </span>
+
+                <strong class="summary-card__label">
+                    Componentes
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.components }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🧭
+                </span>
+
+                <strong class="summary-card__label">
+                    Patrones
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.patterns }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🛠️
+                </span>
+
+                <strong class="summary-card__label">
+                    Utilidades
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.utilities }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    ✅
+                </span>
+
+                <strong class="summary-card__label">
+                    Estables
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.stable }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🚧
+                </span>
+
+                <strong class="summary-card__label">
+                    En desarrollo
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.development }}
+                </p>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    ⏳
+                </span>
+
+                <strong class="summary-card__label">
+                    Pendientes
+                </strong>
+
+                <p class="summary-card__value">
+                    {{ explorer.summary.pending }}
+                </p>
+
+            </article>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     ELEMENTOS REGISTRADOS
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Elementos registrados
+            </h2>
+
+            <p class="panel__subtitle">
+                Información generada directamente desde
+                ComponentMetadata.
+            </p>
+
+        </div>
+
+    </header>
+
+    <div class="panel__body">
+
+        {% if explorer.has_items %}
+
+            <div class="status-grid foundation-registry-grid">
+
+                {% for item in explorer.items %}
+
+                    <a
+                        class="
+                            smart-card
+                            component-reference-card
+                            component-reference-card--{{ item.status }}
+                        "
+                        href="{{ url_for(
+                            'foundation.explorer_detail',
+                            component_id=item.id
+                        ) }}"
+                        aria-label="Abrir detalles de {{ item.name }}"
+                    >
+
+                        <!-- Encabezado de la tarjeta -->
+
+                        <header class="smart-card-header">
+
+                            <div>
+
+                                <span class="smart-card-type">
+                                    {{ item.category | upper }}
+                                </span>
+
+                                <h3 class="smart-card-title">
+                                    {{ item.name }}
+                                </h3>
+
+                            </div>
+
+                            <div class="component-reference-card__status">
+
+                                {% if item.status == "stable" %}
+
+                                    {% with
+                                        text="Estable",
+                                        type="success",
+                                        icon="✅"
+                                    %}
+                                        {% include
+                                            "components/foundation/badge/badge.html"
+                                        %}
+                                    {% endwith %}
+
+                                {% elif item.status == "development" %}
+
+                                    {% with
+                                        text="En desarrollo",
+                                        type="warning",
+                                        icon="🚧"
+                                    %}
+                                        {% include
+                                            "components/foundation/badge/badge.html"
+                                        %}
+                                    {% endwith %}
+
+                                {% elif item.status == "deprecated" %}
+
+                                    {% with
+                                        text="Obsoleto",
+                                        type="danger",
+                                        icon="⚠️"
+                                    %}
+                                        {% include
+                                            "components/foundation/badge/badge.html"
+                                        %}
+                                    {% endwith %}
+
+                                {% else %}
+
+                                    {% with
+                                        text="Pendiente",
+                                        type="neutral",
+                                        icon="⏳"
+                                    %}
+                                        {% include
+                                            "components/foundation/badge/badge.html"
+                                        %}
+                                    {% endwith %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </header>
+                        
+
+
+                        <!-- Identificador -->
+
+                        <div class="smart-card-badges">
+
+                            <span class="info-badge">
+                                ID: {{ item.id }}
+                            </span>
+
+                            <span class="info-badge">
+                                {{ item.category }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- Metadatos -->
+
+                        <dl class="smart-card-grid component-metadata-grid">
+
+                            <div class="smart-card-field">
+
+                                <dt class="smart-card-label">
+                                    Versión
+                                </dt>
+
+                                <dd>
+                                    <strong>
+                                        {{ item.version or "Sin versión" }}
+                                    </strong>
+                                </dd>
+
+                            </div>
+
+
+                            <div class="smart-card-field">
+
+                                <dt class="smart-card-label">
+                                    Disponible desde
+                                </dt>
+
+                                <dd>
+                                    <strong>
+                                        {{ item.since or "No definido" }}
+                                    </strong>
+                                </dd>
+
+                            </div>
+
+
+                            <div class="smart-card-field">
+
+                                <dt class="smart-card-label">
+                                    Responsable
+                                </dt>
+
+                                <dd>
+                                    <strong>
+                                        {{ item.owner or "No asignado" }}
+                                    </strong>
+                                </dd>
+
+                            </div>
+
+
+                            <div class="smart-card-field">
+
+                                <dt class="smart-card-label">
+                                    Estado técnico
+                                </dt>
+
+                                <dd>
+                                    <strong>
+                                        {{ item.status }}
+                                    </strong>
+                                </dd>
+
+                            </div>
+
+                        </dl>
+
+
+                        <!-- Dependencias -->
+
+                        <section class="smart-card-section">
+
+                            <strong class="smart-card-label">
+                                Dependencias
+                            </strong>
+
+                            {% if item.has_dependencies %}
+
+                                <div class="component-tags">
+
+                                    {% for dependency in item.depends_on %}
+
+                                        <span class="component-tag">
+                                            {{ dependency }}
+                                        </span>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% else %}
+
+                                <p>
+                                    Sin dependencias registradas.
+                                </p>
+
+                            {% endif %}
+
+                        </section>
+
+
+                        <!-- Acción visual -->
+
+                        <footer class="smart-card-actions">
+
+                            <span class="button button-small">
+                                Ver detalles
+                            </span>
+
+                        </footer>
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+{% elif explorer.show_empty_state %}
+
+    {% set empty_state = explorer.empty_state %}
+
+    {% include
+        "components/foundation/empty_state/empty_state.html"
+    %}
+
+{% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

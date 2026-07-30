@@ -1,0 +1,160 @@
+/*
+==========================================================
+T3G-FND-010
+
+Component : KPI Card
+Module    : Foundation UI
+Version   : 0.1.0
+Status    : Development
+Sprint    : FND-010
+
+==========================================================
+*/
+
+.kpi-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    height:100%;
+
+    min-height:170px;
+
+    transition:
+        transform .20s ease,
+        box-shadow .20s ease;
+
+}
+
+.kpi-card:hover{
+
+    transform:translateY(-3px);
+
+}
+
+.kpi-card__body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:1rem;
+
+    height:100%;
+
+}
+
+.kpi-card__header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+}
+
+.kpi-card__heading{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:.35rem;
+
+}
+
+.kpi-card__title{
+
+    margin:0;
+
+    font-size:.95rem;
+
+    font-weight:600;
+
+}
+
+.kpi-card__subtitle{
+
+    margin:0;
+
+    font-size:.82rem;
+
+    opacity:.75;
+
+}
+
+.kpi-card__value{
+
+    font-size:2.5rem;
+
+    font-weight:700;
+
+    line-height:1;
+
+}
+
+.kpi-card__icon{
+
+    font-size:1.8rem;
+
+    opacity:.35;
+
+    user-select:none;
+
+}
+
+.kpi-card--primary{
+
+    border-top:4px solid var(--color-primary);
+
+}
+
+.kpi-card--success{
+
+    border-top:4px solid var(--color-success);
+
+}
+
+.kpi-card--warning{
+
+    border-top:4px solid var(--color-warning);
+
+}
+
+.kpi-card--danger{
+
+    border-top:4px solid var(--color-danger);
+
+}
+
+.kpi-card--info{
+
+    border-top:4px solid var(--color-info);
+
+}
+
+.kpi-card--neutral{
+
+    border-top:4px solid var(--color-neutral);
+
+}
+
+@media (max-width:768px){
+
+    .kpi-card{
+
+        min-height:140px;
+
+    }
+
+    .kpi-card__value{
+
+        font-size:2rem;
+
+    }
+
+}

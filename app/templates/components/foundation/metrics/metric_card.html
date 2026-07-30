@@ -1,0 +1,25 @@
+<article class="metric-card metric-card-{{ color|default('gray') }}">
+
+    <div class="metric-header">
+
+        <div class="metric-icon" aria-hidden="true">
+            {{ icono }}
+        </div>
+
+    </div>
+
+    <div class="metric-value">
+        {{ valor }}
+    </div>
+
+    <div class="metric-title">
+        {{ titulo }}
+    </div>
+
+    {% if descripcion %}
+        <div class="metric-description">
+            {{ descripcion }}
+        </div>
+    {% endif %}
+
+</article>

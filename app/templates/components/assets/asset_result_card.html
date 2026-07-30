@@ -1,0 +1,70 @@
+<article class="asset-card">
+
+    <div class="asset-card__header">
+
+        <div>
+
+            <h3 class="asset-card__title">
+                {{ activo.nombre }}
+            </h3>
+
+            <p class="asset-card__code">
+                {{ activo.codigo }}
+            </p>
+
+        </div>
+
+        <span class="asset-card__status">
+            {{ activo.estado }}
+        </span>
+
+    </div>
+
+
+    <div class="asset-card__body">
+
+        <div class="asset-card__item">
+
+            <strong>Área</strong>
+
+            <span>{{ activo.area }}</span>
+
+        </div>
+
+        <div class="asset-card__item">
+
+            <strong>Ubicación</strong>
+
+            <span>{{ activo.ubicacion }}</span>
+
+        </div>
+
+        <div class="asset-card__item">
+
+            <strong>Salud</strong>
+
+            <span>{{ activo.salud }}%</span>
+
+        </div>
+
+        <progress
+            max="100"
+            value="{{ activo.salud }}">
+        </progress>
+
+    </div>
+
+
+    <footer class="asset-card__footer">
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for('assets.asset_detail', codigo=activo.codigo) }}">
+
+            Abrir Hoja de Vida
+
+        </a>
+
+    </footer>
+
+</article>

@@ -1,0 +1,573 @@
+/* ==========================================================
+   T3G-FND-EXPLORER-001
+
+   Component : Foundation Explorer
+   Module    : Foundation UI
+   Version   : 1.0.0
+   Status    : Stable
+
+   Purpose
+   -------
+   Estilos específicos para el catálogo técnico de Foundation,
+   sus indicadores, tarjetas del Registry, vista de detalle y
+   estados vacíos.
+
+   Dependencies
+   ------------
+   - variables.css
+   - layout.css
+   - panel.css
+   - badge.css
+   - buttons.css
+   - smart-card styles
+========================================================== */
+
+
+/* ==========================================================
+   SUMMARY GRID
+========================================================== */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(150px, 1fr));
+
+    gap: var(--space-md, 16px);
+}
+
+
+/* ==========================================================
+   SUMMARY CARD
+========================================================== */
+
+.summary-card {
+    min-width: 0;
+    padding: var(--space-md, 16px);
+
+    background-color: var(
+        --color-surface-secondary,
+        #f8fafc
+    );
+
+    border: 1px solid var(
+        --color-border,
+        #e2e8f0
+    );
+
+    border-radius: var(
+        --radius-md,
+        10px
+    );
+
+    box-shadow: var(
+        --shadow-xs,
+        0 1px 3px rgba(15, 23, 42, 0.05)
+    );
+
+    transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+
+.summary-card:hover {
+    transform: translateY(-2px);
+
+    border-color: var(
+        --color-primary-soft,
+        #bfdbfe
+    );
+
+    box-shadow: var(
+        --shadow-sm,
+        0 4px 12px rgba(15, 23, 42, 0.08)
+    );
+}
+
+
+.summary-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    margin-bottom: var(--space-sm, 8px);
+
+    background-color: var(
+        --color-surface,
+        #ffffff
+    );
+
+    border: 1px solid var(
+        --color-border,
+        #e2e8f0
+    );
+
+    border-radius: var(
+        --radius-md,
+        10px
+    );
+
+    font-size: 1.15rem;
+}
+
+
+.summary-card__label {
+    display: block;
+
+    margin-bottom: var(--space-xs, 6px);
+
+    color: var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size: var(
+        --font-size-xs,
+        0.75rem
+    );
+
+    font-weight: var(
+        --font-weight-semibold,
+        600
+    );
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+
+.summary-card__value {
+    margin: 0;
+
+    color: var(
+        --color-text-primary,
+        #0f172a
+    );
+
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: var(
+        --font-weight-bold,
+        700
+    );
+
+    line-height: 1;
+}
+
+
+/* ==========================================================
+   REGISTRY GRID
+========================================================== */
+
+.status-grid,
+.foundation-registry-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(320px, 1fr));
+
+    gap: var(--space-lg, 20px);
+
+    align-items: stretch;
+}
+
+
+/* ==========================================================
+   COMPONENT REFERENCE CARD
+========================================================== */
+
+.component-reference-card {
+    min-width: 0;
+
+    color: inherit;
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+
+.component-reference-card:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.24);
+    outline-offset: 3px;
+}
+
+
+.component-reference-card__status {
+    flex-shrink: 0;
+}
+
+
+.component-reference-card .smart-card-title {
+    overflow-wrap: anywhere;
+}
+
+
+.component-reference-card .smart-card-actions {
+    margin-top: auto;
+}
+
+
+.component-reference-card .smart-card-actions .button {
+    pointer-events: none;
+}
+
+
+/* ----------------------------------------------------------
+   Variantes visuales por estado
+---------------------------------------------------------- */
+
+.component-reference-card--stable {
+    border-left-color: var(
+        --color-success,
+        #16a34a
+    );
+}
+
+
+.component-reference-card--development {
+    border-left-color: var(
+        --color-warning,
+        #eab308
+    );
+}
+
+
+.component-reference-card--deprecated {
+    border-left-color: var(
+        --color-danger,
+        #dc2626
+    );
+}
+
+
+.component-reference-card--pending {
+    border-left-color: var(
+        --color-neutral,
+        #64748b
+    );
+}
+
+
+/* ==========================================================
+   METADATA GRID
+========================================================== */
+
+.component-metadata-grid {
+    margin: 0;
+}
+
+
+.component-metadata-grid dt,
+.component-metadata-grid dd {
+    margin: 0;
+}
+
+
+.component-metadata-grid dd {
+    min-width: 0;
+}
+
+
+/* ==========================================================
+   TAGS
+========================================================== */
+
+.component-tags {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: var(--space-xs, 6px);
+
+    margin-top: var(--space-sm, 8px);
+}
+
+
+.component-tag {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 28px;
+    padding: 4px 10px;
+
+    color: var(
+        --color-text-secondary,
+        #475569
+    );
+
+    background-color: var(
+        --color-surface-secondary,
+        #f1f5f9
+    );
+
+    border: 1px solid var(
+        --color-border,
+        #cbd5e1
+    );
+
+    border-radius: 999px;
+
+    font-size: var(
+        --font-size-xs,
+        0.75rem
+    );
+
+    font-weight: var(
+        --font-weight-semibold,
+        600
+    );
+
+    line-height: 1.2;
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.foundation-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 260px;
+    padding: var(--space-2xl, 32px);
+
+    text-align: center;
+
+    background-color: var(
+        --color-surface-secondary,
+        #f8fafc
+    );
+
+    border: 1px dashed var(
+        --color-border,
+        #cbd5e1
+    );
+
+    border-radius: var(
+        --radius-lg,
+        12px
+    );
+}
+
+
+.foundation-empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 58px;
+    height: 58px;
+
+    margin-bottom: var(--space-md, 16px);
+
+    background-color: var(
+        --color-surface,
+        #ffffff
+    );
+
+    border: 1px solid var(
+        --color-border,
+        #e2e8f0
+    );
+
+    border-radius: 50%;
+
+    font-size: 1.6rem;
+}
+
+
+.foundation-empty-state h3 {
+    margin: 0;
+
+    color: var(
+        --color-text-primary,
+        #0f172a
+    );
+
+    font-size: var(
+        --font-size-lg,
+        1.125rem
+    );
+}
+
+
+.foundation-empty-state p {
+    max-width: 520px;
+
+    margin-top: var(--space-sm, 8px);
+    margin-bottom: 0;
+
+    color: var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    line-height: 1.6;
+}
+
+
+/* ==========================================================
+   EXPLORER DETAIL
+========================================================== */
+
+.component-detail-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: var(--space-md, 16px);
+
+    margin: 0;
+}
+
+
+.component-detail-field {
+    min-width: 0;
+    padding: var(--space-md, 16px);
+
+    background-color: var(
+        --color-surface-secondary,
+        #f8fafc
+    );
+
+    border: 1px solid var(
+        --color-border,
+        #e2e8f0
+    );
+
+    border-radius: var(
+        --radius-md,
+        10px
+    );
+}
+
+
+.component-detail-field dt {
+    margin: 0 0 var(--space-xs, 6px);
+
+    color: var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size: var(
+        --font-size-xs,
+        0.75rem
+    );
+
+    font-weight: var(
+        --font-weight-semibold,
+        600
+    );
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+
+.component-detail-field dd {
+    margin: 0;
+
+    overflow-wrap: anywhere;
+
+    color: var(
+        --color-text-primary,
+        #0f172a
+    );
+
+    font-weight: var(
+        --font-weight-semibold,
+        600
+    );
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================
+   ASSET LABEL COMPATIBILITY
+========================================================== */
+
+.asset-label {
+    margin: 0 0 var(--space-xs, 6px);
+
+    color: var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size: var(
+        --font-size-xs,
+        0.75rem
+    );
+
+    font-weight: var(
+        --font-weight-bold,
+        700
+    );
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 900px) {
+
+    .summary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .status-grid,
+    .foundation-registry-grid {
+        grid-template-columns:
+            repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+
+    .component-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .summary-grid,
+    .status-grid,
+    .foundation-registry-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .summary-card {
+        padding: var(--space-md, 16px);
+    }
+
+
+    .component-reference-card__status {
+        align-self: flex-start;
+    }
+
+
+    .component-detail-field {
+        padding: var(--space-sm, 12px);
+    }
+
+
+    .foundation-empty-state {
+        min-height: 220px;
+        padding: var(--space-lg, 20px);
+    }
+
+}

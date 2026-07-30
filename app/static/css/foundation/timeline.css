@@ -1,0 +1,287 @@
+.timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 24px;
+    padding-left: 34px;
+}
+
+/* Línea vertical principal */
+.timeline::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 16px;
+    width: 3px;
+    border-radius: 999px;
+    background: #dbe4ea;
+}
+
+.timeline-event {
+    position: relative;
+    display: flex;
+    padding: 0 0 22px 28px;
+}
+
+.timeline-event:last-child {
+    padding-bottom: 0;
+}
+
+/* Nodo circular */
+.timeline-marker {
+    position: absolute;
+    top: 14px;
+    left: -27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    background: #ffffff;
+    border: 3px solid #94a3b8;
+    border-radius: 50%;
+
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+    z-index: 2;
+}
+
+.timeline-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Tarjeta del evento */
+.timeline-content {
+    width: 100%;
+    padding: 18px 20px;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.timeline-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+}
+
+.timeline-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.timeline-category {
+    display: inline-block;
+    margin-bottom: 5px;
+
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.timeline-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.timeline-date {
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.timeline-description {
+    margin: 12px 0 0;
+    color: #475569;
+    line-height: 1.55;
+}
+
+.timeline-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+
+    margin-top: 15px;
+    padding-top: 12px;
+
+    border-top: 1px solid #edf2f7;
+
+    color: #64748b;
+    font-size: 13px;
+}
+
+.timeline-reference {
+    color: #0f5f83;
+    font-weight: 700;
+}
+
+/* Colores de los nodos */
+.timeline-marker-blue {
+    border-color: #2563eb;
+    background: #dbeafe;
+}
+
+.timeline-marker-orange {
+    border-color: #ea580c;
+    background: #ffedd5;
+}
+
+.timeline-marker-purple {
+    border-color: #7c3aed;
+    background: #ede9fe;
+}
+
+.timeline-marker-green {
+    border-color: #16a34a;
+    background: #dcfce7;
+}
+
+.timeline-marker-yellow {
+    border-color: #ca8a04;
+    background: #fef9c3;
+}
+
+.timeline-marker-red {
+    border-color: #dc2626;
+    background: #fee2e2;
+}
+
+.timeline-marker-cyan {
+    border-color: #0891b2;
+    background: #cffafe;
+}
+
+.timeline-marker-indigo {
+    border-color: #4f46e5;
+    background: #e0e7ff;
+}
+
+.timeline-marker-gray {
+    border-color: #64748b;
+    background: #f1f5f9;
+}
+
+.timeline-empty {
+    padding: 30px;
+
+    color: #64748b;
+    text-align: center;
+
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+}
+
+/* Adaptación para teléfonos */
+@media (max-width: 700px) {
+
+    .timeline {
+        padding-left: 24px;
+    }
+
+    .timeline::before {
+        left: 11px;
+    }
+
+    .timeline-event {
+        padding-left: 26px;
+    }
+
+    .timeline-marker {
+        left: -25px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .timeline-icon {
+        font-size: 17px;
+    }
+
+    .timeline-header,
+    .timeline-footer {
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .timeline-content {
+        padding: 15px;
+    }
+
+    .timeline-date {
+        white-space: normal;
+    }
+}
+
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+
+    margin-bottom: 8px;
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* Categorías */
+
+.category-badge-actividad {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.category-badge-material {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.category-badge-tecnico {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.category-badge-estado {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.category-badge-herramienta {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.category-badge-comentario {
+    background: #cffafe;
+    color: #0e7490;
+}
+
+.category-badge-evidencia {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.category-badge-pendiente {
+    background: #fef9c3;
+    color: #a16207;
+}

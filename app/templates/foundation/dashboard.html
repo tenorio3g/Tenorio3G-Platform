@@ -1,0 +1,49 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Foundation Dashboard
+{% endblock %}
+
+{% block content %}
+
+<h1>Foundation Dashboard</h1>
+
+<p>
+Estado general del T3G Framework.
+</p>
+
+<hr>
+
+<h2>Registry</h2>
+
+<ul>
+
+    <li>Total: {{ statistics.total }}</li>
+
+    <li>Primitives: {{ statistics.primitives }}</li>
+
+    <li>Components: {{ statistics.components }}</li>
+
+    <li>Patterns: {{ statistics.patterns }}</li>
+
+    <li>Utilities: {{ statistics.utilities }}</li>
+
+</ul>
+
+<hr>
+
+<h2>Status</h2>
+
+<ul>
+
+    <li>Stable: {{ statistics.stable }}</li>
+
+    <li>Development: {{ statistics.development }}</li>
+
+    <li>Pending: {{ statistics.pending }}</li>
+
+    <li>Deprecated: {{ statistics.deprecated }}</li>
+
+</ul>
+
+{% endblock %}

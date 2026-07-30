@@ -1,0 +1,19 @@
+<div class="metric-grid">
+
+    {% for metrica in metricas %}
+
+        {% with
+            titulo=metrica.titulo,
+            valor=metrica.valor,
+            icono=metrica.icono,
+            descripcion=metrica.descripcion,
+            color=metrica.color
+        %}
+
+            {% include "components/foundation/metrics/metric_card.html" %}
+
+        {% endwith %}
+
+    {% endfor %}
+
+</div>

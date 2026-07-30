@@ -1,0 +1,122 @@
+/* ==========================================================
+   T3G-FND-004
+
+   Component : Hero Panel
+   Module    : Foundation UI
+   Version   : 0.1.0
+   Status    : Development
+   Sprint    : UI-004
+
+========================================================== */
+
+.hero-panel {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 1.75rem;
+
+}
+
+
+.hero-panel__heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 1rem;
+
+}
+
+
+.hero-panel__title {
+
+    margin: 0;
+
+}
+
+
+.hero-panel__subtitle {
+
+    margin-top: .35rem;
+
+}
+
+
+.hero-panel__progress {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .75rem;
+
+}
+
+
+.hero-panel__progress-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+}
+
+
+.hero-panel__details {
+
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+
+    gap: 1rem;
+
+    margin: 0;
+
+}
+
+
+.hero-panel__detail {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .35rem;
+
+}
+
+
+.hero-panel__detail-label {
+
+    font-size: .85rem;
+
+    opacity: .7;
+
+}
+
+
+.hero-panel__detail-value {
+
+    margin: 0;
+
+    font-weight: 600;
+
+}
+
+
+.hero-panel__actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: .75rem;
+
+}

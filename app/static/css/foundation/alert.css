@@ -1,0 +1,128 @@
+/* ==========================================================
+   T3G-FND-014
+
+   Component : Alert
+   Module    : Foundation UI
+   Version   : 0.2.0
+
+========================================================== */
+
+.foundation-alert {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 1rem;
+
+    padding: 1rem 1.25rem;
+
+    border-radius: var(--radius-md);
+
+    border: 1px solid transparent;
+
+    margin-bottom: 1rem;
+
+}
+
+.foundation-alert__icon {
+
+    font-size: 1.5rem;
+
+    line-height: 1;
+
+    flex-shrink: 0;
+
+}
+
+.foundation-alert__content {
+
+    flex: 1;
+
+}
+
+.foundation-alert__title {
+
+    margin: 0 0 .35rem;
+
+    font-size: 1rem;
+
+    font-weight: 700;
+
+}
+
+.foundation-alert__message {
+
+    margin: 0;
+
+    line-height: 1.5;
+
+    opacity: .9;
+
+}
+
+.foundation-alert__close {
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 1rem;
+
+    opacity: .7;
+
+    transition: opacity .2s;
+
+}
+
+.foundation-alert__close:hover {
+
+    opacity: 1;
+
+}
+
+/* ==========================================================
+   Variantes
+========================================================== */
+
+.foundation-alert--info {
+
+    background: var(--color-info-50);
+
+    border-color: var(--color-info-300);
+
+    color: var(--color-info-900);
+
+}
+
+.foundation-alert--success {
+
+    background: var(--color-success-50);
+
+    border-color: var(--color-success-300);
+
+    color: var(--color-success-900);
+
+}
+
+.foundation-alert--warning {
+
+    background: var(--color-warning-50);
+
+    border-color: var(--color-warning-300);
+
+    color: var(--color-warning-900);
+
+}
+
+.foundation-alert--danger {
+
+    background: var(--color-danger-50);
+
+    border-color: var(--color-danger-300);
+
+    color: var(--color-danger-900);
+
+}

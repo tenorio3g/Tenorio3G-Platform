@@ -1,0 +1,61 @@
+{# ==========================================================
+   T3G-FND-014
+
+   Component : Alert
+   Module    : Foundation UI
+   Version   : 0.2.0
+
+   Espera un objeto:
+
+       alert : AlertViewModel
+
+========================================================== #}
+
+{% if alert.visible %}
+
+<div
+    class="
+        foundation-alert
+        foundation-alert--{{ alert.type }}
+    "
+    role="alert"
+>
+
+    <div class="foundation-alert__icon">
+
+        {{ alert.icon }}
+
+    </div>
+
+    <div class="foundation-alert__content">
+
+        <h3 class="foundation-alert__title">
+
+            {{ alert.title }}
+
+        </h3>
+
+        <p class="foundation-alert__message">
+
+            {{ alert.message }}
+
+        </p>
+
+    </div>
+
+    {% if alert.dismissible %}
+
+        <button
+            class="foundation-alert__close"
+            type="button"
+            aria-label="Cerrar"
+        >
+            ✕
+
+        </button>
+
+    {% endif %}
+
+</div>
+
+{% endif %}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            Tenorio3G Platform
+        {% endblock %}
+    </title>
+
+    <!-- ==================================================
+         FOUNDATION
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/foundation/foundation.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/foundation/timeline.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/foundation/metrics.css'
+        ) }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/foundation/dashboard.css'
+        ) }}"
+    >
+
+    <!-- ==================================================
+         ESTILOS GENERALES
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/style.css'
+        ) }}"
+    >
+
+    <!-- ==================================================
+         MÓDULOS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/modules/assets.css'
+        ) }}"
+    >
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+<body>
+
+    <header>
+
+        <div class="logo">
+            <h1>Tenorio3G Platform</h1>
+        </div>
+
+    </header>
+
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer>
+        Foundation v0.1
+    </footer>
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+
+</html>

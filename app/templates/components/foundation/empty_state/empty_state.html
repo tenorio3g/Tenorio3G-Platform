@@ -1,0 +1,61 @@
+{# ==========================================================
+   T3G-FND-012
+
+   Component : Empty State
+   Module    : Foundation UI
+   Version   : 0.1.0
+   Status    : Development
+
+   Expected Context
+   ----------------
+   empty_state : EmptyStateViewModel
+
+========================================================== #}
+
+<section
+    class="foundation-empty-state"
+    aria-labelledby="foundation-empty-state-title"
+>
+
+    {% if empty_state.icon %}
+
+        <div
+            class="foundation-empty-state__icon"
+            aria-hidden="true"
+        >
+            {{ empty_state.icon }}
+        </div>
+
+    {% endif %}
+
+    <h3
+        class="foundation-empty-state__title"
+        id="foundation-empty-state-title"
+    >
+        {{ empty_state.title }}
+    </h3>
+
+    {% if empty_state.description %}
+
+        <p class="foundation-empty-state__description">
+            {{ empty_state.description }}
+        </p>
+
+    {% endif %}
+
+    {% if (
+        empty_state.show_action
+        and empty_state.action_label
+        and empty_state.action_url
+    ) %}
+
+        <a
+            class="button"
+            href="{{ empty_state.action_url }}"
+        >
+            {{ empty_state.action_label }}
+        </a>
+
+    {% endif %}
+
+</section>

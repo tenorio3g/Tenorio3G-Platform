@@ -1,0 +1,45 @@
+<div class="asset-top">
+
+    <div class="asset-info">
+
+        <p class="asset-label">
+            EXPEDIENTE DEL ACTIVO
+        </p>
+
+        <h1>
+            ⚡ {{ activo.nombre }}
+        </h1>
+
+        <p class="asset-code">
+            {{ activo.codigo }}
+        </p>
+
+    </div>
+
+    <div class="asset-status
+        {% if activo.estado == 'Operando' %}
+            status-operando
+        {% elif activo.estado == 'Advertencia' %}
+            status-advertencia
+        {% elif activo.estado == 'Falla' %}
+            status-falla
+        {% elif activo.estado == 'Fuera de servicio' %}
+            status-fuera
+        {% endif %}
+    ">
+
+        {% if activo.estado == 'Operando' %}
+            🟢
+        {% elif activo.estado == 'Advertencia' %}
+            🟡
+        {% elif activo.estado == 'Falla' %}
+            🔴
+        {% elif activo.estado == 'Fuera de servicio' %}
+            ⚫
+        {% endif %}
+
+        <span>{{ activo.estado }}</span>
+
+    </div>
+
+</div>

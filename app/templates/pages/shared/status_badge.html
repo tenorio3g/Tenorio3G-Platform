@@ -1,0 +1,31 @@
+{% if estado == "Pendiente" %}
+
+<span class="badge badge-warning">
+    🟡 Pendiente
+</span>
+
+{% elif estado == "En Proceso" %}
+
+<span class="badge badge-primary">
+    🔵 En Proceso
+</span>
+
+{% elif estado == "Finalizada" %}
+
+<span class="badge badge-success">
+    🟢 Finalizada
+</span>
+
+{% elif estado == "Cancelada" %}
+
+<span class="badge badge-danger">
+    🔴 Cancelada
+</span>
+
+{% else %}
+
+<span class="badge badge-secondary">
+    {{ estado }}
+</span>
+
+{% endif %}

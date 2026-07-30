@@ -1,0 +1,43 @@
+<div class="status-panel">
+
+    <h3>Eventos recientes</h3>
+
+    {% if activo.tiene_eventos() %}
+
+        {% for event in activo.events %}
+
+            <article class="event-item">
+
+                <div class="event-header">
+                    <strong>{{ event.title }}</strong>
+                </div>
+
+                <div class="event-body">
+                    <p>{{ event.description }}</p>
+                </div>
+
+                <div class="event-footer">
+                    <small>
+                        {{ event.event_type }} · {{ event.created_by }}
+                    </small>
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="event-item">
+
+            <strong>Sin eventos registrados</strong>
+
+            <p>
+                Este activo todavía no tiene eventos en su historial.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>

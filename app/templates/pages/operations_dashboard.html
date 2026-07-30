@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Centro de Operaciones
+{% endblock %}
+
+{% block content %}
+
+<div class="asset-card">
+
+    <p class="asset-label">
+        CENTRO DE OPERACIONES
+    </p>
+
+    <h1>
+        🏭 Resumen Operativo
+    </h1>
+
+    <hr>
+
+    {% with metricas=metricas %}
+        {% include "components/foundation/metrics/metric_grid.html" %}
+    {% endwith %}
+
+    {% with ordenes_recientes=ordenes_recientes %}
+        {% include "components/foundation/dashboard/recent_orders_widget.html" %}
+    {% endwith %}
+
+    {% with
+        activos_en_riesgo=activos_en_riesgo,
+        tecnicos=tecnicos
+    %}
+        {% include "components/foundation/dashboard/dashboard_grid.html" %}
+    {% endwith %}
+
+</div>
+
+{% endblock %}

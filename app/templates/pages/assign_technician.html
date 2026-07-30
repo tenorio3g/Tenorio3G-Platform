@@ -1,0 +1,84 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Asignar Técnico
+{% endblock %}
+
+{% block content %}
+
+<div class="asset-card">
+
+    <p class="asset-label">
+        WORK ORDERS
+    </p>
+
+    <h1>
+
+        👷 Asignar Técnico
+
+    </h1>
+
+    <p>
+
+        Orden {{ orden.numero }}
+
+    </p>
+
+    <hr>
+
+    {% if error %}
+
+        <div class="form-alert form-alert-error">
+
+            {{ error }}
+
+        </div>
+
+    {% endif %}
+
+    <form method="POST">
+
+        <div class="form-field">
+
+            <label>
+
+                Número del Técnico
+
+            </label>
+
+            <input
+                id="numero_tecnico"
+                name="numero_tecnico"
+                type="text"
+                required
+                value="{{ numero_tecnico|default('') }}"
+                placeholder="Ej. 0003"
+            >
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                class="button button-primary">
+
+                Asignar
+
+            </button>
+
+            <a
+                class="button button-secondary"
+                href="{{ url_for('work_orders.detalle',
+                                 numero=orden.numero) }}">
+
+                Cancelar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

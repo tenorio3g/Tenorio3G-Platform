@@ -1,0 +1,22 @@
+<div class="status-box">
+
+    <h4>{{ actividad.titulo }}</h4>
+
+    {% if actividad.descripcion %}
+        <p>{{ actividad.descripcion }}</p>
+    {% endif %}
+
+    <hr>
+
+    <strong>Estado</strong><br>
+
+    {% with estado=actividad.estado %}
+        {% include "components/shared/status_badge.html" %}
+    {% endwith %}
+
+    <br><br>
+
+    <strong>Responsable</strong><br>
+    {{ actividad.responsable }}
+
+</div>

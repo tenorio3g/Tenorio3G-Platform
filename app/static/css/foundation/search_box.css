@@ -1,0 +1,164 @@
+/* ==========================================================
+   T3G-FND-005
+
+   Component : Search Box
+   Module    : Foundation UI
+   Version   : 1.0.0
+   Status    : Development
+========================================================== */
+
+
+/* ==========================================================
+   SEARCH BOX
+========================================================== */
+
+.foundation-search-box{
+    width:100%;
+}
+
+
+.foundation-search-box__container{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:8px;
+
+    background:var(
+        --color-surface,
+        #ffffff
+    );
+
+    border:1px solid var(
+        --color-border,
+        #dbe2ea
+    );
+
+    border-radius:12px;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease;
+}
+
+
+.foundation-search-box__container:focus-within{
+
+    border-color:var(
+        --color-primary,
+        #2563eb
+    );
+
+    box-shadow:
+        0 0 0 3px rgba(37,99,235,.12);
+
+}
+
+
+.foundation-search-box__icon{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:36px;
+    height:36px;
+
+    color:var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size:18px;
+
+    flex-shrink:0;
+
+}
+
+
+.foundation-search-box__input{
+
+    flex:1;
+
+    min-width:0;
+
+    border:none;
+
+    background:transparent;
+
+    color:var(
+        --color-text-primary,
+        #0f172a
+    );
+
+    font-size:.95rem;
+
+    outline:none;
+
+}
+
+
+.foundation-search-box__input::placeholder{
+
+    color:var(
+        --color-text-secondary,
+        #94a3b8
+    );
+
+}
+
+
+.foundation-search-box__input:disabled{
+
+    cursor:not-allowed;
+    opacity:.65;
+
+}
+
+
+.foundation-search-box .button{
+
+    flex-shrink:0;
+
+}
+
+
+/* ==========================================================
+   HELP TEXT
+========================================================== */
+
+.foundation-search-box__help{
+
+    margin-top:8px;
+
+    color:var(
+        --color-text-secondary,
+        #64748b
+    );
+
+    font-size:.80rem;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:768px){
+
+    .foundation-search-box__container{
+
+        flex-direction:column;
+        align-items:stretch;
+
+    }
+
+    .foundation-search-box .button{
+
+        width:100%;
+
+    }
+
+}

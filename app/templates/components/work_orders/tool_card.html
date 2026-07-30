@@ -1,0 +1,20 @@
+<div class="status-box">
+
+    <h4>🛠 {{ herramienta.nombre }}</h4>
+
+    <strong>Cantidad</strong><br>
+    {{ herramienta.cantidad }}
+
+    {% if herramienta.codigo %}
+        <br><br>
+        <strong>Código</strong><br>
+        {{ herramienta.codigo }}
+    {% endif %}
+
+    {% if herramienta.observaciones %}
+        <br><br>
+        <strong>Observaciones</strong><br>
+        {{ herramienta.observaciones }}
+    {% endif %}
+
+</div>

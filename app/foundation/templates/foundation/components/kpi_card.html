@@ -1,0 +1,52 @@
+{#
+==========================================================
+T3G-FND-010
+
+Component : KPI Card
+Module    : Foundation UI
+Version   : 0.1.0
+Status    : Development
+Sprint    : FND-010
+
+Purpose
+-------
+Renderiza un indicador reutilizable (KPI).
+
+Inputs
+------
+- card: KpiCardViewModel
+
+==========================================================
+#}
+
+<article class="kpi-card kpi-card--{{ card.variant }}">
+
+    <header class="kpi-card__header">
+
+        {% if card.icon %}
+            <div class="kpi-card__icon">
+                {{ card.icon }}
+            </div>
+        {% endif %}
+
+        <h3 class="kpi-card__title">
+            {{ card.title }}
+        </h3>
+
+    </header>
+
+    <div class="kpi-card__body">
+
+        <div class="kpi-card__value">
+            {{ card.value }}
+        </div>
+
+        {% if card.subtitle %}
+            <div class="kpi-card__subtitle">
+                {{ card.subtitle }}
+            </div>
+        {% endif %}
+
+    </div>
+
+</article>

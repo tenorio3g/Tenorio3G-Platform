@@ -1,0 +1,96 @@
+{# ==========================================================
+   T3G-FND-005
+
+   Component : Search Box
+   Module    : Foundation UI
+   Version   : 1.0.0
+   Status    : Development
+
+   Expected Context
+   ----------------
+   search : SearchBoxViewModel
+
+========================================================== #}
+
+<form
+    class="foundation-search-box"
+    action="{{ search.action }}"
+    method="{{ search.method }}"
+    role="search"
+>
+
+    <div class="foundation-search-box__container">
+
+        {% if search.input_icon %}
+
+            <span
+                class="foundation-search-box__icon"
+                aria-hidden="true"
+            >
+                {{ search.input_icon }}
+            </span>
+
+        {% endif %}
+
+        <input
+            class="foundation-search-box__input"
+
+            id="{{ search.resolved_field_id }}"
+
+            name="{{ search.name }}"
+
+            type="search"
+
+            value="{{ search.value }}"
+
+            placeholder="{{ search.placeholder }}"
+
+            autocomplete="{{ search.autocomplete }}"
+
+            aria-label="{{ search.resolved_aria_label }}"
+
+            {% if search.autofocus %}
+                autofocus
+            {% endif %}
+
+            {% if search.disabled %}
+                disabled
+            {% endif %}
+        >
+
+        {% if search.show_button %}
+
+            <button
+                class="button"
+                type="submit"
+
+                {% if search.disabled %}
+                    disabled
+                {% endif %}
+            >
+
+                {% if search.button_icon %}
+                    <span aria-hidden="true">
+                        {{ search.button_icon }}
+                    </span>
+                {% endif %}
+
+                {{ search.button_label }}
+
+            </button>
+
+        {% endif %}
+
+    </div>
+
+    {% if search.help_text %}
+
+        <p class="foundation-search-box__help">
+
+            {{ search.help_text }}
+
+        </p>
+
+    {% endif %}
+
+</form>

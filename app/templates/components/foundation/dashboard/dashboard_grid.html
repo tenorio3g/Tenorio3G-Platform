@@ -1,0 +1,15 @@
+<div class="dashboard-grid">
+
+    <div class="dashboard-grid-item">
+        {% with activos_en_riesgo=activos_en_riesgo %}
+            {% include "components/foundation/dashboard/critical_assets_widget.html" %}
+        {% endwith %}
+    </div>
+
+    <div class="dashboard-grid-item">
+        {% with tecnicos=tecnicos %}
+            {% include "components/foundation/dashboard/technicians_widget.html" %}
+        {% endwith %}
+    </div>
+
+</div>

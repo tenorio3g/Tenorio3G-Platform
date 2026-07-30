@@ -1,0 +1,467 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+{{ component.name }} | Foundation Explorer
+{% endblock %}
+
+
+{% block content %}
+
+<section class="panel panel--highlighted">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <p class="asset-label">
+                {{ component.category }}
+            </p>
+
+            <h1 class="panel__title">
+                {{ component.name }}
+            </h1>
+
+            <p class="panel__subtitle">
+
+                {% if component.description %}
+
+                    {{ component.description }}
+
+                {% else %}
+
+                    Ficha técnica del elemento
+                    <strong>{{ component.id }}</strong>
+                    registrado en T3G Framework.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+
+        <div class="panel__actions">
+
+            {% if component.status == "stable" %}
+
+                {% with
+                    text="Estable",
+                    type="success",
+                    icon="✅"
+                %}
+                    {% include
+                        "components/foundation/badge/badge.html"
+                    %}
+                {% endwith %}
+
+            {% elif component.status == "development" %}
+
+                {% with
+                    text="En desarrollo",
+                    type="warning",
+                    icon="🚧"
+                %}
+                    {% include
+                        "components/foundation/badge/badge.html"
+                    %}
+                {% endwith %}
+
+            {% elif component.status == "deprecated" %}
+
+                {% with
+                    text="Obsoleto",
+                    type="danger",
+                    icon="⚠️"
+                %}
+                    {% include
+                        "components/foundation/badge/badge.html"
+                    %}
+                {% endwith %}
+
+            {% else %}
+
+                {% with
+                    text="Pendiente",
+                    type="neutral",
+                    icon="⏳"
+                %}
+                    {% include
+                        "components/foundation/badge/badge.html"
+                    %}
+                {% endwith %}
+
+            {% endif %}
+
+
+            <a
+                class="button button-secondary"
+                href="{{ url_for('foundation.explorer') }}"
+            >
+                Volver al Explorer
+            </a>
+
+        </div>
+
+    </header>
+
+</section>
+
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Información general
+            </h2>
+
+            <p class="panel__subtitle">
+                Identidad, clasificación y estado oficial del componente.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <dl class="component-detail-grid">
+
+            <div class="component-detail-field">
+
+                <dt>ID</dt>
+
+                <dd>
+                    {{ component.id }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Categoría</dt>
+
+                <dd>
+                    {{ component.category }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Estado</dt>
+
+                <dd>
+                    {{ component.status }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Responsable</dt>
+
+                <dd>
+                    {{ component.owner }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Versión</dt>
+
+                <dd>
+                    {{ component.version or "Sin versión" }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Disponible desde</dt>
+
+                <dd>
+                    {{ component.since or "No definido" }}
+                </dd>
+
+            </div>
+
+        </dl>
+
+    </div>
+
+</section>
+
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Recursos técnicos
+            </h2>
+
+            <p class="panel__subtitle">
+                Archivos y elementos asociados con la implementación.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        <dl class="component-detail-grid">
+
+            <div class="component-detail-field">
+
+                <dt>Template</dt>
+
+                <dd>
+                    {{ component.template or "No registrado" }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Hoja de estilos</dt>
+
+                <dd>
+                    {{ component.stylesheet or "No registrada" }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>ViewModel</dt>
+
+                <dd>
+                    {{ component.viewmodel or "No registrado" }}
+                </dd>
+
+            </div>
+
+
+            <div class="component-detail-field">
+
+                <dt>Documentación</dt>
+
+                <dd>
+                    {{ component.documentation or "No registrada" }}
+                </dd>
+
+            </div>
+
+        </dl>
+
+    </div>
+
+</section>
+
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Etiquetas
+            </h2>
+
+            <p class="panel__subtitle">
+                Palabras clave utilizadas para clasificar y localizar
+                componentes dentro del Registry.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        {% if component.tags %}
+
+            <div class="component-tags">
+
+                {% for tag in component.tags %}
+
+                    <span class="component-tag">
+                        {{ tag }}
+                    </span>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>
+                Este elemento no tiene etiquetas registradas.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Dependencias
+            </h2>
+
+            <p class="panel__subtitle">
+                Elementos que este componente necesita para funcionar.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        {% if component.has_dependencies %}
+
+            <div class="status-grid">
+
+                {% for dependency in component.dependencies %}
+
+                    <a
+                        class="summary-card component-reference-card"
+                        href="{{ url_for(
+                            'foundation.explorer_detail',
+                            component_id=dependency.id
+                        ) }}"
+                    >
+
+                        <p class="asset-label">
+                            {{ dependency.category }}
+                        </p>
+
+                        <strong>
+                            {{ dependency.name }}
+                        </strong>
+
+                        <p>
+                            {{ dependency.id }}
+                        </p>
+
+                        <span>
+                            {{ dependency.status }}
+                        </span>
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>
+                Este elemento no tiene dependencias registradas.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                Utilizado por
+            </h2>
+
+            <p class="panel__subtitle">
+                Elementos que dependen directamente de este componente.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        {% if component.has_dependents %}
+
+            <div class="status-grid">
+
+                {% for dependent in component.dependents %}
+
+                    <a
+                        class="summary-card component-reference-card"
+                        href="{{ url_for(
+                            'foundation.explorer_detail',
+                            component_id=dependent.id
+                        ) }}"
+                    >
+
+                        <p class="asset-label">
+                            {{ dependent.category }}
+                        </p>
+
+                        <strong>
+                            {{ dependent.name }}
+                        </strong>
+
+                        <p>
+                            {{ dependent.id }}
+                        </p>
+
+                        <span>
+                            {{ dependent.status }}
+                        </span>
+
+                    </a>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p>
+                Ningún elemento depende directamente de este componente.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

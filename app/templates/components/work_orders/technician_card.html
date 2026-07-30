@@ -1,0 +1,25 @@
+<div class="status-box">
+
+    <h4>👷 {{ tecnico.nombre }}</h4>
+
+    <strong>Número de empleado</strong><br>
+    {{ tecnico.numero_empleado }}
+
+    <br><br>
+
+    <strong>Rol</strong><br>
+    {{ tecnico.rol }}
+
+    {% if tecnico.puesto %}
+        <br><br>
+        <strong>Puesto</strong><br>
+        {{ tecnico.puesto }}
+    {% endif %}
+
+    {% if tecnico.turno %}
+        <br><br>
+        <strong>Turno</strong><br>
+        {{ tecnico.turno }}
+    {% endif %}
+
+</div>

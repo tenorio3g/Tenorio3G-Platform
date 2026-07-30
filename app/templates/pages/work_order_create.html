@@ -1,0 +1,224 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Nueva Orden de Trabajo
+{% endblock %}
+
+{% block content %}
+
+<div class="asset-card">
+
+    <p class="asset-label">
+        WORK ORDERS
+    </p>
+
+    <h1>
+        📋 Nueva Orden de Trabajo
+    </h1>
+
+    <p>
+        Registre la información inicial de la orden.
+    </p>
+
+    <hr>
+
+    {% if error %}
+
+        <div class="form-alert form-alert-error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+    <form
+        method="POST"
+        class="work-order-form"
+    >
+
+        <div class="form-grid">
+
+            <div class="form-field">
+
+                <label for="numero">
+                    Número de orden
+                </label>
+
+                <input
+                    id="numero"
+                    name="numero"
+                    type="text"
+                    required
+                    value="{{ datos.get('numero', '') if datos else '' }}"
+                    placeholder="Ej. 70150"
+                >
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="titulo">
+                    Título
+                </label>
+
+                <input
+                    id="titulo"
+                    name="titulo"
+                    type="text"
+                    required
+                    value="{{ datos.get('titulo', '') if datos else '' }}"
+                    placeholder="Descripción breve del trabajo"
+                >
+
+            </div>
+
+            <div class="form-field form-field-full">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    rows="5"
+                    placeholder="Explique el trabajo solicitado"
+                >{{ datos.get('descripcion', '') if datos else '' }}</textarea>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="tipo">
+                    Tipo
+                </label>
+
+                <select
+                    id="tipo"
+                    name="tipo"
+                    required
+                >
+                    <option value="Correctivo">
+                        Correctivo
+                    </option>
+
+                    <option value="Preventivo">
+                        Preventivo
+                    </option>
+
+                    <option value="Proyecto">
+                        Proyecto
+                    </option>
+
+                    <option value="Inspección">
+                        Inspección
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="prioridad">
+                    Prioridad
+                </label>
+
+                <select
+                    id="prioridad"
+                    name="prioridad"
+                    required
+                >
+                    <option value="Baja">
+                        Baja
+                    </option>
+
+                    <option value="Media">
+                        Media
+                    </option>
+
+                    <option value="Alta">
+                        Alta
+                    </option>
+
+                    <option value="Crítica">
+                        Crítica
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="codigo_activo">
+                    Código del activo
+                </label>
+
+                <input
+                    id="codigo_activo"
+                    name="codigo_activo"
+                    type="text"
+                    required
+                    value="{{ datos.get('codigo_activo', 'ES09') if datos else 'ES09' }}"
+                    placeholder="Ej. ES09"
+                >
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="numero_solicitante">
+                    Número del solicitante
+                </label>
+
+                <input
+                    id="numero_solicitante"
+                    name="numero_solicitante"
+                    type="text"
+                    required
+                    value="{{ datos.get('numero_solicitante', '0004') if datos else '0004' }}"
+                    placeholder="Ej. 0004"
+                >
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="numero_supervisor">
+                    Número del supervisor
+                </label>
+
+                <input
+                    id="numero_supervisor"
+                    name="numero_supervisor"
+                    type="text"
+                    required
+                    value="{{ datos.get('numero_supervisor', '0001') if datos else '0001' }}"
+                    placeholder="Ej. 0001"
+                >
+
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button button-primary"
+            >
+                Crear Orden
+            </button>
+
+            <a
+                href="{{ url_for('operations.index') }}"
+                class="button button-secondary"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

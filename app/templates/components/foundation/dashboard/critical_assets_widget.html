@@ -1,0 +1,95 @@
+<section class="dashboard-widget">
+
+    <div class="dashboard-widget-header">
+
+        <div>
+            <p class="dashboard-widget-label">
+                CONDICIÓN DE ACTIVOS
+            </p>
+
+            <h2 class="dashboard-widget-title">
+                ⚠️ Activos que requieren atención
+            </h2>
+        </div>
+
+        <a class="dashboard-widget-link" href="#">
+            Ver activos →
+        </a>
+
+    </div>
+
+    {% if activos_en_riesgo %}
+
+        <div class="critical-assets-list">
+
+            {% for activo in activos_en_riesgo %}
+
+                <article class="critical-asset-item">
+
+                    <div class="critical-asset-main">
+
+                        <div class="critical-asset-heading">
+
+                            <a
+                                class="critical-asset-code"
+                                href="#"
+                            >
+                                {{ activo.codigo }}
+                            </a>
+
+                            {% with categoria=activo.riesgo %}
+                                {% include "components/shared/category_badge.html" %}
+                            {% endwith %}
+
+                        </div>
+
+                        <h3 class="critical-asset-name">
+                            {{ activo.nombre }}
+                        </h3>
+
+                        <p class="critical-asset-location">
+                            📍 {{ activo.ubicacion }}
+                        </p>
+
+                        <p class="critical-asset-status">
+                            Estado: {{ activo.estado }}
+                        </p>
+
+                    </div>
+
+                    <div class="critical-asset-health">
+
+                        <span class="critical-asset-health-label">
+                            Salud
+                        </span>
+
+                        <strong>
+                            {{ activo.salud }}%
+                        </strong>
+
+                        <div class="critical-asset-health-track">
+
+                            <div
+                                class="critical-asset-health-value"
+                                style="--health-width: {{ activo.salud }}%;"
+                                ></div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="dashboard-empty">
+            No existen activos que requieran atención.
+        </div>
+
+    {% endif %}
+
+</section>

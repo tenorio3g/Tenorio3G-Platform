@@ -1,0 +1,55 @@
+<article class="timeline-event">
+
+    <div class="timeline-marker timeline-marker-{{ evento.color }}">
+        <span class="timeline-icon">
+            {{ evento.icono }}
+        </span>
+    </div>
+
+    <div class="timeline-content">
+
+        <div class="timeline-header">
+
+            <div>
+                {% with categoria=evento.categoria %}
+                    {% include "components/shared/category_badge.html" %}
+                {% endwith %}
+
+                <h4 class="timeline-title">
+                    {{ evento.titulo }}
+                </h4>
+            </div>
+
+            <time
+                class="timeline-date"
+                datetime="{{ evento.fecha.isoformat() }}"
+                title="{{ evento.fecha.strftime('%d/%m/%Y %H:%M:%S') }}"
+            >
+                {{ evento.fecha.strftime("%d/%m/%Y %H:%M") }}
+            </time>
+
+        </div>
+
+        {% if evento.descripcion %}
+            <p class="timeline-description">
+                {{ evento.descripcion }}
+            </p>
+        {% endif %}
+
+        <div class="timeline-footer">
+
+            <span>
+                👤 {{ evento.usuario }}
+            </span>
+
+            {% if evento.referencia %}
+                <span class="timeline-reference">
+                    🔗 {{ evento.referencia }}
+                </span>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</article>

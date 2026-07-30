@@ -1,0 +1,87 @@
+/* ==================================================
+   TENORIO3G FOUNDATION UI
+   Primitive: Badge
+   Version: 1.0
+================================================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: var(--space-xs, 6px);
+
+    min-height: 28px;
+    padding: 4px 12px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+
+    font-size: var(--font-size-sm, 0.875rem);
+    font-weight: var(--font-weight-semibold, 600);
+    line-height: 1;
+
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+
+/* Tamaños */
+
+.badge--small {
+    min-height: 22px;
+    padding: 3px 9px;
+    font-size: 0.75rem;
+}
+
+.badge--large {
+    min-height: 34px;
+    padding: 6px 15px;
+    font-size: 0.9375rem;
+}
+
+
+/* Variantes */
+
+.badge--success {
+    color: #166534;
+    background-color: #dcfce7;
+    border-color: #bbf7d0;
+}
+
+.badge--warning {
+    color: #92400e;
+    background-color: #fef3c7;
+    border-color: #fde68a;
+}
+
+.badge--danger {
+    color: #991b1b;
+    background-color: #fee2e2;
+    border-color: #fecaca;
+}
+
+.badge--info {
+    color: #1d4ed8;
+    background-color: #dbeafe;
+    border-color: #bfdbfe;
+}
+
+.badge--neutral {
+    color: #374151;
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+
+/* Punto indicador opcional */
+
+.badge__dot {
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 auto;
+
+    background-color: currentColor;
+    border-radius: 50%;
+}

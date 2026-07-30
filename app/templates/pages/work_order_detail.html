@@ -1,0 +1,422 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Orden {{ orden.numero }}
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==================================================
+     INFORMACIÓN GENERAL
+================================================== -->
+
+<div class="asset-card">
+
+    <p class="asset-label">ORDEN DE TRABAJO</p>
+
+    <div class="asset-top">
+
+        <div>
+            <h1>📋 {{ orden.titulo }}</h1>
+            <p class="asset-code">OT-{{ orden.numero }}</p>
+        </div>
+
+        <div class="asset-status">
+            <strong>
+                Activo: {{ orden.activo.nombre }}
+            </strong>
+
+            <br>
+
+            {{ orden.activo.ubicacion }}
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <span>🏭</span>
+            <strong>Activo</strong>
+
+            <p>
+                {{ orden.activo.nombre }}<br>
+                {{ orden.activo.codigo }}<br>
+                {{ orden.activo.ubicacion }}
+            </p>
+        </div>
+
+
+        <div class="summary-card">
+            <span>⚡</span>
+            <strong>Tipo</strong>
+
+            <p>{{ orden.tipo }}</p>
+        </div>
+
+
+        <div class="summary-card">
+            <span>🔥</span>
+            <strong>Prioridad</strong>
+
+            <p>{{ orden.prioridad }}</p>
+        </div>
+
+
+        <div class="summary-card">
+            <span>📨</span>
+            <strong>Solicitante</strong>
+
+            {% if orden.solicitante %}
+
+                <p>
+                    {{ orden.solicitante.nombre }}<br>
+
+                    <small>
+                        {{ orden.solicitante.departamento }}
+                        ·
+                        {{ orden.solicitante.rol }}
+                    </small>
+                </p>
+
+            {% else %}
+
+                <p>Sin solicitante registrado</p>
+
+            {% endif %}
+        </div>
+
+
+        <div class="summary-card">
+            <span>👷</span>
+            <strong>Supervisor</strong>
+
+            {% if orden.supervisor %}
+
+                <p>
+                    {{ orden.supervisor.nombre }}<br>
+
+                    <small>
+                        {{ orden.supervisor.numero_empleado }}
+                        ·
+                        {{ orden.supervisor.rol }}
+                    </small>
+                </p>
+
+            {% else %}
+
+                <p>Sin supervisor asignado</p>
+
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     TÉCNICOS
+================================================== -->
+
+<section class="panel">
+
+    <header class="panel__header">
+
+        <div class="panel__heading">
+
+            <h2 class="panel__title">
+                👷 Técnicos asignados
+            </h2>
+
+            <p class="panel__subtitle">
+                Personal responsable de ejecutar los trabajos de esta orden.
+            </p>
+
+        </div>
+
+
+        <div class="panel__actions">
+
+            <a
+                class="button button-primary"
+                href="{{ url_for(
+                    'work_orders.asignar_tecnico',
+                    numero=orden.numero
+                ) }}"
+            >
+                + Asignar técnico
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <div class="panel__body">
+
+        {% if orden.tecnicos %}
+
+            <ul class="employee-list">
+
+                {% for tecnico in orden.tecnicos %}
+
+                    <li>
+                        👷 {{ tecnico.nombre }}
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% else %}
+
+            <p>No hay técnicos asignados.</p>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ==================================================
+     MATERIALES
+================================================== -->
+
+<div class="asset-card">
+
+    <div class="section-header">
+
+        <h2>📦 Materiales utilizados</h2>
+
+        <a
+            class="button button-primary"
+            href="{{ url_for(
+                'work_orders.agregar_material',
+                numero=orden.numero
+            ) }}"
+        >
+            + Agregar material
+        </a>
+
+    </div>
+
+
+    {% if orden.materiales %}
+
+        <div class="status-grid">
+
+            {% for material in orden.materiales %}
+
+                {% include
+                    "components/work_orders/material_card.html"
+                %}
+
+            {% endfor %}
+
+        </div>
+
+
+        <hr>
+
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <span>📦</span>
+                <strong>Materiales diferentes</strong>
+
+                <p>{{ orden.cantidad_materiales }}</p>
+            </div>
+
+
+            <div class="summary-card">
+                <span>🔢</span>
+                <strong>Cantidad acumulada</strong>
+
+                <p>{{ orden.cantidad_total_material }}</p>
+            </div>
+
+
+            <div class="summary-card">
+                <span>💰</span>
+                <strong>Costo de materiales</strong>
+
+                <p>
+                    ${{ "%.2f"|format(orden.costo_materiales) }}
+                </p>
+            </div>
+
+
+            <div class="summary-card">
+                <span>🧾</span>
+                <strong>Costo total de la orden</strong>
+
+                <p>
+                    ${{ "%.2f"|format(orden.costo_total) }}
+                </p>
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <p>No hay materiales registrados en esta orden.</p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ==================================================
+     HERRAMIENTAS
+================================================== -->
+
+<div class="asset-card">
+
+    <div class="section-header">
+
+        <h2>🧰 Herramientas utilizadas</h2>
+
+    </div>
+
+
+    {% if orden.herramientas %}
+
+        <div class="status-grid">
+
+            {% for herramienta in orden.herramientas %}
+
+                {% include
+                    "components/work_orders/tool_card.html"
+                %}
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <p>No hay herramientas registradas.</p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ==================================================
+     ACTIVIDADES
+================================================== -->
+
+<div class="asset-card">
+
+    <div class="section-header">
+
+        <h2>📋 Actividades</h2>
+
+        <a
+            class="button button-primary"
+            href="{{ url_for(
+                'work_orders.agregar_actividad',
+                numero=orden.numero
+            ) }}"
+        >
+            + Agregar actividad
+        </a>
+
+    </div>
+
+
+    <p>
+        <strong>Avance:</strong>
+        {{ orden.porcentaje_avance() }}%
+    </p>
+
+
+    <div class="status-grid">
+
+        {% for actividad in orden.actividades %}
+
+            {% include
+                "components/work_orders/activity_card.html"
+            %}
+
+        {% else %}
+
+            <p>No hay actividades registradas.</p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     TIMELINE
+================================================== -->
+
+<div class="asset-card">
+
+    <h2>🕒 Timeline Foundation</h2>
+
+    {% with eventos = orden.eventos_timeline() %}
+
+        {% include
+            "components/foundation/timeline/timeline.html"
+        %}
+
+    {% endwith %}
+
+</div>
+
+
+<!-- ==================================================
+     BITÁCORA
+================================================== -->
+
+<div class="asset-card">
+
+    <h2>📖 Bitácora de la orden</h2>
+
+    <div class="event-list">
+
+        {% if orden.eventos %}
+
+            {% for evento in orden.eventos %}
+
+                {% include
+                    "components/work_orders/work_order_event_card.html"
+                %}
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>
+                No hay eventos registrados en esta orden.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+

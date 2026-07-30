@@ -1,0 +1,151 @@
+/* =====================================================
+   TENORIO3G PLATFORM
+   FOUNDATION UI — DESIGN TOKENS
+===================================================== */
+
+:root {
+
+    /* =================================================
+       COLORES INSTITUCIONALES
+    ================================================= */
+
+    --color-primary: #0b3c5d;
+    --color-primary-light: #0f5f83;
+    --color-primary-dark: #082d45;
+
+    --color-secondary: #475569;
+    --color-secondary-light: #e2e8f0;
+
+
+    /* =================================================
+       COLORES SEMÁNTICOS
+    ================================================= */
+
+    --color-success: #16a34a;
+    --color-success-light: #dcfce7;
+    --color-success-dark: #166534;
+
+    --color-warning: #eab308;
+    --color-warning-light: #fef9c3;
+    --color-warning-dark: #854d0e;
+
+    --color-orange: #f97316;
+    --color-orange-light: #ffedd5;
+    --color-orange-dark: #9a3412;
+
+    --color-danger: #dc2626;
+    --color-danger-light: #fee2e2;
+    --color-danger-dark: #991b1b;
+
+    --color-info: #2563eb;
+    --color-info-light: #dbeafe;
+    --color-info-dark: #1d4ed8;
+
+
+    /* =================================================
+       SUPERFICIES
+    ================================================= */
+
+    --color-background: #f4f6f9;
+    --color-surface: #ffffff;
+    --color-surface-soft: #f8fafc;
+
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
+
+
+    /* =================================================
+       TEXTO
+    ================================================= */
+
+    --color-text: #1e293b;
+    --color-text-strong: #0f172a;
+    --color-text-muted: #64748b;
+    --color-text-inverse: #ffffff;
+
+
+    /* =================================================
+       TIPOGRAFÍA
+    ================================================= */
+
+    --font-family-base:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 28px;
+    --font-size-2xl: 36px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extra-bold: 800;
+
+    --line-height-sm: 1.25;
+    --line-height-md: 1.5;
+    --line-height-lg: 1.7;
+
+
+    /* =================================================
+       ESPACIADO
+    ================================================= */
+
+    --space-0: 0;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+
+
+    /* =================================================
+       BORDES
+    ================================================= */
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-pill: 999px;
+
+
+    /* =================================================
+       SOMBRAS
+    ================================================= */
+
+    --shadow-sm:
+        0 2px 6px rgba(15, 23, 42, 0.06);
+
+    --shadow-md:
+        0 4px 14px rgba(15, 23, 42, 0.08);
+
+    --shadow-lg:
+        0 8px 24px rgba(15, 23, 42, 0.12);
+
+
+    /* =================================================
+       TRANSICIONES
+    ================================================= */
+
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+
+
+    /* =================================================
+       TAMAÑOS DE INTERFAZ
+    ================================================= */
+
+    --button-height-sm: 34px;
+    --button-height-md: 42px;
+    --button-height-lg: 50px;
+
+    --container-max-width: 1440px;
+
+}

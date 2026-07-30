@@ -1,0 +1,77 @@
+<section class="dashboard-widget">
+
+    <div class="dashboard-widget-header">
+
+        <div>
+            <p class="dashboard-widget-label">
+                OPERACIÓN
+            </p>
+
+            <h2 class="dashboard-widget-title">
+                📋 Órdenes recientes
+            </h2>
+        </div>
+
+        <a
+            class="dashboard-widget-link"
+            href="#"
+        >
+            Ver todas →
+        </a>
+
+    </div>
+
+    {% if ordenes_recientes %}
+
+        <div class="recent-orders-list">
+
+            {% for orden in ordenes_recientes %}
+
+                <article class="recent-order-item">
+
+                    <div class="recent-order-main">
+
+                        <a
+                            class="recent-order-number"
+                            href="/ordenes/{{ orden.numero }}"
+                        >
+                            OT-{{ orden.numero }}
+                        </a>
+
+                        <h3 class="recent-order-title">
+                            {{ orden.titulo }}
+                        </h3>
+
+                        <p class="recent-order-responsible">
+                            👷 {{ orden.responsable }}
+                        </p>
+
+                    </div>
+
+                    <div class="recent-order-meta">
+
+                        {% with categoria=orden.estado %}
+                            {% include "components/shared/category_badge.html" %}
+                        {% endwith %}
+
+                        <span class="recent-order-priority">
+                            Prioridad: {{ orden.prioridad }}
+                        </span>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="dashboard-empty">
+            No hay órdenes recientes.
+        </div>
+
+    {% endif %}
+
+</section>

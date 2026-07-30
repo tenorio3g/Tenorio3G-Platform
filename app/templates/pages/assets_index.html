@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Activos | Tenorio3G
+{% endblock %}
+
+
+{% block content %}
+
+<section class="assets-page">
+
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="/">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span>Activos</span>
+    </nav>
+
+    <header class="assets-page__header">
+
+        <div>
+            <p class="assets-page__eyebrow">
+                Gestión de activos
+            </p>
+
+            <h1 class="assets-page__title">
+                Activos
+            </h1>
+
+            <p class="assets-page__description">
+                Busca equipos por código, nombre, área o ubicación
+                y accede a su Hoja de Vida.
+            </p>
+        </div>
+
+    </header>
+
+    {% include "components/assets/asset_search.html" %}
+
+    {% include "components/assets/asset_results.html" %}
+
+</section>
+
+{% endblock %}

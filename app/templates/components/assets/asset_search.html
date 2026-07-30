@@ -1,0 +1,19 @@
+<form class="asset-search" method="GET" action="{{ url_for('assets.index') }}">
+
+    <div class="asset-search__box">
+
+        <input
+            type="text"
+            name="buscar"
+            placeholder="Buscar por código, nombre, área o ubicación..."
+            value="{{ request.args.get('buscar', '') }}"
+            autocomplete="off"
+        >
+
+        <button type="submit">
+            🔍 Buscar
+        </button>
+
+    </div>
+
+</form>

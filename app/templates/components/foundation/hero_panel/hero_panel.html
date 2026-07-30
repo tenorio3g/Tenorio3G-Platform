@@ -1,0 +1,132 @@
+{#
+==========================================================
+T3G-FND-004
+
+Component : Hero Panel
+Module    : Foundation UI
+Version   : 0.1.0
+Status    : Development
+Sprint    : UI-004
+
+Purpose
+-------
+Renderiza un panel principal reutilizable para mostrar
+el estado general de una entidad.
+
+Inputs
+------
+- hero: HeroPanelViewModel
+
+Dependencies
+------------
+- panel.css
+- badge.css
+- progress.css
+- buttons.css
+
+==========================================================
+#}
+
+<section class="hero-panel panel">
+
+    <header class="hero-panel__header panel__header">
+
+        <div class="hero-panel__heading">
+
+            <div>
+                <h2 class="hero-panel__title panel__title">
+                    {{ hero.title }}
+                </h2>
+
+                {% if hero.subtitle %}
+                    <p class="hero-panel__subtitle panel__subtitle">
+                        {{ hero.subtitle }}
+                    </p>
+                {% endif %}
+            </div>
+
+            {% if hero.badge %}
+                <span class="badge badge--{{ hero.badge.variant }}">
+                    {{ hero.badge.text }}
+                </span>
+            {% endif %}
+
+        </div>
+
+    </header>
+
+    <div class="hero-panel__body panel__body">
+
+        {% if hero.progress is not none %}
+
+            <div class="hero-panel__progress">
+
+                <div class="hero-panel__progress-header">
+                    <span class="hero-panel__progress-label">
+                        {{ hero.progress_label or "Progreso" }}
+                    </span>
+
+                    <strong class="hero-panel__progress-value">
+                        {{ hero.progress }}%
+                    </strong>
+                </div>
+
+                <div
+                    class="progress"
+                    role="progressbar"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ hero.progress }}"
+                >
+                    <div
+                        class="progress__bar"
+                        style="width: {{ hero.progress }}%;"
+                    ></div>
+                </div>
+
+            </div>
+
+        {% endif %}
+
+        {% if hero.details %}
+
+            <dl class="hero-panel__details">
+
+                {% for detail in hero.details %}
+
+                    <div class="hero-panel__detail">
+                        <dt class="hero-panel__detail-label">
+                            {{ detail.label }}
+                        </dt>
+
+                        <dd class="hero-panel__detail-value">
+                            {{ detail.value }}
+                        </dd>
+                    </div>
+
+                {% endfor %}
+
+            </dl>
+
+        {% endif %}
+
+    </div>
+
+    {% if hero.actions %}
+
+        <footer class="hero-panel__actions">
+
+            {% for action in hero.actions %}
+                <a
+                    href="{{ action.url }}"
+                    class="button button--{{ action.variant }}"
+                >
+                    {{ action.label }}
+                </a>
+            {% endfor %}
+
+        </footer>
+
+    {% endif %}
+
+</section>

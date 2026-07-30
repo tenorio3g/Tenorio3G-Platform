@@ -1,0 +1,12 @@
+{% set categoria_clase = categoria|lower
+    |replace("á", "a")
+    |replace("é", "e")
+    |replace("í", "i")
+    |replace("ó", "o")
+    |replace("ú", "u")
+    |replace(" ", "-")
+%}
+
+<span class="category-badge category-badge-{{ categoria_clase }}">
+    {{ categoria }}
+</span>

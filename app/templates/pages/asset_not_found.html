@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Activo no encontrado | Tenorio3G
+{% endblock %}
+
+
+{% block content %}
+
+<section class="asset-not-found">
+
+    <header class="asset-not-found__header">
+
+        <h1>
+            Activo no encontrado
+        </h1>
+
+        <p>
+            No fue posible localizar el activo solicitado.
+        </p>
+
+    </header>
+
+
+    <div class="asset-not-found__card">
+
+        <h2>
+            Código consultado
+        </h2>
+
+        <p class="asset-not-found__code">
+            {{ codigo }}
+        </p>
+
+        <p>
+            Verifica que el código sea correcto o realiza una nueva búsqueda.
+        </p>
+
+    </div>
+
+
+    <div class="asset-not-found__actions">
+
+        <a
+            href="{{ url_for('assets.index') }}"
+            class="btn btn-primary">
+
+            Volver al buscador
+
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

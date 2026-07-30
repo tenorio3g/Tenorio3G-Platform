@@ -1,0 +1,19 @@
+<div class="timeline">
+
+    {% if eventos %}
+
+        {% for evento in eventos %}
+
+            {% include "components/foundation/timeline/timeline_event.html" %}
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="timeline-empty">
+            No hay eventos registrados.
+        </div>
+
+    {% endif %}
+
+</div>

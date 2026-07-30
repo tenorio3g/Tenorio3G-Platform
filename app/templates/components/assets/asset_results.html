@@ -1,0 +1,44 @@
+<section class="asset-results">
+
+    <header class="asset-results__header">
+
+        <h2>
+            Resultados
+        </h2>
+
+        {% if activos %}
+            <span class="asset-results__count">
+                {{ activos|length }} activo(s)
+            </span>
+        {% endif %}
+
+    </header>
+
+
+    {% if activos %}
+
+        <div class="asset-results__list">
+
+            {% for activo in activos %}
+
+                {% include "components/assets/asset_result_card.html" %}
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-results__empty">
+
+            <h3>No se encontraron activos</h3>
+
+            <p>
+                Intenta buscar por código, nombre, área o ubicación.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>

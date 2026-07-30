@@ -1,0 +1,89 @@
+<div class="asset-dashboard">
+
+    <section class="asset-photo" aria-label="Fotografía del activo">
+
+        <div class="photo-placeholder">
+            <span class="photo-icon" aria-hidden="true">📷</span>
+            <p>Fotografía del activo</p>
+        </div>
+
+    </section>
+
+    <section class="asset-summary" aria-labelledby="asset-summary-title">
+
+        <h3 id="asset-summary-title">
+            Información general
+        </h3>
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <span aria-hidden="true">📍</span>
+                <strong>Ubicación</strong>
+                <p>{{ activo.ubicacion or "Sin ubicación registrada" }}</p>
+            </div>
+
+            <div class="summary-card">
+                <span aria-hidden="true">🏭</span>
+                <strong>Área</strong>
+                <p>{{ activo.area or "Sin área registrada" }}</p>
+            </div>
+
+            <div class="summary-card">
+                <span aria-hidden="true">🛠️</span>
+                <strong>Último mantenimiento</strong>
+                <p>
+                    {{ activo.ultimo_mantenimiento or "Sin mantenimiento registrado" }}
+                </p>
+            </div>
+
+            <div class="summary-card">
+                <span aria-hidden="true">📅</span>
+                <strong>Próximo mantenimiento</strong>
+                <p>
+                    {{ activo.proximo_mantenimiento or "Sin fecha programada" }}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="asset-health">
+
+            <div class="health-title">
+                <label for="asset-health-progress">
+                    Salud del activo
+                </label>
+
+                <span>
+                    {% if activo.salud is not none %}
+                        {{ activo.salud }}%
+                    {% else %}
+                        Sin evaluar
+                    {% endif %}
+                </span>
+            </div>
+
+            {% if activo.salud is not none %}
+
+                <progress
+                    id="asset-health-progress"
+                    value="{{ activo.salud }}"
+                    max="100"
+                    aria-label="Salud del activo: {{ activo.salud }} por ciento"
+                >
+                    {{ activo.salud }}%
+                </progress>
+
+            {% else %}
+
+                <p class="health-unavailable">
+                    La salud del activo aún no ha sido evaluada.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</div>
