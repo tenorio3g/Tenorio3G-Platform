@@ -1,10 +1,18 @@
 from flask import render_template, request
 
 from . import assets
-from app.assets.repositories.asset_repository import AssetRepository
 from app.assets.services.asset_service import AssetService
+from app.domains.assets.bootstrap import (
+    get_asset_life_sheet,
+)
 
-repository = AssetRepository()
+from app.domains.assets.use_cases.get_asset_life_sheet.query import (
+    GetAssetLifeSheetQuery,
+)
+
+from app.assets.presenters.asset_life_sheet_presenter import (
+    AssetLifeSheetPresenter,
+)
 
 
 @assets.route("/activos")
@@ -28,9 +36,14 @@ def asset_detail(codigo: str):
     Muestra la Hoja de Vida del activo.
     """
 
-    activo = repository.obtener_por_codigo(codigo)
+    result = get_asset_life_sheet.execute(
+        GetAssetLifeSheetQuery(
+            code=codigo,
+        )
+    )
 
-    if activo is None:
+    if not result.success:
+
         return (
             render_template(
                 "pages/asset_not_found.html",
@@ -38,6 +51,11 @@ def asset_detail(codigo: str):
             ),
             404,
         )
+
+    activo = AssetLifeSheetPresenter.present(
+        asset=result.asset,
+        asset_model=result.asset_model,
+    )
 
     return render_template(
         "pages/asset_detail.html",
