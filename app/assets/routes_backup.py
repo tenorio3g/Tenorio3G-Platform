@@ -2,7 +2,7 @@ from flask import render_template, request
 
 from . import assets
 from app.assets.repositories.asset_repository import AssetRepository
-from app.assets.services.asset_service import AssetService
+
 
 repository = AssetRepository()
 
@@ -13,12 +13,20 @@ def index():
     Pantalla principal del módulo Assets.
     """
 
-    activos = AssetService.get_assets()
+    termino_busqueda = request.args.get(
+        "buscar",
+        ""
+    ).strip()
+
+    if termino_busqueda:
+        activos = repository.buscar(termino_busqueda)
+    else:
+        activos = repository.obtener_todos()
 
     return render_template(
         "pages/assets_index.html",
         activos=activos,
-        termino_busqueda="",
+        termino_busqueda=termino_busqueda,
     )
 
 
