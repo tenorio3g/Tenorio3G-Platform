@@ -89,10 +89,41 @@ function renderPuntos(locations) {
 }
 
 // Abrir popup
-function abrirPopup(elemento, id, nombre) {
-  contenidoPopup.innerHTML = `<strong>${nombre}</strong><br>
-                              <br>Hola</br>
-                              <button onclick="verMas('${nombre}')">Ver más</button>`;
+async function abrirPopup(elemento, id, nombre) {
+try {
+
+    const response = await fetch(`/assets/api/${id}`);
+
+    const activo = await response.json();
+
+    contenidoPopup.innerHTML = `
+        <h3>${activo.nombre}</h3>
+
+        <p><strong>Código:</strong> ${activo.codigo}</p>
+
+        <p><strong>Estado:</strong> ${activo.estado}</p>
+
+        <p><strong>Ubicación:</strong> ${activo.ubicacion}</p>
+
+        <p><strong>Área:</strong> ${activo.area}</p>
+
+        <p><strong>Salud:</strong> ${activo.salud}%</p>
+
+        <button onclick="verMas('${activo.codigo}')">
+            Ver Hoja de Vida
+        </button>
+    `;
+
+}
+catch(error){
+
+    console.error(error);
+
+    contenidoPopup.innerHTML = `
+        <p>Error cargando activo.</p>
+    `;
+
+}
   popup.style.display = "block";
   const rect = elemento.getBoundingClientRect();
   const mapaRect = mapa.getBoundingClientRect();
@@ -104,8 +135,11 @@ document.getElementById("cerrarPopup").addEventListener("click", () => {
 });
 
 // Ver más
-function verMas(nombre) {
-  window.location.href = nombre + ".html";
+function verMas(codigo){
+
+    window.location.href =
+        "/activo/" + codigo;
+
 }
 
 // Buscar equipo

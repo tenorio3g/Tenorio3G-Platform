@@ -1,7 +1,9 @@
-from flask import render_template, request
+from flask import jsonify, render_template
 
 from . import assets
+
 from app.assets.services.asset_service import AssetService
+
 from app.domains.assets.bootstrap import (
     get_asset_life_sheet,
 )
@@ -12,6 +14,10 @@ from app.domains.assets.use_cases.get_asset_life_sheet.query import (
 
 from app.assets.presenters.asset_life_sheet_presenter import (
     AssetLifeSheetPresenter,
+)
+
+from app.assets.presenters.asset_api_presenter import (
+    AssetApiPresenter,
 )
 
 
@@ -43,7 +49,6 @@ def asset_detail(codigo: str):
     )
 
     if not result.success:
-
         return (
             render_template(
                 "pages/asset_not_found.html",
@@ -61,3 +66,39 @@ def asset_detail(codigo: str):
         "pages/asset_detail.html",
         activo=activo,
     )
+
+
+@assets.get("/assets/api/<string:codigo>")
+def asset_api(codigo: str):
+    """
+    Devuelve la Hoja de Vida del activo en formato JSON.
+    """
+
+    result = get_asset_life_sheet.execute(
+        GetAssetLifeSheetQuery(
+            code=codigo,
+        )
+    )
+
+    if not result.success:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": result.message,
+                    "codigo": codigo,
+                }
+            ),
+            404,
+        )
+
+    view_model = AssetLifeSheetPresenter.present(
+        asset=result.asset,
+        asset_model=result.asset_model,
+    )
+
+    payload = AssetApiPresenter.present(
+        view_model,
+    )
+
+    return jsonify(payload)
