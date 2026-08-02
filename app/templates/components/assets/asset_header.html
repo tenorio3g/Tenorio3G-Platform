@@ -6,7 +6,7 @@
             EXPEDIENTE DEL ACTIVO
         </p>
 
-        <h1>
+        <h1 class="asset-title">
             ⚡ {{ activo.nombre }}
         </h1>
 
@@ -14,31 +14,80 @@
             {{ activo.codigo }}
         </p>
 
+        <div class="asset-header-meta">
+
+            <span>
+                📍 {{ activo.ubicacion or "Sin ubicación registrada" }}
+            </span>
+
+            <span>
+                ⚙ {{ activo.modelo or "Sin modelo registrado" }}
+            </span>
+
+        </div>
+
     </div>
 
-    <div class="asset-status
-        {% if activo.estado == 'Operando' %}
-            status-operando
-        {% elif activo.estado == 'Advertencia' %}
-            status-advertencia
-        {% elif activo.estado == 'Falla' %}
-            status-falla
-        {% elif activo.estado == 'Fuera de servicio' %}
-            status-fuera
-        {% endif %}
-    ">
+    <div class="asset-header-side">
 
-        {% if activo.estado == 'Operando' %}
-            🟢
-        {% elif activo.estado == 'Advertencia' %}
-            🟡
-        {% elif activo.estado == 'Falla' %}
-            🔴
-        {% elif activo.estado == 'Fuera de servicio' %}
-            ⚫
-        {% endif %}
+        <div class="asset-status
+            {% if activo.estado == 'Operando' %}
+                status-operando
+            {% elif activo.estado == 'Advertencia' %}
+                status-advertencia
+            {% elif activo.estado == 'Falla' %}
+                status-falla
+            {% elif activo.estado == 'Fuera de servicio' %}
+                status-fuera
+            {% endif %}
+        ">
 
-        <span>{{ activo.estado }}</span>
+            {% if activo.estado == 'Operando' %}
+                🟢
+            {% elif activo.estado == 'Advertencia' %}
+                🟡
+            {% elif activo.estado == 'Falla' %}
+                🔴
+            {% elif activo.estado == 'Fuera de servicio' %}
+                ⚫
+            {% else %}
+                ⚪
+            {% endif %}
+
+            <span>{{ activo.estado }}</span>
+
+        </div>
+
+        <div class="asset-quick-actions">
+
+            <button
+                type="button"
+                class="asset-action-button"
+                disabled
+                title="Disponible próximamente"
+            >
+                Ver mapa
+            </button>
+
+            <button
+                type="button"
+                class="asset-action-button"
+                disabled
+                title="Disponible próximamente"
+            >
+                Manual
+            </button>
+
+            <button
+                type="button"
+                class="asset-action-button asset-action-button--primary"
+                disabled
+                title="Disponible próximamente"
+            >
+                Registrar evento
+            </button>
+
+        </div>
 
     </div>
 

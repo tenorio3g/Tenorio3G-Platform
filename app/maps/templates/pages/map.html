@@ -1,0 +1,167 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Mapa de activos | Tenorio3G
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'maps.static',
+        filename='css/maps.css'
+    ) }}"
+>
+
+{% endblock %}
+
+{% block content %}
+
+<section class="maps-page">
+
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="/">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <span>Mapa de activos</span>
+    </nav>
+
+    <header class="maps-page__header">
+
+        <p class="maps-page__eyebrow">
+            Ubicación industrial
+        </p>
+
+        <h1 class="maps-page__title">
+            Mapa de activos
+        </h1>
+
+        <p class="maps-page__description">
+            Consulta, busca y localiza equipos dentro de la planta.
+        </p>
+
+    </header>
+
+    <section class="plant-map-card">
+
+        <div class="plant-map-toolbar">
+
+            <div class="plant-map-search">
+                <label for="busqueda">
+                    Buscar equipo
+                </label>
+
+                <div class="plant-map-search__controls">
+                    <input
+                        type="search"
+                        id="busqueda"
+                        placeholder="Ejemplo: Aire1"
+                    >
+
+                    <button
+                        type="button"
+                        onclick="buscarEquipo()"
+                    >
+                        Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div class="plant-map-filter">
+                <label for="filtroCategoria">
+                    Categoría
+                </label>
+
+                <select
+                    id="filtroCategoria"
+                    onchange="cambiarCategoria(this.value)"
+                >
+                    <option value="todos">
+                        Mostrar todos
+                    </option>
+
+                    <option value="aires">
+                        Aires acondicionados
+                    </option>
+
+                    <option value="tableros">
+                        Tableros eléctricos
+                    </option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="plant-map-viewport">
+
+            <div id="mapa" class="plant-map">
+
+                <img
+                    src="{{ url_for(
+                        'maps.static',
+                        filename='images/mapa.jpg'
+                    ) }}"
+                    alt="Plano aéreo de la planta"
+                    id="imagenMapa"
+                >
+
+                <div id="popup" class="map-popup">
+
+                    <button
+                        type="button"
+                        id="cerrarPopup"
+                        class="map-popup__close"
+                        aria-label="Cerrar información"
+                    >
+                        ×
+                    </button>
+
+                    <div id="contenidoPopup"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <footer class="plant-map-footer">
+
+            <div id="coordenadas">
+                X: 0%, Y: 0%
+            </div>
+
+            <div class="plant-map-zoom">
+                <button
+                    type="button"
+                    onclick="zoomMapa(1.2)"
+                    aria-label="Acercar mapa"
+                >
+                    +
+                </button>
+
+                <button
+                    type="button"
+                    onclick="zoomMapa(0.8)"
+                    aria-label="Alejar mapa"
+                >
+                    −
+                </button>
+            </div>
+
+        </footer>
+
+    </section>
+
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script
+    src="{{ url_for(
+        'maps.static',
+        filename='js/map.js'
+    ) }}"
+></script>
+
+{% endblock %}

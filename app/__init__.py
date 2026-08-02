@@ -8,6 +8,7 @@ from app.foundation import foundation
 from app.foundation.registry import RegistryValidator
 from app.operations import operations
 from app.work_orders import work_orders
+from app.maps import maps
 
 
 def create_app(config_class=Config) -> Flask:
@@ -60,6 +61,7 @@ def _register_blueprints(app: Flask) -> None:
         core,
         foundation,
         assets,
+        maps,
         work_orders,
         operations,
     )

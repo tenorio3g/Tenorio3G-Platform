@@ -1,0 +1,204 @@
+.maps-page {
+    width: min(1280px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.maps-page__header {
+    margin-bottom: 1.5rem;
+}
+
+.maps-page__eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+
+.maps-page__title {
+    margin: 0;
+}
+
+.maps-page__description {
+    max-width: 700px;
+    margin-top: 0.65rem;
+    line-height: 1.6;
+}
+
+.plant-map-card {
+    overflow: hidden;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 1rem;
+    background: var(--color-surface, #ffffff);
+}
+
+.plant-map-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border, #d0d5dd);
+}
+
+.plant-map-search,
+.plant-map-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.plant-map-search label,
+.plant-map-filter label {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.plant-map-search__controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.plant-map-search input,
+.plant-map-filter select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 0.55rem;
+    font: inherit;
+}
+
+.plant-map-search button,
+.plant-map-zoom button {
+    min-width: 44px;
+    min-height: 42px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 0.55rem;
+    background: var(--color-surface, #ffffff);
+    font: inherit;
+    cursor: pointer;
+}
+
+.plant-map-viewport {
+    overflow: auto;
+    min-height: 520px;
+    background: #eef1f5;
+}
+
+.plant-map {
+    position: relative;
+    width: 100%;
+    min-width: 900px;
+    transform-origin: center center;
+    transition: transform 180ms ease;
+}
+
+.plant-map img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.punto {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+}
+
+.punto.aires {
+    background: #2563eb;
+}
+
+.punto.tableros {
+    background: #dc2626;
+}
+
+.punto.default {
+    background: #667085;
+}
+
+.parpadeo {
+    animation: map-marker-pulse 0.8s infinite alternate;
+}
+
+@keyframes map-marker-pulse {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1.5);
+        box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+    }
+}
+
+.map-popup {
+    position: absolute;
+    display: none;
+    z-index: 20;
+    min-width: 220px;
+    max-width: 300px;
+    padding: 1rem;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 0.75rem;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(16, 24, 40, 0.18);
+    transform: translate(-50%, -100%);
+}
+
+.map-popup__close {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.45rem;
+    border: 0;
+    background: transparent;
+    font-size: 1.35rem;
+    cursor: pointer;
+}
+
+.plant-map-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-top: 1px solid var(--color-border, #d0d5dd);
+}
+
+#coordenadas {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.plant-map-zoom {
+    display: flex;
+    gap: 0.45rem;
+}
+
+@media (max-width: 760px) {
+    .plant-map-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .plant-map-search__controls {
+        flex-direction: column;
+    }
+
+    .plant-map-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .plant-map-viewport {
+        min-height: 420px;
+    }
+}

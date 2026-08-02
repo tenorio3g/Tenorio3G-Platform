@@ -1,78 +1,206 @@
 <div class="asset-dashboard">
 
-    <section class="asset-photo" aria-label="Fotografía del activo">
+    <section
+        class="asset-photo-card"
+        aria-label="Fotografía del activo"
+    >
 
-        <div class="photo-placeholder">
-            <span class="photo-icon" aria-hidden="true">📷</span>
-            <p>Fotografía del activo</p>
+        <div class="asset-photo-card__preview">
+
+            <span
+                class="asset-photo-card__icon"
+                aria-hidden="true"
+            >
+                📷
+            </span>
+
+            <p class="asset-photo-card__title">
+                Sin fotografía registrada
+            </p>
+
+            <p class="asset-photo-card__description">
+                La fotografía permitirá confirmar visualmente
+                que se está consultando el equipo correcto.
+            </p>
+
         </div>
+
+        <button
+            type="button"
+            class="asset-photo-card__action"
+            disabled
+            title="Disponible próximamente"
+        >
+            Agregar fotografía
+        </button>
 
     </section>
 
-    <section class="asset-summary" aria-labelledby="asset-summary-title">
+    <section
+        class="asset-summary"
+        aria-labelledby="asset-summary-title"
+    >
 
-        <h3 id="asset-summary-title">
-            Información general
-        </h3>
+        <div class="asset-section-heading">
 
-        <div class="summary-grid">
-
-            <div class="summary-card">
-                <span aria-hidden="true">📍</span>
-                <strong>Ubicación</strong>
-                <p>{{ activo.ubicacion or "Sin ubicación registrada" }}</p>
-            </div>
-
-            <div class="summary-card">
-                <span aria-hidden="true">🏭</span>
-                <strong>Área</strong>
-                <p>{{ activo.area or "Sin área registrada" }}</p>
-            </div>
-
-            <div class="summary-card">
-                <span aria-hidden="true">🛠️</span>
-                <strong>Último mantenimiento</strong>
-                <p>
-                    {{ activo.ultimo_mantenimiento or "Sin mantenimiento registrado" }}
+            <div>
+                <p class="asset-section-heading__eyebrow">
+                    Resumen operativo
                 </p>
-            </div>
 
-            <div class="summary-card">
-                <span aria-hidden="true">📅</span>
-                <strong>Próximo mantenimiento</strong>
-                <p>
-                    {{ activo.proximo_mantenimiento or "Sin fecha programada" }}
-                </p>
+                <h2 id="asset-summary-title">
+                    Información general
+                </h2>
             </div>
 
         </div>
 
-        <div class="asset-health">
+        <div class="summary-grid">
 
-            <div class="health-title">
-                <label for="asset-health-progress">
-                    Salud del activo
-                </label>
+            <article class="summary-card">
 
-                <span>
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    📍
+                </span>
+
+                <div>
+                    <p class="summary-card__label">
+                        Ubicación
+                    </p>
+
+                    <p class="summary-card__value">
+                        {{
+                            activo.ubicacion
+                            or "Sin ubicación registrada"
+                        }}
+                    </p>
+                </div>
+
+            </article>
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🏭
+                </span>
+
+                <div>
+                    <p class="summary-card__label">
+                        Área
+                    </p>
+
+                    <p class="summary-card__value">
+                        {{
+                            activo.area
+                            or "Sin área registrada"
+                        }}
+                    </p>
+                </div>
+
+            </article>
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    🛠️
+                </span>
+
+                <div>
+                    <p class="summary-card__label">
+                        Último mantenimiento
+                    </p>
+
+                    <p class="summary-card__value">
+                        {{
+                            activo.ultimo_mantenimiento
+                            or "Sin mantenimiento registrado"
+                        }}
+                    </p>
+                </div>
+
+            </article>
+
+            <article class="summary-card">
+
+                <span
+                    class="summary-card__icon"
+                    aria-hidden="true"
+                >
+                    📅
+                </span>
+
+                <div>
+                    <p class="summary-card__label">
+                        Próximo mantenimiento
+                    </p>
+
+                    <p class="summary-card__value">
+                        {{
+                            activo.proximo_mantenimiento
+                            or "Sin fecha programada"
+                        }}
+                    </p>
+                </div>
+
+            </article>
+
+        </div>
+
+        <section
+            class="asset-health-card"
+            aria-labelledby="asset-health-title"
+        >
+
+            <div class="asset-health-card__header">
+
+                <div>
+                    <p class="asset-health-card__eyebrow">
+                        Indicador general
+                    </p>
+
+                    <h3 id="asset-health-title">
+                        Salud del activo
+                    </h3>
+                </div>
+
+                <strong class="asset-health-card__value">
                     {% if activo.salud is not none %}
                         {{ activo.salud }}%
                     {% else %}
                         Sin evaluar
                     {% endif %}
-                </span>
+                </strong>
+
             </div>
 
             {% if activo.salud is not none %}
 
                 <progress
-                    id="asset-health-progress"
+                    class="asset-health-card__progress"
                     value="{{ activo.salud }}"
                     max="100"
-                    aria-label="Salud del activo: {{ activo.salud }} por ciento"
+                    aria-label="
+                        Salud del activo:
+                        {{ activo.salud }} por ciento
+                    "
                 >
                     {{ activo.salud }}%
                 </progress>
+
+                <p class="asset-health-card__description">
+                    Indicador preliminar. Más adelante se calculará
+                    con mantenimiento, fallas, inspecciones y condición
+                    operativa.
+                </p>
 
             {% else %}
 
@@ -82,7 +210,7 @@
 
             {% endif %}
 
-        </div>
+        </section>
 
     </section>
 
