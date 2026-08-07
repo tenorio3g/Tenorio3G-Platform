@@ -12,6 +12,20 @@ Mapa de activos | Tenorio3G
         'maps.static',
         filename='css/maps.css'
     ) }}"
+
+    <script
+        src="{{ url_for(
+            'maps.static',
+            filename='js/map.js'
+        ) }}"
+    ></script>
+
+    <script
+        src="{{ url_for(
+            'maps.static',
+            filename='js/popup.js'
+        ) }}"
+    ></script>
 >
 
 {% endblock %}
@@ -163,5 +177,9 @@ Mapa de activos | Tenorio3G
         filename='js/map.js'
     ) }}"
 ></script>
+<script src="{{ url_for(
+    'maps.static',
+    filename='js/popup.js'
+) }}"></script>
 
 {% endblock %}

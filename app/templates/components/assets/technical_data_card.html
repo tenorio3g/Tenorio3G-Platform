@@ -1,0 +1,116 @@
+<section
+    class="asset-workspace-card technical-data-card"
+    aria-labelledby="technical-data-title"
+>
+
+    <header class="asset-workspace-card__header">
+
+        <div>
+            <p class="asset-workspace-card__eyebrow">
+                Especificaciones
+            </p>
+
+            <h2 id="technical-data-title">
+                Datos técnicos
+            </h2>
+        </div>
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for(
+                'assets.edit_technical_data',
+                codigo=activo.codigo
+            ) }}"
+        >
+            Editar
+        </a>
+
+    </header>
+
+
+    {% if technical_data %}
+
+        <div class="technical-data-grid">
+
+            <div class="technical-data-item">
+                <span>Tipo de equipo</span>
+                <strong>
+                    {{ technical_data.equipment_type }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Fabricante</span>
+                <strong>
+                    {{ technical_data.manufacturer }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Modelo</span>
+                <strong>
+                    {{ technical_data.model }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Número de serie</span>
+                <strong>
+                    {{ technical_data.serial_number }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Voltaje</span>
+                <strong>
+                    {{ technical_data.voltage }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Fases</span>
+                <strong>
+                    {{ technical_data.phases }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Frecuencia</span>
+                <strong>
+                    {{ technical_data.frequency }}
+                </strong>
+            </div>
+
+            <div class="technical-data-item">
+                <span>Potencia del motor</span>
+                <strong>
+                    {{ technical_data.motor_power }}
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="technical-data-observations">
+
+            <span>
+                Observaciones técnicas
+            </span>
+
+            <p>
+                {{ technical_data.observations }}
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-workspace-card__placeholder">
+
+            Este activo todavía no tiene una
+            ficha técnica registrada.
+
+        </div>
+
+    {% endif %}
+
+</section>

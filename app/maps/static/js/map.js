@@ -88,59 +88,7 @@ function renderPuntos(locations) {
 
 }
 
-// Abrir popup
-async function abrirPopup(elemento, id, nombre) {
-try {
 
-    const response = await fetch(`/assets/api/${id}`);
-
-    const activo = await response.json();
-
-    contenidoPopup.innerHTML = `
-        <h3>${activo.nombre}</h3>
-
-        <p><strong>Código:</strong> ${activo.codigo}</p>
-
-        <p><strong>Estado:</strong> ${activo.estado}</p>
-
-        <p><strong>Ubicación:</strong> ${activo.ubicacion}</p>
-
-        <p><strong>Área:</strong> ${activo.area}</p>
-
-        <p><strong>Salud:</strong> ${activo.salud}%</p>
-
-        <button onclick="verMas('${activo.codigo}')">
-            Ver Hoja de Vida
-        </button>
-    `;
-
-}
-catch(error){
-
-    console.error(error);
-
-    contenidoPopup.innerHTML = `
-        <p>Error cargando activo.</p>
-    `;
-
-}
-  popup.style.display = "block";
-  const rect = elemento.getBoundingClientRect();
-  const mapaRect = mapa.getBoundingClientRect();
-  popup.style.left = (rect.left - mapaRect.left + rect.width/2) + "px";
-  popup.style.top = (rect.top - mapaRect.top - 5) + "px";
-}
-document.getElementById("cerrarPopup").addEventListener("click", () => {
-  popup.style.display = "none";
-});
-
-// Ver más
-function verMas(codigo){
-
-    window.location.href =
-        "/activo/" + codigo;
-
-}
 
 // Buscar equipo
 function buscarEquipo() {

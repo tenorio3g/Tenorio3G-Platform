@@ -1,0 +1,212 @@
+<section class="technical-data-form-page">
+
+    <nav
+        class="breadcrumb"
+        aria-label="Ruta de navegación"
+    >
+        <a
+            href="{{ url_for(
+                'assets.asset_detail',
+                codigo=codigo
+            ) }}"
+        >
+            Expediente del activo
+        </a>
+
+        <span aria-hidden="true">›</span>
+
+        <span>Editar datos técnicos</span>
+    </nav>
+
+    <header class="technical-data-form-page__header">
+
+        <p class="technical-data-form-page__eyebrow">
+            Technical Data Engine
+        </p>
+
+        <h1>Editar datos técnicos</h1>
+
+        <p>
+            Activo:
+            <strong>{{ codigo }}</strong>
+        </p>
+
+    </header>
+
+    {% if technical_data %}
+
+        <form
+            class="technical-data-form"
+            method="post"
+        >
+
+            <div class="technical-data-form__grid">
+
+                <div class="form-field">
+                    <label for="equipment_type">
+                        Tipo de equipo
+                    </label>
+
+                    <input
+                        id="equipment_type"
+                        name="equipment_type"
+                        type="text"
+                        value="{{ technical_data.equipment_type }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="manufacturer">
+                        Fabricante
+                    </label>
+
+                    <input
+                        id="manufacturer"
+                        name="manufacturer"
+                        type="text"
+                        value="{{ technical_data.manufacturer }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="model">
+                        Modelo
+                    </label>
+
+                    <input
+                        id="model"
+                        name="model"
+                        type="text"
+                        value="{{ technical_data.model }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="serial_number">
+                        Número de serie
+                    </label>
+
+                    <input
+                        id="serial_number"
+                        name="serial_number"
+                        type="text"
+                        value="{{ technical_data.serial_number }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="voltage">
+                        Voltaje
+                    </label>
+
+                    <input
+                        id="voltage"
+                        name="voltage"
+                        type="text"
+                        value="{{ technical_data.voltage }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="phases">
+                        Fases
+                    </label>
+
+                    <input
+                        id="phases"
+                        name="phases"
+                        type="text"
+                        value="{{ technical_data.phases }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="frequency">
+                        Frecuencia
+                    </label>
+
+                    <input
+                        id="frequency"
+                        name="frequency"
+                        type="text"
+                        value="{{ technical_data.frequency }}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="motor_power">
+                        Potencia del motor
+                    </label>
+
+                    <input
+                        id="motor_power"
+                        name="motor_power"
+                        type="text"
+                        value="{{ technical_data.motor_power }}"
+                    >
+                </div>
+
+            </div>
+
+            <div class="form-field">
+                <label for="observations">
+                    Observaciones técnicas
+                </label>
+
+                <textarea
+                    id="observations"
+                    name="observations"
+                    rows="5"
+                >{{ technical_data.observations }}</textarea>
+            </div>
+
+            <footer class="technical-data-form__actions">
+
+                <a
+                    class="btn"
+                    href="{{ url_for(
+                        'assets.asset_detail',
+                        codigo=codigo
+                    ) }}"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Guardar cambios
+                </button>
+
+            </footer>
+
+        </form>
+
+    {% else %}
+
+        <section class="technical-data-form__empty">
+
+            <h2>Ficha técnica no encontrada</h2>
+
+            <p>
+                Este activo todavía no tiene datos
+                técnicos registrados.
+            </p>
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=codigo
+                ) }}"
+            >
+                Regresar al expediente
+            </a>
+
+        </section>
+
+    {% endif %}
+
+</section>

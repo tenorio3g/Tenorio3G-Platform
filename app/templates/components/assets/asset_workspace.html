@@ -1,0 +1,132 @@
+<section
+    class="asset-workspace"
+    aria-label="Expediente técnico del activo"
+>
+
+    <div class="asset-workspace__primary">
+
+        {% include "components/assets/asset_card.html" %}
+
+        {% include "components/assets/status_panel.html" %}
+
+    </div>
+
+
+    <div class="asset-workspace__sections">
+
+        <section
+            class="asset-workspace-card"
+            aria-labelledby="technical-data-title"
+        >
+            <header class="asset-workspace-card__header">
+
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Especificaciones
+                    </p>
+
+                    {% include "components/assets/technical_data_card.html" %}
+                </div>
+
+                <span aria-hidden="true">
+                    ⚙️
+                </span>
+
+            </header>
+
+            <div class="asset-workspace-card__placeholder">
+                La ficha técnica del activo se integrará
+                en este espacio.
+            </div>
+        </section>
+
+
+        <section
+            class="asset-workspace-card"
+            aria-labelledby="spare-parts-title"
+        >
+            <header class="asset-workspace-card__header">
+
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Componentes críticos
+                    </p>
+
+                    <h2 id="spare-parts-title">
+                        Refacciones
+                    </h2>
+                </div>
+
+                <span aria-hidden="true">
+                    🔩
+                </span>
+
+            </header>
+
+            <div class="asset-workspace-card__placeholder">
+                Aquí se mostrarán baleros, bandas,
+                filtros y otras refacciones relacionadas.
+            </div>
+        </section>
+
+
+        <section
+            class="asset-workspace-card"
+            aria-labelledby="documents-title"
+        >
+            <header class="asset-workspace-card__header">
+
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Información de referencia
+                    </p>
+
+                    <h2 id="documents-title">
+                        Documentos técnicos
+                    </h2>
+                </div>
+
+                <span aria-hidden="true">
+                    📄
+                </span>
+
+            </header>
+
+            <div class="asset-workspace-card__placeholder">
+                Manuales, diagramas, procedimientos
+                y fichas técnicas aparecerán aquí.
+            </div>
+        </section>
+
+
+        <section
+            class="asset-workspace-card"
+            aria-labelledby="field-notes-title"
+        >
+            <header class="asset-workspace-card__header">
+
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Conocimiento operativo
+                    </p>
+
+                    <h2 id="field-notes-title">
+                        Notas de campo
+                    </h2>
+                </div>
+
+                <span aria-hidden="true">
+                    📝
+                </span>
+
+            </header>
+
+            <div class="asset-workspace-card__placeholder">
+                Observaciones, recomendaciones y
+                conocimiento obtenido durante las intervenciones.
+            </div>
+        </section>
+
+    </div>
+
+</section>
