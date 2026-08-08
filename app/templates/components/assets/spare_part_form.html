@@ -1,103 +1,175 @@
-<form method="post">
+<form
+    method="post"
+    class="spare-part-form"
+>
 
-    <label for="code">
-        Código
-    </label>
+    <div class="technical-data-form__grid">
 
-    <input
-        id="code"
-        type="text"
-        name="code"
-        required
-    >
+        <div class="form-field">
 
-    <label for="name">
-        Nombre
-    </label>
+            <label for="code">
+                Código
+            </label>
 
-    <input
-        id="name"
-        type="text"
-        name="name"
-        required
-    >
+            {% if relation %}
 
-    <label for="manufacturer">
-        Fabricante
-    </label>
+                <input
+                    id="code"
+                    type="text"
+                    value="{{ relation.spare_part.code }}"
+                    disabled
+                >
 
-    <input
-        id="manufacturer"
-        type="text"
-        name="manufacturer"
-    >
+            {% else %}
 
-    <label for="part_number">
-        Número de parte
-    </label>
+                <input
+                    id="code"
+                    type="text"
+                    name="code"
+                    required
+                >
 
-    <input
-        id="part_number"
-        type="text"
-        name="part_number"
-    >
+            {% endif %}
 
-    <label for="unit">
-        Unidad
-    </label>
+        </div>
 
-    <input
-        id="unit"
-        type="text"
-        name="unit"
-        value="pieza"
-    >
 
-    <label for="quantity">
-        Cantidad instalada
-    </label>
+        <div class="form-field">
 
-    <input
-        id="quantity"
-        type="number"
-        name="quantity"
-        step="0.01"
-        min="0.01"
-        value="1"
-        required
-    >
+            <label for="name">
+                Nombre
+            </label>
 
-    <label for="position">
-        Posición
-    </label>
+            <input
+                id="name"
+                type="text"
+                name="name"
+                value="{% if relation %}{{ relation.spare_part.name }}{% endif %}"
+                required
+            >
 
-    <input
-        id="position"
-        type="text"
-        name="position"
-    >
+        </div>
 
-    <label for="observations">
-        Observaciones
-    </label>
 
-    <textarea
-        id="observations"
-        name="observations"
-        rows="4"
-    ></textarea>
+        <div class="form-field">
 
-    <label>
+            <label for="manufacturer">
+                Fabricante
+            </label>
+
+            <input
+                id="manufacturer"
+                type="text"
+                name="manufacturer"
+                value="{% if relation %}{{ relation.spare_part.manufacturer }}{% endif %}"
+            >
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="part_number">
+                Número de parte
+            </label>
+
+            <input
+                id="part_number"
+                type="text"
+                name="part_number"
+                value="{% if relation %}{{ relation.spare_part.part_number }}{% endif %}"
+            >
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="unit">
+                Unidad
+            </label>
+
+            <input
+                id="unit"
+                type="text"
+                name="unit"
+                value="{% if relation %}{{ relation.spare_part.unit }}{% else %}pieza{% endif %}"
+            >
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="quantity">
+                Cantidad instalada
+            </label>
+
+            <input
+                id="quantity"
+                type="number"
+                name="quantity"
+                step="0.01"
+                min="0.01"
+                value="{% if relation %}{{ relation.quantity }}{% else %}1{% endif %}"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label for="position">
+                Posición
+            </label>
+
+            <input
+                id="position"
+                type="text"
+                name="position"
+                value="{% if relation %}{{ relation.position }}{% endif %}"
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="form-field">
+
+        <label for="observations">
+            Observaciones
+        </label>
+
+        <textarea
+            id="observations"
+            name="observations"
+            rows="4"
+        >{% if relation %}{{ relation.observations }}{% endif %}</textarea>
+
+    </div>
+
+
+    <label class="spare-part-form__critical">
+
         <input
             type="checkbox"
             name="is_critical"
+            {% if relation and relation.is_critical %}
+                checked
+            {% endif %}
         >
+
         Refacción crítica
+
     </label>
 
-    <div>
+
+    <footer class="technical-data-form__actions">
 
         <a
+            class="btn"
             href="{{ url_for(
                 'assets.asset_detail',
                 codigo=codigo
@@ -106,10 +178,19 @@
             Cancelar
         </a>
 
-        <button type="submit">
-            Guardar Refacción
+        <button
+            class="btn btn-primary"
+            type="submit"
+        >
+
+            {% if relation %}
+                Guardar cambios
+            {% else %}
+                Guardar refacción
+            {% endif %}
+
         </button>
 
-    </div>
+    </footer>
 
 </form>

@@ -249,3 +249,29 @@ class SQLiteSparePartRepository(
             observations=relation_model.observations,
             is_critical=relation_model.is_critical,
         )
+
+    def unlink_from_asset(
+        self,
+        asset_code: str,
+        spare_part_code: str,
+    ) -> None:
+
+        clean_asset_code = asset_code.strip()
+        clean_spare_part_code = spare_part_code.strip()
+
+        with self._session_factory() as session:
+
+            model = session.scalar(
+                select(AssetSparePartModel).where(
+                    AssetSparePartModel.asset_code
+                    == clean_asset_code,
+                    AssetSparePartModel.spare_part_code
+                    == clean_spare_part_code,
+                )
+            )
+
+            if model is None:
+                return
+
+            session.delete(model)
+            session.commit()

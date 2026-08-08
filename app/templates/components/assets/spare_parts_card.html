@@ -106,6 +106,42 @@
 
                     {% endif %}
 
+                    <div class="spare-part-item__actions">
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'assets.edit_spare_part',
+                                codigo=activo.codigo,
+                                spare_part_code=item.code
+                            ) }}"
+                        >
+                            Editar
+                        </a>
+                    
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'assets.delete_spare_part_route',
+                                codigo=activo.codigo,
+                                spare_part_code=item.code
+                            ) }}"
+                            onsubmit="
+                                return confirm(
+                                    '¿Eliminar esta refacción del activo?'
+                                );
+                            "
+                        >
+                            <button
+                                type="submit"
+                                class="btn"
+                            >
+                                Eliminar
+                            </button>
+                        </form>    
+                    
+                    </div>
+
                 </article>
 
             {% endfor %}
@@ -120,5 +156,6 @@
         </div>
 
     {% endif %}
+    
 
 </section>

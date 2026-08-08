@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-Registrar Refacción
+Editar Refacción
 {% endblock %}
 
 {% block content %}
@@ -12,6 +12,7 @@ Registrar Refacción
         class="breadcrumb"
         aria-label="Ruta de navegación"
     >
+
         <a
             href="{{ url_for(
                 'assets.asset_detail',
@@ -26,7 +27,7 @@ Registrar Refacción
         </span>
 
         <span>
-            Registrar refacción
+            Editar refacción
         </span>
 
     </nav>
@@ -39,7 +40,7 @@ Registrar Refacción
         </p>
 
         <h1>
-            Registrar Refacción
+            Editar Refacción
         </h1>
 
         <p>
@@ -47,10 +48,15 @@ Registrar Refacción
             <strong>{{ codigo }}</strong>
         </p>
 
+        <p>
+            Refacción:
+            <strong>
+                {{ relation.spare_part.name }}
+            </strong>
+        </p>
+
     </header>
 
-
-    {% set relation = none %}
 
     {% include
         "components/assets/spare_part_form.html"

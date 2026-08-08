@@ -72,6 +72,13 @@ from app.assets.presenters.spare_parts_presenter import (
     SparePartsPresenter,
 )
 
+from app.domains.assets.spare_parts.bootstrap import (
+    delete_spare_part,
+)
+
+from app.domains.assets.spare_parts.use_cases.delete_spare_part import (
+    DeleteSparePartCommand,
+)
 
 # ============================================================
 # ASSETS INDEX
@@ -401,4 +408,131 @@ def create_spare_part(codigo: str):
     return render_template(
         "pages/create_spare_part.html",
         codigo=codigo,
+    )
+
+
+
+@assets.route(
+    "/activo/<string:codigo>/refacciones/<string:spare_part_code>/editar",
+    methods=["GET", "POST"],
+)
+def edit_spare_part(
+    codigo: str,
+    spare_part_code: str,
+):
+    """
+    Edita una refacción asociada a un activo.
+    """
+
+    spare_parts_result = get_spare_parts_by_asset.execute(
+        GetSparePartsByAssetQuery(
+            asset_code=codigo,
+        )
+    )
+
+    relation = next(
+        (
+            item
+            for item in spare_parts_result.spare_parts
+            if item.spare_part_code == spare_part_code
+        ),
+        None,
+    )
+
+    if relation is None:
+        return (
+            render_template(
+                "pages/spare_part_not_found.html",
+                codigo=codigo,
+                spare_part_code=spare_part_code,
+            ),
+            404,
+        )
+
+    if request.method == "POST":
+
+        try:
+            quantity = float(
+                request.form.get(
+                    "quantity",
+                    "1",
+                )
+            )
+        except ValueError:
+            quantity = 0
+
+        result = save_spare_part.execute(
+            SaveSparePartCommand(
+                asset_code=codigo,
+
+                # El código permanece fijo durante edición.
+                code=spare_part_code,
+
+                name=request.form.get(
+                    "name",
+                    "",
+                ),
+                manufacturer=request.form.get(
+                    "manufacturer",
+                    "",
+                ),
+                part_number=request.form.get(
+                    "part_number",
+                    "",
+                ),
+                unit=request.form.get(
+                    "unit",
+                    "pieza",
+                ),
+                quantity=quantity,
+                position=request.form.get(
+                    "position",
+                    "",
+                ),
+                observations=request.form.get(
+                    "observations",
+                    "",
+                ),
+                is_critical=(
+                    request.form.get("is_critical")
+                    == "on"
+                ),
+            )
+        )
+
+        if result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+    return render_template(
+        "pages/edit_spare_part.html",
+        codigo=codigo,
+        relation=relation,
+    )
+
+@assets.post(
+    "/activo/<string:codigo>/refacciones/"
+    "<string:spare_part_code>/eliminar"
+)
+def delete_spare_part_route(
+    codigo: str,
+    spare_part_code: str,
+):
+
+    result = delete_spare_part.execute(
+        DeleteSparePartCommand(
+            asset_code=codigo,
+            spare_part_code=spare_part_code,
+        )
+    )
+
+    return redirect(
+        url_for(
+            "assets.asset_detail",
+            codigo=codigo,
+        )
     )

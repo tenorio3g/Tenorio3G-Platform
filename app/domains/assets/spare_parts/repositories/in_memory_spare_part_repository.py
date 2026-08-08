@@ -92,3 +92,23 @@ class InMemorySparePartRepository(
             for relation in self._relations
             if relation.spare_part_code == clean_code
         ]
+
+    def unlink_from_asset(
+        self,
+        asset_code: str,
+        spare_part_code: str,
+    ) -> None:
+
+        clean_asset_code = asset_code.strip()
+        clean_spare_part_code = spare_part_code.strip()
+
+        self._relations = [
+            relation
+            for relation in self._relations
+            if not (
+                relation.asset_code == clean_asset_code
+                and
+                relation.spare_part_code
+                == clean_spare_part_code
+            )
+        ]

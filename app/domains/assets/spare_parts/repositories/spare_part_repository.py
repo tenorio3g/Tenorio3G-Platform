@@ -48,3 +48,10 @@ class SparePartRepository(ABC):
         spare_part_code: str,
     ) -> list[AssetSparePart]:
         raise NotImplementedError
+    @abstractmethod
+    def unlink_from_asset(
+        self,
+        asset_code: str,
+        spare_part_code: str,
+    ) -> None:
+        raise NotImplementedError
