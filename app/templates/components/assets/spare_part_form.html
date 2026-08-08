@@ -1,0 +1,115 @@
+<form method="post">
+
+    <label for="code">
+        Código
+    </label>
+
+    <input
+        id="code"
+        type="text"
+        name="code"
+        required
+    >
+
+    <label for="name">
+        Nombre
+    </label>
+
+    <input
+        id="name"
+        type="text"
+        name="name"
+        required
+    >
+
+    <label for="manufacturer">
+        Fabricante
+    </label>
+
+    <input
+        id="manufacturer"
+        type="text"
+        name="manufacturer"
+    >
+
+    <label for="part_number">
+        Número de parte
+    </label>
+
+    <input
+        id="part_number"
+        type="text"
+        name="part_number"
+    >
+
+    <label for="unit">
+        Unidad
+    </label>
+
+    <input
+        id="unit"
+        type="text"
+        name="unit"
+        value="pieza"
+    >
+
+    <label for="quantity">
+        Cantidad instalada
+    </label>
+
+    <input
+        id="quantity"
+        type="number"
+        name="quantity"
+        step="0.01"
+        min="0.01"
+        value="1"
+        required
+    >
+
+    <label for="position">
+        Posición
+    </label>
+
+    <input
+        id="position"
+        type="text"
+        name="position"
+    >
+
+    <label for="observations">
+        Observaciones
+    </label>
+
+    <textarea
+        id="observations"
+        name="observations"
+        rows="4"
+    ></textarea>
+
+    <label>
+        <input
+            type="checkbox"
+            name="is_critical"
+        >
+        Refacción crítica
+    </label>
+
+    <div>
+
+        <a
+            href="{{ url_for(
+                'assets.asset_detail',
+                codigo=codigo
+            ) }}"
+        >
+            Cancelar
+        </a>
+
+        <button type="submit">
+            Guardar Refacción
+        </button>
+
+    </div>
+
+</form>

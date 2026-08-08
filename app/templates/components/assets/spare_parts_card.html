@@ -1,0 +1,124 @@
+<section
+    class="asset-workspace-card spare-parts-card"
+    aria-labelledby="spare-parts-title"
+>
+
+<header class="asset-workspace-card__header">
+
+    <div>
+
+        <p class="asset-workspace-card__eyebrow">
+            Componentes críticos
+        </p>
+
+        <h2 id="spare-parts-title">
+            Refacciones
+        </h2>
+
+    </div>
+
+    <div class="asset-workspace-card__actions">
+
+        <a
+            href="{{ url_for(
+                'assets.create_spare_part',
+                codigo=activo.codigo
+            ) }}"
+            class="btn btn-primary"
+        >
+            + Registrar
+        </a>
+
+        <span aria-hidden="true">
+            🔩
+        </span>
+
+    </div>
+
+</header>
+
+
+    {% if spare_parts and spare_parts.has_items %}
+
+        <div class="spare-parts-list">
+
+            {% for item in spare_parts.items %}
+
+                <article class="spare-part-item">
+
+                    <div class="spare-part-item__header">
+
+                        <div>
+                            <strong>
+                                {{ item.name }}
+                            </strong>
+
+                            <span>
+                                {{ item.code }}
+                            </span>
+                        </div>
+
+                        {% if item.is_critical %}
+                            <span class="spare-part-critical">
+                                Crítica
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="spare-part-item__grid">
+
+                        <div>
+                            <span>Fabricante</span>
+                            <strong>
+                                {{ item.manufacturer }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Número de parte</span>
+                            <strong>
+                                {{ item.part_number }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Cantidad instalada</span>
+                            <strong>
+                                {{ item.quantity }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Posición</span>
+                            <strong>
+                                {{ item.position }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    {% if item.observations %}
+
+                        <p class="spare-part-item__observations">
+                            {{ item.observations }}
+                        </p>
+
+                    {% endif %}
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-workspace-card__placeholder">
+            Este activo todavía no tiene
+            refacciones registradas.
+        </div>
+
+    {% endif %}
+
+</section>

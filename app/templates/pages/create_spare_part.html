@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Registrar Refacción
+{% endblock %}
+
+{% block content %}
+
+<section class="asset-page">
+
+    <h1>
+        Registrar Refacción
+    </h1>
+
+    <p>
+        Activo:
+        <strong>{{ codigo }}</strong>
+    </p>
+
+    {% include "components/assets/spare_part_form.html" %}
+
+</section>
+
+{% endblock %}
