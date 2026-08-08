@@ -186,3 +186,43 @@ def test_should_update_existing_asset_relation() -> None:
         "Reemplazar por pares."
     )
     assert persisted.is_critical is True
+
+    def test_should_unlink_spare_part():
+
+        Base.metadata.create_all(engine)
+
+        repository = SQLiteSparePartRepository()
+
+        spare_part = SparePart(
+            code="6206",
+            name="Balero",
+            manufacturer="SKF",
+            part_number="6206",
+            unit="pieza",
+        )
+
+        repository.save_spare_part(
+            spare_part
+        )
+
+        repository.link_to_asset(
+            AssetSparePart(
+                asset_code="ES09",
+                spare_part=spare_part,
+                quantity=2,
+                position="Motor",
+                observations="",
+                is_critical=True,
+            )
+        )
+
+        repository.unlink_from_asset(
+            "ES09",
+            "6206",
+        )
+
+        relations = repository.get_by_asset_code(
+            "ES09"
+        )
+
+        assert len(relations) == 0
