@@ -1,0 +1,201 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="page-section">
+
+    <div class="page-header">
+
+        <div>
+            <p class="page-header__eyebrow">
+                Documents Engine
+            </p>
+
+            <h1>
+                Editar documento técnico
+            </h1>
+
+            <p>
+                Activo:
+                <strong>{{ codigo }}</strong>
+            </p>
+
+            <p>
+                Documento:
+                <strong>{{ document.code }}</strong>
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="form-card"
+    >
+
+        <div class="form-group">
+
+            <label for="title">
+                Título
+            </label>
+
+            <input
+                id="title"
+                name="title"
+                type="text"
+                required
+                value="{{ document.title }}"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="document_type">
+                Tipo de documento
+            </label>
+
+            <select
+                id="document_type"
+                name="document_type"
+                required
+            >
+
+                <option
+                    value="manual"
+                    {% if document.document_type == "manual" %}
+                        selected
+                    {% endif %}
+                >
+                    Manual
+                </option>
+
+                <option
+                    value="electrical_diagram"
+                    {% if document.document_type == "electrical_diagram" %}
+                        selected
+                    {% endif %}
+                >
+                    Diagrama eléctrico
+                </option>
+
+                <option
+                    value="mechanical_drawing"
+                    {% if document.document_type == "mechanical_drawing" %}
+                        selected
+                    {% endif %}
+                >
+                    Plano mecánico
+                </option>
+
+                <option
+                    value="datasheet"
+                    {% if document.document_type == "datasheet" %}
+                        selected
+                    {% endif %}
+                >
+                    Ficha técnica
+                </option>
+
+                <option
+                    value="procedure"
+                    {% if document.document_type == "procedure" %}
+                        selected
+                    {% endif %}
+                >
+                    Procedimiento
+                </option>
+
+                <option
+                    value="certificate"
+                    {% if document.document_type == "certificate" %}
+                        selected
+                    {% endif %}
+                >
+                    Certificado
+                </option>
+
+                <option
+                    value="manufacturer_document"
+                    {% if document.document_type == "manufacturer_document" %}
+                        selected
+                    {% endif %}
+                >
+                    Documento del fabricante
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="file_name">
+                Nombre del archivo
+            </label>
+
+            <input
+                id="file_name"
+                name="file_name"
+                type="text"
+                required
+                value="{{ document.file_name }}"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="revision">
+                Revisión
+            </label>
+
+            <input
+                id="revision"
+                name="revision"
+                type="text"
+                value="{{ document.revision }}"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="4"
+            >{{ document.description }}</textarea>
+
+        </div>
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=codigo
+                ) }}"
+                class="btn"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

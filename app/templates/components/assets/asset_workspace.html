@@ -84,16 +84,27 @@
                     </h2>
                 </div>
 
-                <span aria-hidden="true">
-                    📄
-                </span>
+                <div class="asset-workspace-card__actions">
 
+                    <a
+                        href="{{ url_for(
+                            'assets.create_document_route',
+                            codigo=activo.codigo
+                        ) }}"
+                        class="btn btn-primary"
+                    >
+                        + Registrar
+                    </a>
+
+                    <span aria-hidden="true">
+                        📄
+                    </span>
+
+                </div>
             </header>
 
-            <div class="asset-workspace-card__placeholder">
-                Manuales, diagramas, procedimientos
-                y fichas técnicas aparecerán aquí.
-            </div>
+            {% include "components/assets/documents_card.html" %}
+
         </section>
 
 

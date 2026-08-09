@@ -11,3 +11,4 @@ __all__ = [
     "spare_part_repository",
     "delete_spare_part",
 ]
+

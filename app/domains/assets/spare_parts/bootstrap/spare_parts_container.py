@@ -13,6 +13,7 @@ from app.domains.assets.spare_parts.use_cases.delete_spare_part import (
     DeleteSparePart,
 )
 
+
 spare_part_repository = SQLiteSparePartRepository()
 
 get_spare_parts_by_asset = GetSparePartsByAsset(

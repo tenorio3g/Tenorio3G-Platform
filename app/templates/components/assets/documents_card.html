@@ -1,0 +1,109 @@
+{% if documents and documents.items %}
+
+    <div class="spare-parts-list">
+
+        {% for item in documents.items %}
+
+            <article class="spare-part-item">
+
+                <div class="spare-part-item__header">
+
+                    <div>
+                        <strong>
+                            {{ item.title }}
+                        </strong>
+
+                        <span>
+                            {{ item.code }}
+                        </span>
+                    </div>
+
+                    <span>
+                        {{ item.document_type }}
+                    </span>
+
+                </div>
+
+                <div class="spare-part-item__grid">
+
+                    <div>
+                        <span>Archivo</span>
+                        <strong>
+                            {{ item.file_name }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Revisión</span>
+                        <strong>
+                            {{ item.revision }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Registrado</span>
+                        <strong>
+                            {{ item.created_at }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                {% if item.description %}
+
+                    <p class="spare-part-item__observations">
+                        {{ item.description }}
+                    </p>
+
+                {% endif %}
+
+                <div class="spare-part-item__actions">
+
+                    <a
+                        class="btn"
+                        href="{{ url_for(
+                            'assets.edit_document_route',
+                            codigo=activo.codigo,
+                            document_code=item.code
+                        ) }}"
+                    >
+                        Editar
+                    </a>
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'assets.delete_document_route',
+                            codigo=activo.codigo,
+                            document_code=item.code
+                        ) }}"
+                        onsubmit="
+                            return confirm(
+                                '¿Eliminar este documento técnico?'
+                            );
+                        "
+                    >
+                        <button
+                            type="submit"
+                            class="btn"
+                        >
+                            Eliminar
+                        </button>
+                    </form>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="asset-workspace-card__placeholder">
+        Este activo todavía no tiene
+        documentos técnicos registrados.
+    </div>
+
+{% endif %}

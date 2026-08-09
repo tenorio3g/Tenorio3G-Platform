@@ -80,6 +80,47 @@ from app.domains.assets.spare_parts.use_cases.delete_spare_part import (
     DeleteSparePartCommand,
 )
 
+
+# ============================================================
+# DOCUMENTS
+# ============================================================
+
+
+
+from app.domains.assets.documents.bootstrap import (
+    create_document,
+    delete_document,
+    get_document,
+    list_documents_by_asset,
+    update_document,
+)
+from app.domains.assets.documents.use_cases.delete_document import (
+    DeleteDocumentCommand,
+)
+
+from app.domains.assets.documents.use_cases.create_document import (
+    CreateDocumentCommand,
+)
+
+from app.domains.assets.documents.use_cases.list_documents_by_asset import (
+    ListDocumentsByAssetQuery,
+)
+
+from app.domains.assets.documents.presentation import (
+    DocumentsPresenter,
+)
+
+
+from app.domains.assets.documents.use_cases.get_document import (
+    GetDocumentQuery,
+)
+
+from app.domains.assets.documents.use_cases.update_document import (
+    UpdateDocumentCommand,
+)
+
+
+
 # ============================================================
 # ASSETS INDEX
 # ============================================================
@@ -166,6 +207,24 @@ def asset_detail(codigo: str):
         spare_parts_result.spare_parts
     )
 
+# --------------------------------------------------------
+# Documentos técnicos
+# --------------------------------------------------------
+
+    documents_result = list_documents_by_asset.execute(
+        ListDocumentsByAssetQuery(
+            asset_code=codigo,
+        )
+    )
+
+    documents = DocumentsPresenter.present(
+        documents_result.documents
+    )
+
+
+
+
+
     # DEBUG TEMPORAL
     print(
         "REFACCIONES LEÍDAS:",
@@ -193,7 +252,79 @@ def asset_detail(codigo: str):
         activo=activo,
         technical_data=technical_data,
         spare_parts=spare_parts,
+        documents=documents,
     )
+
+
+
+
+
+
+# ============================================================
+# CREATE DOCUMENT
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/documentos/nuevo",
+    methods=["GET", "POST"],
+)
+def create_document_route(codigo: str):
+    """
+    Registra un documento técnico asociado a un activo.
+    """
+
+    if request.method == "POST":
+
+        result = create_document.execute(
+            CreateDocumentCommand(
+                code=request.form.get(
+                    "code",
+                    "",
+                ),
+                asset_code=codigo,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                document_type=request.form.get(
+                    "document_type",
+                    "",
+                ),
+                file_name=request.form.get(
+                    "file_name",
+                    "",
+                ),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                revision=request.form.get(
+                    "revision",
+                    "",
+                ),
+            )
+        )
+
+        if result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+    return render_template(
+        "pages/create_document.html",
+        codigo=codigo,
+    )
+
+
+
+
+
+
+
+
 
 
 # ============================================================
@@ -527,6 +658,135 @@ def delete_spare_part_route(
         DeleteSparePartCommand(
             asset_code=codigo,
             spare_part_code=spare_part_code,
+        )
+    )
+
+    return redirect(
+        url_for(
+            "assets.asset_detail",
+            codigo=codigo,
+        )
+    )
+
+
+
+# ============================================================
+# EDIT DOCUMENT
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/documentos/<string:document_code>/editar",
+    methods=["GET", "POST"],
+)
+def edit_document_route(
+    codigo: str,
+    document_code: str,
+):
+    """
+    Edita los metadatos de un documento técnico.
+    """
+
+    document_result = get_document.execute(
+        GetDocumentQuery(
+            code=document_code,
+        )
+    )
+
+    document = document_result.document
+
+    if document is None or document.asset_code != codigo:
+        return (
+            render_template(
+                "pages/document_not_found.html",
+                codigo=codigo,
+                document_code=document_code,
+            ),
+            404,
+        )
+
+    if request.method == "POST":
+
+        result = update_document.execute(
+            UpdateDocumentCommand(
+                code=document_code,
+                asset_code=codigo,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                document_type=request.form.get(
+                    "document_type",
+                    "",
+                ),
+                file_name=request.form.get(
+                    "file_name",
+                    "",
+                ),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                revision=request.form.get(
+                    "revision",
+                    "",
+                ),
+            )
+        )
+
+        if result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+    return render_template(
+        "pages/edit_document.html",
+        codigo=codigo,
+        document=document,
+    )
+
+
+
+
+# ============================================================
+# DELETE DOCUMENT
+# ============================================================
+
+@assets.post(
+    "/activo/<string:codigo>/documentos/"
+    "<string:document_code>/eliminar"
+)
+def delete_document_route(
+    codigo: str,
+    document_code: str,
+):
+    """
+    Elimina un documento técnico asociado a un activo.
+    """
+
+    document_result = get_document.execute(
+        GetDocumentQuery(
+            code=document_code,
+        )
+    )
+
+    document = document_result.document
+
+    if document is None or document.asset_code != codigo:
+        return (
+            render_template(
+                "pages/document_not_found.html",
+                codigo=codigo,
+                document_code=document_code,
+            ),
+            404,
+        )
+
+    delete_document.execute(
+        DeleteDocumentCommand(
+            code=document_code,
         )
     )
 
