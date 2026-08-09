@@ -26,3 +26,6 @@ instance/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+# Documentos cargados por usuarios
+storage/documents/*
+!storage/documents/.gitkeep

@@ -22,6 +22,12 @@ from app.domains.assets.documents.use_cases.delete_document import (
     DeleteDocument,
 )
 
+from pathlib import Path
+
+from app.domains.assets.documents.storage import (
+    LocalDocumentStorage,
+)
+
 
 document_repository = SQLiteDocumentRepository()
 
@@ -44,4 +50,8 @@ update_document = UpdateDocument(
 
 delete_document = DeleteDocument(
     document_repository,
+)
+
+document_storage = LocalDocumentStorage(
+    Path("storage/documents")
 )

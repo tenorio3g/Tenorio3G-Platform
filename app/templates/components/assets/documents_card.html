@@ -58,6 +58,20 @@
                 {% endif %}
 
                 <div class="spare-part-item__actions">
+                    
+                    <a
+                        class="btn btn-primary"
+                        href="{{ url_for(
+                            'assets.view_document_route',
+                            codigo=activo.codigo,
+                            document_code=item.code
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Ver documento
+                    </a>
+
 
                     <a
                         class="btn"

@@ -3,6 +3,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 
@@ -84,12 +85,16 @@ from app.domains.assets.spare_parts.use_cases.delete_spare_part import (
 # ============================================================
 # DOCUMENTS
 # ============================================================
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
+from werkzeug.utils import secure_filename
 
 
 from app.domains.assets.documents.bootstrap import (
     create_document,
     delete_document,
+    document_storage,
     get_document,
     list_documents_by_asset,
     update_document,
@@ -275,6 +280,67 @@ def create_document_route(codigo: str):
 
     if request.method == "POST":
 
+        uploaded_file = request.files.get(
+            "document_file"
+        )
+
+        stored_file_name = request.form.get(
+            "file_name",
+            "",
+        )
+
+        if (
+            uploaded_file
+            and uploaded_file.filename
+        ):
+            original_name = secure_filename(
+                uploaded_file.filename
+            )
+
+            extension = Path(
+                original_name
+            ).suffix.lower()
+
+            if extension != ".pdf":
+                return (
+                    "Solo se permiten archivos PDF.",
+                    400,
+                )
+
+            safe_code = secure_filename(
+                request.form.get(
+                    "code",
+                    "",
+                )
+            )
+
+            stored_file_name = (
+                f"{safe_code}__{original_name}"
+            )
+
+            with NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf",
+            ) as temporary_file:
+
+                temporary_path = Path(
+                    temporary_file.name
+                )
+
+                uploaded_file.save(
+                    temporary_file
+                )
+
+            try:
+                document_storage.save(
+                    temporary_path,
+                    stored_file_name,
+                )
+            finally:
+                temporary_path.unlink(
+                    missing_ok=True
+                )
+
         result = create_document.execute(
             CreateDocumentCommand(
                 code=request.form.get(
@@ -290,10 +356,7 @@ def create_document_route(codigo: str):
                     "document_type",
                     "",
                 ),
-                file_name=request.form.get(
-                    "file_name",
-                    "",
-                ),
+                file_name=stored_file_name,
                 description=request.form.get(
                     "description",
                     "",
@@ -317,7 +380,6 @@ def create_document_route(codigo: str):
         "pages/create_document.html",
         codigo=codigo,
     )
-
 
 
 
@@ -784,15 +846,89 @@ def delete_document_route(
             404,
         )
 
-    delete_document.execute(
+    file_name = document.file_name
+
+    result = delete_document.execute(
         DeleteDocumentCommand(
             code=document_code,
         )
     )
 
-    return redirect(
-        url_for(
-            "assets.asset_detail",
-            codigo=codigo,
+    if result.success:
+
+        if (
+            file_name
+            and document_storage.exists(
+                file_name
+            )
+        ):
+            document_storage.delete(
+                file_name
+            )
+
+        return redirect(
+            url_for(
+                "assets.asset_detail",
+                codigo=codigo,
+            )
         )
+
+    return  (
+        "No se pudo eliminar el documento.",
+        400,
+    )
+
+
+
+# ============================================================
+# VIEW DOCUMENT
+# ============================================================
+
+@assets.get(
+    "/activo/<string:codigo>/documentos/"
+    "<string:document_code>/ver"
+)
+def view_document_route(
+    codigo: str,
+    document_code: str,
+):
+    """
+    Entrega un documento técnico asociado a un activo.
+    """
+
+    document_result = get_document.execute(
+        GetDocumentQuery(
+            code=document_code,
+        )
+    )
+
+    document = document_result.document
+
+    if document is None or document.asset_code != codigo:
+        return (
+            render_template(
+                "pages/document_not_found.html",
+                codigo=codigo,
+                document_code=document_code,
+            ),
+            404,
+        )
+
+    if not document_storage.exists(
+        document.file_name
+    ):
+        return (
+            "Archivo físico no encontrado.",
+            404,
+        )
+
+    file_path = document_storage.get_path(
+        document.file_name
+    )
+
+    return send_file(
+        file_path,
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=document.file_name,
     )
