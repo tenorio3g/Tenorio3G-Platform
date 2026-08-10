@@ -127,6 +127,45 @@ from app.domains.assets.documents.use_cases.update_document import (
 
 
 # ============================================================
+# PHOTOS
+# ============================================================
+
+from app.domains.assets.photos.bootstrap import (
+    list_photos_by_asset,
+)
+
+from app.domains.assets.photos.use_cases import (
+    ListPhotosByAssetQuery,
+)
+
+from app.domains.assets.photos.presentation import (
+    PhotosPresenter,
+)
+
+
+
+from app.domains.assets.photos.bootstrap import (
+    create_photo,
+    delete_photo,
+    get_photo,
+    list_photos_by_asset,
+    photo_storage,
+    update_photo,
+)
+
+from app.domains.assets.photos.use_cases import (
+    CreatePhotoCommand,
+    DeletePhotoCommand,
+    GetPhotoQuery,
+    ListPhotosByAssetQuery,
+    UpdatePhotoCommand,
+)
+
+from app.domains.assets.photos.presentation import (
+    PhotosPresenter,
+)
+
+# ============================================================
 # ASSETS INDEX
 # ============================================================
 
@@ -225,7 +264,19 @@ def asset_detail(codigo: str):
     documents = DocumentsPresenter.present(
         documents_result.documents
     )
+# --------------------------------------------------------
+# Fotografías
+# --------------------------------------------------------
 
+    photos_result = list_photos_by_asset.execute(
+        ListPhotosByAssetQuery(
+            asset_code=codigo,
+        )
+    )
+
+    photos = PhotosPresenter.present(
+        photos_result.photos
+    )
 
 
 
@@ -258,9 +309,359 @@ def asset_detail(codigo: str):
         technical_data=technical_data,
         spare_parts=spare_parts,
         documents=documents,
+        photos=photos,
     )
 
 
+
+
+
+# ============================================================
+# CREATE PHOTO
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/fotografias/nueva",
+    methods=["GET", "POST"],
+)
+def create_photo_route(codigo: str):
+    """
+    Registra una fotografía técnica asociada a un activo.
+    """
+
+    if request.method == "POST":
+
+        uploaded_file = request.files.get(
+            "photo_file"
+        )
+
+        if (
+            uploaded_file is None
+            or not uploaded_file.filename
+        ):
+            return (
+                "Debe seleccionar una fotografía.",
+                400,
+            )
+
+        original_name = secure_filename(
+            uploaded_file.filename
+        )
+
+        extension = Path(
+            original_name
+        ).suffix.lower()
+
+        allowed_extensions = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+        }
+
+        if extension not in allowed_extensions:
+            return (
+                "Solo se permiten imágenes JPG, JPEG o PNG.",
+                400,
+            )
+
+        safe_code = secure_filename(
+            request.form.get(
+                "code",
+                "",
+            )
+        )
+
+        stored_file_name = (
+            f"{safe_code}__{original_name}"
+        )
+
+        with NamedTemporaryFile(
+            delete=False,
+            suffix=extension,
+        ) as temporary_file:
+
+            temporary_path = Path(
+                temporary_file.name
+            )
+
+            uploaded_file.save(
+                temporary_file
+            )
+
+        try:
+            photo_storage.save(
+                temporary_path,
+                stored_file_name,
+            )
+
+        finally:
+            temporary_path.unlink(
+                missing_ok=True
+            )
+
+        result = create_photo.execute(
+            CreatePhotoCommand(
+                code=request.form.get(
+                    "code",
+                    "",
+                ),
+                asset_code=codigo,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                photo_type=request.form.get(
+                    "photo_type",
+                    "",
+                ),
+                file_name=stored_file_name,
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+            )
+        )
+
+        if result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+        # Evita dejar un archivo huérfano.
+        if photo_storage.exists(
+            stored_file_name
+        ):
+            photo_storage.delete(
+                stored_file_name
+            )
+
+        return (
+            result.error
+            or "No se pudo registrar la fotografía.",
+            400,
+        )
+
+    return render_template(
+        "pages/create_photo.html",
+        codigo=codigo,
+    )
+
+
+# ============================================================
+# VIEW PHOTO
+# ============================================================
+
+@assets.get(
+    "/activo/<string:codigo>/fotografias/"
+    "<string:photo_code>/ver"
+)
+def view_photo_route(
+    codigo: str,
+    photo_code: str,
+):
+    """
+    Entrega una fotografía asociada a un activo.
+    """
+
+    from app.domains.assets.photos.bootstrap import (
+        get_photo,
+    )
+
+    from app.domains.assets.photos.use_cases import (
+        GetPhotoQuery,
+    )
+
+    result = get_photo.execute(
+        GetPhotoQuery(
+            code=photo_code,
+        )
+    )
+
+    photo = result.photo
+
+    if (
+        photo is None
+        or photo.asset_code != codigo
+    ):
+        return (
+            "Fotografía no encontrada.",
+            404,
+        )
+
+    if not photo_storage.exists(
+        photo.file_name
+    ):
+        return (
+            "Archivo físico no encontrado.",
+            404,
+        )
+
+    file_path = photo_storage.get_path(
+        photo.file_name
+    )
+
+    extension = file_path.suffix.lower()
+
+    mimetype_map = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+    }
+
+    mimetype = mimetype_map.get(
+        extension,
+        "application/octet-stream",
+    )
+
+    return send_file(
+        file_path,
+        mimetype=mimetype,
+        as_attachment=False,
+    )
+
+# ============================================================
+# DELETE PHOTO
+# ============================================================
+
+@assets.post(
+    "/activo/<string:codigo>/fotografias/"
+    "<string:photo_code>/eliminar"
+)
+def delete_photo_route(
+    codigo: str,
+    photo_code: str,
+):
+    """
+    Elimina una fotografía y su archivo físico.
+    """
+
+    result = get_photo.execute(
+        GetPhotoQuery(
+            code=photo_code,
+        )
+    )
+
+    photo = result.photo
+
+    if (
+        photo is None
+        or photo.asset_code != codigo
+    ):
+        return (
+            "Fotografía no encontrada.",
+            404,
+        )
+
+    file_name = photo.file_name
+
+    delete_result = delete_photo.execute(
+        DeletePhotoCommand(
+            code=photo_code,
+        )
+    )
+
+    if not delete_result.success:
+        return (
+            delete_result.error
+            or "No se pudo eliminar la fotografía.",
+            400,
+        )
+
+    if (
+        file_name
+        and photo_storage.exists(
+            file_name
+        )
+    ):
+        photo_storage.delete(
+            file_name
+        )
+
+    return redirect(
+        url_for(
+            "assets.asset_detail",
+            codigo=codigo,
+        )
+    )
+
+# ============================================================
+# EDIT PHOTO
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/fotografias/"
+    "<string:photo_code>/editar",
+    methods=["GET", "POST"],
+)
+def edit_photo_route(
+    codigo: str,
+    photo_code: str,
+):
+    """
+    Edita los metadatos de una fotografía.
+    """
+
+    result = get_photo.execute(
+        GetPhotoQuery(
+            code=photo_code,
+        )
+    )
+
+    photo = result.photo
+
+    if (
+        photo is None
+        or photo.asset_code != codigo
+    ):
+        return (
+            "Fotografía no encontrada.",
+            404,
+        )
+
+    if request.method == "POST":
+
+        update_result = update_photo.execute(
+            UpdatePhotoCommand(
+                code=photo_code,
+                asset_code=codigo,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                photo_type=request.form.get(
+                    "photo_type",
+                    "",
+                ),
+                file_name=photo.file_name,
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+            )
+        )
+
+        if update_result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+        return (
+            update_result.error
+            or "No se pudo actualizar la fotografía.",
+            400,
+        )
+
+    return render_template(
+        "pages/edit_photo.html",
+        codigo=codigo,
+        photo=photo,
+    )
 
 
 

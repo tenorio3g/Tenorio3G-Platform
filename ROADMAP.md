@@ -12,7 +12,7 @@ The objective is to transform maintenance information into structured technical 
 
 # Current Baseline
 
-## v0.5.0
+## v0.6.0
 
 Current stable development baseline.
 
@@ -24,15 +24,16 @@ Completed engines:
 - Technical Data Engine
 - Spare Parts Engine
 - Documents Engine
+- Photos Engine
 
 Automated test suite:
 
-105 PASSED  
-0 FAILED  
-0 ERRORS  
-0 SKIPPED
+**147 PASSED**  
+**0 FAILED**  
+**0 ERRORS**  
+**0 SKIPPED**
 
-The Documents Engine extends the asset technical record with persistent technical-document management and physical PDF storage.
+The Photos Engine extends the asset technical record with persistent photographic evidence, physical image storage, image visualization, and primary asset photographs.
 
 ---
 
@@ -101,9 +102,9 @@ Capabilities include:
 
 # Phase 2 — Technical Knowledge
 
-**Status: IN PROGRESS**
+**Status: COMPLETE**
 
-The objective of this phase is to transform each asset into a complete digital technical record containing both structured information and technical evidence.
+The objective of this phase is to transform each asset into a digital technical record containing structured information, technical documentation, and visual evidence.
 
 ## Documents Engine
 
@@ -160,16 +161,35 @@ The repository preserves the storage directory through:
 
 ## Photos Engine
 
-**Status: NEXT**
+**Status: COMPLETE**
 
 Purpose:
 
 Create visual technical evidence and photographic history associated with industrial assets.
 
-Planned capabilities:
+Implemented capabilities:
 
-- Asset photographs
-- Equipment nameplate photographs
+- Photo domain model
+- Asset-photo relationships
+- Repository abstraction
+- SQLite persistence
+- Create / Read / Update / Delete
+- Bootstrap composition
+- Presenter
+- ViewModel
+- Asset-detail integration
+- Photo registration UI
+- Photo editing
+- Photo deletion
+- PhotoStorage abstraction
+- LocalPhotoStorage implementation
+- Physical JPG / JPEG / PNG storage
+- Image visualization
+- Photo gallery
+- Main asset photograph
+- Photo-type classification
+- Equipment photographs
+- Nameplate photographs
 - Component photographs
 - Installation evidence
 - Maintenance evidence
@@ -178,16 +198,35 @@ Planned capabilities:
 - Inspection evidence
 - Photo metadata
 - Date tracking
-- Author tracking
-- Asset-photo relationships
-- Local image storage
-- Image visualization
 - Physical image deletion
-- Automated tests
+- Image file-type validation
+- Safe file naming
+- HTTP integration tests
+- Temporary test storage
+- Storage tests
+- Automated primary-photo selection
 
-The Photos Engine should reuse the architectural patterns established by the Documents Engine where appropriate, particularly storage abstraction and asset relationships.
+Uploaded photographs are maintained outside Git version control.
 
-When completed, the asset technical record will evolve toward:
+The repository preserves the storage directory through:
+
+`storage/photos/.gitkeep`
+
+User-uploaded image files are excluded through `.gitignore`.
+
+### Primary Photo Rule
+
+Photographs classified with:
+
+`photo_type = "general"`
+
+are candidates to become the main asset photograph.
+
+When multiple general photographs exist, the most recently registered general photograph becomes the primary photograph.
+
+Previous general photographs remain available as historical visual evidence.
+
+The asset technical record now integrates:
 
 Asset  
 ↓  
@@ -203,13 +242,13 @@ Photos
 
 # Phase 3 — Maintenance Intelligence
 
-**Status: PLANNED**
+**Status: NEXT**
 
-This phase will begin using the technical foundation to build an operational history for industrial equipment.
+This phase begins using the technical foundation to build a structured operational history for industrial equipment.
 
 ## Maintenance History Engine
 
-**Status: PLANNED**
+**Status: NEXT**
 
 Purpose:
 
@@ -226,8 +265,10 @@ Planned capabilities:
 - Materials used
 - Spare parts replaced
 - Comments
+- Technical observations
 - Documents
 - Photographic evidence
+- Event timestamps
 - Historical timeline
 
 The objective is to answer questions such as:
@@ -239,6 +280,20 @@ The objective is to answer questions such as:
 - What materials were used?
 - Has this failure happened before?
 - What evidence exists from previous interventions?
+
+Maintenance History should integrate information already available from previous engines.
+
+Potential relationship:
+
+Asset  
+↓  
+Maintenance Event  
+├── Spare Parts  
+├── Documents  
+├── Photos  
+├── Technician  
+├── Materials  
+└── Observations
 
 ---
 
@@ -265,6 +320,7 @@ Planned capabilities:
 - Procedures
 - Required spare parts
 - Technical documentation references
+- Photographic evidence
 
 ---
 
@@ -386,9 +442,13 @@ Storage Contract
 ↓  
 Storage Implementation  
 ↓  
-Physical Storage Tests
+Physical Storage  
+↓  
+Storage Tests  
+↓  
+HTTP Integration Tests
 
-before web integration is considered complete.
+before the engine is considered complete.
 
 ---
 
@@ -444,7 +504,7 @@ Major milestone:
 
 **Documents Engine completed**
 
-Adds persistent technical-document management and physical PDF storage.
+Added persistent technical-document management and physical PDF storage.
 
 Completed engines:
 
@@ -459,9 +519,33 @@ Automated test suite:
 
 **105 PASSED**
 
+---
+
+## v0.6.0
+
+Major milestone:
+
+**Photos Engine completed**
+
+Added persistent photographic evidence management, physical image storage, image visualization, photo galleries, and primary asset photographs.
+
+Completed engines:
+
+1. Foundation
+2. Maps
+3. Assets
+4. Technical Data
+5. Spare Parts
+6. Documents
+7. Photos
+
+Automated test suite:
+
+**147 PASSED**
+
 Next development target:
 
-**Photos Engine**
+**Maintenance History Engine**
 
 ---
 
@@ -476,6 +560,8 @@ The expected evolution is:
 Maintenance Data  
 ↓  
 Structured Technical Information  
+↓  
+Technical Evidence  
 ↓  
 Technical Knowledge  
 ↓  

@@ -1,0 +1,157 @@
+{% if photos and photos.has_items %}
+
+    <div class="spare-parts-list">
+
+        {% for item in photos.items %}
+
+            <article class="spare-part-item">
+
+                <!-- Fotografía -->
+                <div class="photo-gallery-item__image-wrapper">
+
+                    <a
+                        href="{{ url_for(
+                            'assets.view_photo_route',
+                            codigo=activo.codigo,
+                            photo_code=item.code
+                        ) }}"
+                        class="photo-gallery-item__image-link"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <img
+                            src="{{ url_for(
+                                'assets.view_photo_route',
+                                codigo=activo.codigo,
+                                photo_code=item.code
+                            ) }}"
+                            alt="{{ item.title }}"
+                            class="photo-gallery-item__image"
+                        >
+                    </a>
+
+                </div>
+
+
+                <!-- Encabezado -->
+                <div class="spare-part-item__header">
+
+                    <div>
+                        <strong>
+                            {{ item.title }}
+                        </strong>
+
+                        <span>
+                            {{ item.code }}
+                        </span>
+                    </div>
+
+                    <span>
+                        {{ item.photo_type }}
+                    </span>
+
+                </div>
+
+
+                <!-- Información -->
+                <div class="spare-part-item__grid">
+
+                    <div>
+                        <span>
+                            Archivo
+                        </span>
+
+                        <strong>
+                            {{ item.file_name }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Registrada
+                        </span>
+
+                        <strong>
+                            {{ item.created_at }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <!-- Descripción -->
+                {% if item.description %}
+
+                    <p class="spare-part-item__observations">
+                        {{ item.description }}
+                    </p>
+
+                {% endif %}
+
+
+                <!-- Acciones -->
+                <div class="spare-part-item__actions">
+
+                    <a
+                        class="btn btn-primary"
+                        href="{{ url_for(
+                            'assets.view_photo_route',
+                            codigo=activo.codigo,
+                            photo_code=item.code
+                        ) }}"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Ver
+                    </a>
+                    
+                    <a
+                        class="btn"
+                        href="{{ url_for(
+                            'assets.edit_photo_route',
+                            codigo=activo.codigo,
+                            photo_code=item.code
+                        ) }}"
+                    >
+                        Editar
+                    </a>
+
+
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'assets.delete_photo_route',
+                            codigo=activo.codigo,
+                            photo_code=item.code
+                        ) }}"
+                        onsubmit="
+                            return confirm(
+                                '¿Eliminar esta fotografía del activo?'
+                            );
+                        "
+                    >
+                        <button
+                            type="submit"
+                            class="btn"
+                        >
+                            Eliminar
+                        </button>
+                    </form>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="asset-workspace-card__placeholder">
+        Este activo todavía no tiene
+        fotografías registradas.
+    </div>
+
+{% endif %}

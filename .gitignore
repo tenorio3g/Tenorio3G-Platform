@@ -29,3 +29,7 @@ Thumbs.db
 # Documentos cargados por usuarios
 storage/documents/*
 !storage/documents/.gitkeep
+
+# Fotografías cargadas por usuarios
+storage/photos/*
+!storage/photos/.gitkeep

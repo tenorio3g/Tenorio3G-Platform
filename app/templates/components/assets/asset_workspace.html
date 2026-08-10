@@ -107,6 +107,49 @@
 
         </section>
 
+        <section
+    class="asset-workspace-card"
+    aria-labelledby="photos-title"
+>
+    <header class="asset-workspace-card__header">
+
+        <div>
+            <p class="asset-workspace-card__eyebrow">
+                Evidencia visual
+            </p>
+
+            <h2 id="photos-title">
+                Fotografías
+            </h2>
+        </div>
+
+        <span aria-hidden="true">
+            <div class="asset-workspace-card__actions">
+
+    <a
+        href="{{ url_for(
+            'assets.create_photo_route',
+            codigo=activo.codigo
+        ) }}"
+        class="btn btn-primary"
+    >
+        + Registrar
+    </a>
+
+    <span aria-hidden="true">
+        📷
+    </span>
+
+</div>
+        </span>
+
+    </header>
+
+    {% include "components/assets/photos_card.html" %}
+
+</section>
+
+
 
         <section
             class="asset-workspace-card"

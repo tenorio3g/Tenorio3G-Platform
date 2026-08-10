@@ -3,9 +3,54 @@
     <section
         class="asset-photo-card"
         aria-label="Fotografía del activo"
-    >
+>
 
-        <div class="asset-photo-card__preview">
+        {% if photos and photos.primary_photo %}
+
+            <a
+                href="{{ url_for(
+                    'assets.view_photo_route',
+                    codigo=activo.codigo,
+                    photo_code=photos.primary_photo.code
+                ) }}"
+                class="asset-photo-card__image-link"
+                target="_blank"
+                rel="noopener"
+            >
+                <img
+                    src="{{ url_for(
+                        'assets.view_photo_route',
+                        codigo=activo.codigo,
+                        photo_code=photos.primary_photo.code
+                    ) }}"
+                    alt="{{ photos.primary_photo.title }}"
+                    class="asset-photo-card__image"
+                >
+            </a>
+
+            <strong>
+                {{ photos.primary_photo.title }}
+            </strong>
+
+            {% if photos.primary_photo.description %}
+
+                <p>
+                    {{ photos.primary_photo.description }}
+                </p>
+
+            {% endif %}
+
+            <a
+                href="{{ url_for(
+                    'assets.create_photo_route',
+                    codigo=activo.codigo
+                ) }}"
+                class="asset-photo-card__action"
+            >
+                Agregar fotografía
+            </a>
+
+        {% else %}
 
             <span
                 class="asset-photo-card__icon"
@@ -14,28 +59,30 @@
                 📷
             </span>
 
-            <p class="asset-photo-card__title">
+            <strong>
                 Sin fotografía registrada
-            </p>
+            </strong>
 
-            <p class="asset-photo-card__description">
+            <p>
                 La fotografía permitirá confirmar visualmente
                 que se está consultando el equipo correcto.
             </p>
 
-        </div>
+            <a
+                href="{{ url_for(
+                    'assets.create_photo_route',
+                    codigo=activo.codigo
+                ) }}"
+                class="asset-photo-card__action"
+            >
+                Agregar fotografía
+            </a>
 
-        <button
-            type="button"
-            class="asset-photo-card__action"
-            disabled
-            title="Disponible próximamente"
-        >
-            Agregar fotografía
-        </button>
+        {% endif %}
 
     </section>
 
+        
     <section
         class="asset-summary"
         aria-labelledby="asset-summary-title"
