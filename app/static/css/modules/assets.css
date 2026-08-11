@@ -833,3 +833,129 @@
         flex-direction: column-reverse;
     }
 }
+
+/* ==========================================================
+   MAINTENANCE HISTORY
+   ========================================================== */
+
+.maintenance-history {
+    display: grid;
+    gap: 0;
+}
+
+.maintenance-history-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    gap: 1rem;
+}
+
+.maintenance-history-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 1.25rem;
+    bottom: 0;
+    left: 0.34rem;
+    width: 2px;
+    background: var(--color-border, #d0d5dd);
+}
+
+.maintenance-history-item__marker {
+    position: relative;
+    z-index: 1;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: 0.35rem;
+    border: 2px solid var(--color-primary, #2563eb);
+    border-radius: 50%;
+    background: var(--color-surface, #ffffff);
+}
+
+.maintenance-history-item__content {
+    padding-bottom: 1.5rem;
+}
+
+.maintenance-history-item__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.maintenance-history-item__header > div {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.maintenance-history-item__header span {
+    font-size: 0.8rem;
+}
+
+.maintenance-history-item__status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.maintenance-history-item__status--completed {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.maintenance-history-item__status--open {
+    background: #fffaeb;
+    color: #b54708;
+}
+
+.maintenance-history-item__grid {
+    display: grid;
+    grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+    );
+    gap: 0.75rem 1rem;
+    margin-top: 1rem;
+}
+
+.maintenance-history-item__grid > div {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.maintenance-history-item__grid span,
+.maintenance-history-item__observations > span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #667085);
+}
+
+.maintenance-history-item__description {
+    margin: 1rem 0 0;
+    line-height: 1.5;
+}
+
+.maintenance-history-item__observations {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.6rem;
+    background: var(--color-background, #f8fafc);
+}
+
+.maintenance-history-item__observations p {
+    margin: 0.25rem 0 0;
+}
+
+@media (max-width: 700px) {
+
+    .maintenance-history-item__header {
+        flex-direction: column;
+    }
+
+    .maintenance-history-item__grid {
+        grid-template-columns: 1fr;
+    }
+}

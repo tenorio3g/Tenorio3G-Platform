@@ -1,0 +1,176 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Hoja de vida
+            </p>
+
+            <h1>
+                Registrar mantenimiento
+            </h1>
+
+            <p>
+                Activo:
+                <strong>{{ codigo }}</strong>
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="code">
+                Código del evento
+            </label>
+
+            <input
+                id="code"
+                name="code"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="event_type">
+                Tipo de mantenimiento
+            </label>
+
+            <select
+                id="event_type"
+                name="event_type"
+                required
+            >
+                <option value="">
+                    Seleccione...
+                </option>
+
+                <option value="preventive">
+                    Preventivo
+                </option>
+
+                <option value="corrective">
+                    Correctivo
+                </option>
+
+                <option value="inspection">
+                    Inspección
+                </option>
+
+                <option value="repair">
+                    Reparación
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label for="title">
+                Título
+            </label>
+
+            <input
+                id="title"
+                name="title"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="performed_by">
+                Realizado por
+            </label>
+
+            <input
+                id="performed_by"
+                name="performed_by"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="started_at">
+                Inicio
+            </label>
+
+            <input
+                id="started_at"
+                name="started_at"
+                type="datetime-local"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="completed_at">
+                Finalización
+            </label>
+
+            <input
+                id="completed_at"
+                name="completed_at"
+                type="datetime-local"
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="4"
+            ></textarea>
+        </div>
+
+        <div>
+            <label for="observations">
+                Observaciones
+            </label>
+
+            <textarea
+                id="observations"
+                name="observations"
+                rows="4"
+            ></textarea>
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=codigo
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Registrar mantenimiento
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

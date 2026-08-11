@@ -23,6 +23,14 @@ from app.domains.assets.photos.bootstrap import (
     photo_repository,
 )
 
+from app.domains.assets.maintenance_history.models import (
+    MaintenanceEventModel,
+)
+
+from app.domains.assets.maintenance_history.bootstrap import (
+    maintenance_event_repository,
+)
+
 @pytest.fixture
 def app():
     app = create_app()
@@ -111,6 +119,47 @@ def photos_test_db(
     )
 
     yield photo_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+@pytest.fixture
+def maintenance_history_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    database_path = (
+        tmp_path
+        / "maintenance_history_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        maintenance_event_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield maintenance_event_repository
 
     Base.metadata.drop_all(
         test_engine

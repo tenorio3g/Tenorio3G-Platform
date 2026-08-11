@@ -12,7 +12,7 @@ The objective is to transform maintenance information into structured technical 
 
 # Current Baseline
 
-## v0.6.0
+## v0.7.0
 
 Current stable development baseline.
 
@@ -25,15 +25,16 @@ Completed engines:
 - Spare Parts Engine
 - Documents Engine
 - Photos Engine
+- Maintenance History Engine
 
 Automated test suite:
 
-**147 PASSED**  
+**184 PASSED**  
 **0 FAILED**  
 **0 ERRORS**  
 **0 SKIPPED**
 
-The Photos Engine extends the asset technical record with persistent photographic evidence, physical image storage, image visualization, and primary asset photographs.
+The Maintenance History Engine extends the asset technical record with persistent maintenance events, chronological operational history, technician information, maintenance timestamps, technical observations, and open / completed maintenance status.
 
 ---
 
@@ -242,64 +243,69 @@ Photos
 
 # Phase 3 — Maintenance Intelligence
 
-**Status: NEXT**
+**Status: IN PROGRESS**
 
 This phase begins using the technical foundation to build a structured operational history for industrial equipment.
 
 ## Maintenance History Engine
 
-**Status: NEXT**
+**Status: COMPLETE**
 
 Purpose:
 
 Create a complete technical and maintenance history for every asset.
 
-Planned capabilities:
+Implemented capabilities:
 
-- Maintenance events
-- Failures
-- Repairs
-- Inspections
-- Corrective actions
-- Technician information
-- Materials used
-- Spare parts replaced
-- Comments
-- Technical observations
-- Documents
-- Photographic evidence
-- Event timestamps
+- Maintenance event domain model
+- Asset-maintenance-event relationships
+- Repository abstraction
+- In-memory repository
+- SQLite persistence
+- Create / Read / Update / Delete
+- Bootstrap composition
+- Presenter
+- ViewModel
+- Asset-detail integration
+- Maintenance registration UI
+- Maintenance editing UI
+- Maintenance deletion
+- Maintenance type classification
+- Technician / responsible-person information
+- Maintenance start timestamps
+- Maintenance completion timestamps
+- Open / completed event status
+- Technical descriptions
+- Maintenance observations
 - Historical timeline
+- Most-recent-first chronological presentation
+- Flask route integration
+- HTTP integration tests
+- Temporary SQLite database testing
+- Automated domain tests
+- Repository tests
+- Use-case tests
+- Presenter tests
 
-The objective is to answer questions such as:
+The Maintenance History Engine transforms the asset record from a static technical record into a chronological operational record.
 
-- What happened to this equipment?
-- When did it fail?
-- Who repaired it?
-- What component was replaced?
-- What materials were used?
-- Has this failure happened before?
-- What evidence exists from previous interventions?
+The platform can now answer questions such as:
 
-Maintenance History should integrate information already available from previous engines.
+- What maintenance has been performed on this asset?
+- When did an intervention begin?
+- When was it completed?
+- Who performed the work?
+- Is the maintenance event still open?
+- What technical description was recorded?
+- What observations were documented?
 
-Potential relationship:
-
-Asset  
-↓  
-Maintenance Event  
-├── Spare Parts  
-├── Documents  
-├── Photos  
-├── Technician  
-├── Materials  
-└── Observations
+Future engines can extend maintenance events with direct relationships to spare parts, materials, documents, photographs, work orders, and additional operational evidence.
 
 ---
 
 ## Preventive Maintenance Engine
 
-**Status: PLANNED**
+**Status: NEXT**
 
 Purpose:
 
@@ -321,6 +327,7 @@ Planned capabilities:
 - Required spare parts
 - Technical documentation references
 - Photographic evidence
+- Integration with Maintenance History
 
 ---
 
@@ -496,6 +503,10 @@ Completed engines:
 4. Technical Data
 5. Spare Parts
 
+Automated test suite:
+
+**62 PASSED**
+
 ---
 
 ## v0.5.0
@@ -546,6 +557,35 @@ Automated test suite:
 Next development target:
 
 **Maintenance History Engine**
+
+---
+
+## v0.7.0
+
+Major milestone:
+
+**Maintenance History Engine completed**
+
+Added persistent maintenance-event management, chronological asset history, maintenance status tracking, technician information, timestamps, technical descriptions, observations, complete CRUD functionality, asset-detail integration, historical timeline visualization, and HTTP integration testing.
+
+Completed engines:
+
+1. Foundation
+2. Maps
+3. Assets
+4. Technical Data
+5. Spare Parts
+6. Documents
+7. Photos
+8. Maintenance History
+
+Automated test suite:
+
+**184 PASSED**
+
+Next development target:
+
+**Preventive Maintenance Engine**
 
 ---
 

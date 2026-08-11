@@ -1,0 +1,150 @@
+{% if maintenance_history and maintenance_history.has_items %}
+
+    <div class="maintenance-history">
+
+        {% for item in maintenance_history.items %}
+
+            <article class="maintenance-history-item">
+
+                <div class="maintenance-history-item__marker">
+                </div>
+
+                <div class="maintenance-history-item__content">
+
+                    <div class="maintenance-history-item__header">
+
+                        <div>
+                            <strong>
+                                {{ item.title }}
+                            </strong>
+
+                            <span>
+                                {{ item.code }}
+                            </span>
+                        </div>
+
+                        <span
+                            class="
+                                maintenance-history-item__status
+                                {% if item.status == 'Completado' %}
+                                    maintenance-history-item__status--completed
+                                {% else %}
+                                    maintenance-history-item__status--open
+                                {% endif %}
+                            "
+                        >
+                            {{ item.status }}
+                        </span>
+
+                    </div>
+
+                    <div class="maintenance-history-item__grid">
+
+                        <div>
+                            <span>Tipo</span>
+                            <strong>
+                                {{ item.event_type }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Responsable</span>
+                            <strong>
+                                {{ item.performed_by }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Inicio</span>
+                            <strong>
+                                {{ item.started_at }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Finalización</span>
+                            <strong>
+                                {{
+                                    item.completed_at
+                                    or "Pendiente"
+                                }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    {% if item.description %}
+
+                        <p class="maintenance-history-item__description">
+                            {{ item.description }}
+                        </p>
+
+                    {% endif %}
+
+                    {% if item.observations %}
+
+                        <div class="maintenance-history-item__observations">
+                            <span>Observaciones</span>
+
+                            <p>
+                                {{ item.observations }}
+                            </p>
+                        
+
+                        
+                        </div>
+                            <div class="spare-part-item__actions">
+
+                                <a
+                                    class="btn"
+                                    href="{{ url_for(
+                                        'assets.edit_maintenance_event_route',
+                                        codigo=activo.codigo,
+                                        event_code=item.code
+                                    ) }}"
+                                >
+                                    Editar
+                                </a>
+
+                                <form
+                                    method="post"
+                                    action="{{ url_for(
+                                        'assets.delete_maintenance_event_route',
+                                        codigo=activo.codigo,
+                                        event_code=item.code
+                                    ) }}"
+                                    onsubmit="
+                                        return confirm(
+                                            '¿Eliminar este evento del historial?'
+                                        );
+                                    "
+                                >
+                                    <button
+                                        type="submit"
+                                        class="btn"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </form>
+
+                            </div>
+
+
+                    {% endif %}
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="asset-workspace-card__placeholder">
+        Este activo todavía no tiene
+        historial de mantenimiento registrado.
+    </div>
+
+{% endif %}

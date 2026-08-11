@@ -2,9 +2,9 @@
 
 ## Current Version
 
-**Version:** v0.6.0  
-**Status:** Stable Development Baseline  
-**Test Suite:** 147 passed / 0 failed / 0 errors / 0 skipped
+**Version:** v0.7.0
+**Status:** Stable Development Baseline
+**Test Suite:** 184 passed / 0 failed / 0 errors / 0 skipped
 
 ---
 
@@ -248,7 +248,47 @@ Previous general photographs are preserved as historical visual evidence.
 This allows the asset's main photograph to evolve without losing previous images.
 
 ---
+### Maintenance History Engine
 
+**Status:** COMPLETE
+
+Provides structured maintenance-history management associated with industrial assets.
+
+Current capabilities include:
+
+- Maintenance event domain model
+- Asset-to-maintenance-event relationships
+- Repository abstraction
+- In-memory repository
+- SQLite persistence
+- Create / Read / Update / Delete
+- Bootstrap composition
+- Presenter
+- ViewModel
+- Asset-detail integration
+- Historical maintenance timeline
+- Maintenance event registration UI
+- Maintenance event editing UI
+- Maintenance event deletion
+- Maintenance type classification
+- Technician / responsible-person information
+- Maintenance start timestamps
+- Maintenance completion timestamps
+- Open / completed event status
+- Technical descriptions
+- Maintenance observations
+- Most-recent-first chronological presentation
+- Flask route integration
+- HTTP integration tests
+- Temporary SQLite database testing
+- Automated domain tests
+- Repository tests
+- Use-case tests
+- Presenter tests
+
+Maintenance events are persisted in SQLite and associated directly with the corresponding industrial.
+
+The asset technical record can therefore preserve a chronological operational history instead of representing only the asset's current technical condition.
 ## Asset Technical Record
 
 The industrial asset technical record currently integrates:
@@ -263,17 +303,18 @@ Spare Parts
 ↓  
 Technical Documents  
 ↓  
-Photographic Evidence
+Photographic Evidence  
+↓  
+Maintenance History
 
-The asset record can therefore preserve both structured technical information and physical technical evidence.
-
+The asset record can therefore preserve structured technical information, physical technical evidence, and a chronological record of maintenance interventions throughout the asset lifecycle.
 ---
 
 ## Test Status
 
 Current automated test suite:
 
-**147 PASSED**  
+**184 PASSED**  
 **0 FAILED**  
 **0 ERRORS**  
 **0 SKIPPED**
@@ -300,6 +341,16 @@ The automated suite protects multiple architectural layers, including:
 - Invalid-image rejection
 - Primary-photo selection
 - Local storage behavior
+- Maintenance-event domain behavior
+- Maintenance-history repositories
+- Maintenance-event SQLite persistence
+- Maintenance-history use cases
+- Maintenance-history presenter
+- Chronological event ordering
+- Open / completed maintenance status
+- Maintenance registration through HTTP
+- Maintenance editing through HTTP
+- Maintenance deletion through HTTP
 
 The test suite is used as a regression barrier before integrating new engines or preparing releases.
 
@@ -307,7 +358,7 @@ The test suite is used as a regression barrier before integrating new engines or
 
 ## Current Development Stage
 
-Tenorio3G Platform v0.6.0 represents the completion of the Photos Engine and the integration of persistent visual technical evidence into the asset lifecycle.
+Tenorio3G Platform v0.7.0 represents the completion of the Maintenance History Engine and the integration of persistent chronological maintenance records into the industrial asset lifecycle.
 
 An industrial asset can now maintain:
 
@@ -319,43 +370,48 @@ An industrial asset can now maintain:
 - Physical PDF files
 - Photographic evidence
 - Main equipment photograph
+- Maintenance events
+- Maintenance descriptions
+- Responsible technician information
+- Maintenance start and completion timestamps
+- Open / completed maintenance status
+- Technical observations
+- Historical maintenance timeline
 
-This creates a substantially richer digital technical record for industrial equipment.
+The platform can now represent not only what an asset is and what it looks like, but also what has happened to it throughout its operational lifecycle.
 
-The platform can now represent not only what an asset **is**, but also what it **looks like**, what components are installed, and visual evidence associated with failures, inspections, installations, and maintenance interventions.
-
----
-
+This establishes the foundation for future preventive-maintenance planning, failure analysis, operational analytics, and intelligent technical assistance.
 ## Next Engine
 
 The next planned development module is:
 
-### Maintenance History Engine
+### Preventive Maintenance Engine
 
 **Status:** NEXT
 
-Its purpose will be to create a structured historical record of everything that happens to an industrial asset throughout its operational lifecycle.
+Its purpose will be to transform asset technical information and maintenance history into structured preventive-maintenance planning.
 
 Potential capabilities include:
 
-- Maintenance events
-- Corrective maintenance
-- Inspections
-- Failures
-- Repairs
-- Component replacements
-- Technician information
-- Materials used
-- Spare parts used
-- Comments
-- Technical observations
-- Before / after evidence
-- Attached documents
-- Attached photographs
-- Event timestamps
-- Asset historical timeline
+- Preventive maintenance plans
+- Maintenance frequencies
+- Scheduled maintenance dates
+- Next-maintenance calculations
+- Maintenance checklists
+- Task definitions
+- Assigned technicians
+- Required spare parts
+- Required materials
+- Required tools
+- Safety instructions
+- Maintenance procedures
+- Overdue maintenance detection
+- Upcoming maintenance alerts
+- Maintenance completion tracking
+- Integration with Maintenance History
+- Preventive-maintenance compliance indicators
 
-The Maintenance History Engine should integrate information generated by previously completed engines.
+The Preventive Maintenance Engine should reuse information already generated by Assets, Technical Data, Spare Parts, Documents, Photos, and Maintenance History.
 
 Potential relationship:
 
@@ -374,12 +430,10 @@ Maintenance Event
 
 ## Planned Engines
 
-Maintenance History Engine  
-↓  
-Preventive Maintenance Engine  
-↓  
-Dashboard / Analytics  
-↓  
+Preventive Maintenance Engine
+↓
+Dashboard / Analytics
+↓
 Tenorio AI
 
 ---
@@ -448,9 +502,9 @@ Release
 
 ## Project Milestone
 
-Version v0.6.0 extends the consolidated architectural baseline of Tenorio3G Platform with complete photographic evidence management.
+Version v0.7.0 extends the consolidated architectural baseline of Tenorio3G Platform with persistent maintenance-history management.
 
-At this stage the platform has seven completed engines:
+At this stage the platform has eight completed engines:
 
 1. Foundation Engine
 2. Maps Engine
@@ -459,6 +513,7 @@ At this stage the platform has seven completed engines:
 5. Spare Parts Engine
 6. Documents Engine
 7. Photos Engine
+8. Maintenance History Engine
 
 The project currently provides:
 
@@ -489,6 +544,14 @@ The project currently provides:
 - Temporary test storage
 - Git version control
 - Engine-based modular development
+- Maintenance-history management
+- Persistent maintenance events
+- Historical asset timeline
+- Open / completed maintenance tracking
+- Maintenance technician information
+- Maintenance timestamps
+- Maintenance observations
+- Maintenance CRUD through the web interface
 
 ---
 
@@ -582,6 +645,19 @@ Next development target:
 **Maintenance History Engine**
 
 ---
+### v0.7.0
+
+**Maintenance History Engine completed**
+
+Added persistent maintenance-event management, chronological asset history, maintenance status tracking, technician information, timestamps, observations, complete CRUD functionality, asset-detail integration, and HTTP integration testing.
+
+Test baseline:
+
+**184 PASSED**
+
+Next development target:
+
+**Preventive Maintenance Engine**
 
 Tenorio3G Platform
 

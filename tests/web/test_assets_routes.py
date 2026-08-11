@@ -1,4 +1,9 @@
 from io import BytesIO
+from datetime import datetime
+
+from app.domains.assets.maintenance_history.entities import (
+    MaintenanceEvent,
+)
 
 
 def test_assets_index_should_respond(
@@ -830,3 +835,212 @@ def test_delete_photo_should_remove_image_file(
     assert test_storage.exists(
         stored_name
     ) is False
+
+def test_create_maintenance_event_form_should_respond(
+    client,
+) -> None:
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "mantenimiento/nuevo"
+        )
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Registrar mantenimiento"
+        in response.get_data(as_text=True)
+    )
+
+
+def test_create_maintenance_event_should_persist_and_redirect(
+    client,
+    maintenance_history_test_db,
+) -> None:
+
+    response = client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "mantenimiento/nuevo"
+        ),
+        data={
+            "code": "ME-HTTP-001",
+            "event_type": "inspection",
+            "title": "Inspección general",
+            "performed_by": "Fortunato Tenorio",
+            "started_at": "2026-08-10T16:00",
+            "completed_at": "",
+            "description": "Revisión general.",
+            "observations": "Sin anomalías.",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    event = (
+        maintenance_history_test_db.get_by_code(
+            "ME-HTTP-001"
+        )
+    )
+
+    assert event is not None
+
+    assert (
+        event.asset_code
+        == "S2-480-ES09-T269"
+    )
+
+    assert event.event_type == "inspection"
+    assert event.title == "Inspección general"
+    assert event.is_completed is False
+
+
+def test_create_maintenance_event_should_reject_invalid_date(
+    client,
+    maintenance_history_test_db,
+) -> None:
+
+    response = client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "mantenimiento/nuevo"
+        ),
+        data={
+            "code": "ME-HTTP-BAD-DATE",
+            "event_type": "inspection",
+            "title": "Inspección",
+            "performed_by": "Fortunato Tenorio",
+            "started_at": "fecha-invalida",
+            "completed_at": "",
+            "description": "Prueba.",
+            "observations": "",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+
+    assert (
+        maintenance_history_test_db.get_by_code(
+            "ME-HTTP-BAD-DATE"
+        )
+        is None
+    )
+
+def test_edit_maintenance_event_should_update_and_redirect(
+    client,
+    maintenance_history_test_db,
+) -> None:
+
+    maintenance_history_test_db.save(
+        MaintenanceEvent(
+            code="ME-HTTP-EDIT-001",
+            asset_code="S2-480-ES09-T269",
+            event_type="inspection",
+            title="Inspección inicial",
+            description="Revisión inicial.",
+            performed_by="Fortunato Tenorio",
+            started_at=datetime(
+                2026,
+                8,
+                10,
+                8,
+                0,
+            ),
+        )
+    )
+
+    response = client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "mantenimiento/"
+            "ME-HTTP-EDIT-001/"
+            "editar"
+        ),
+        data={
+            "event_type": "corrective",
+            "title": "Mantenimiento terminado",
+            "performed_by": "Fortunato Tenorio",
+            "started_at": "2026-08-10T08:00",
+            "completed_at": "2026-08-10T10:30",
+            "description": "Se realizó reparación.",
+            "observations": "Equipo liberado.",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    event = (
+        maintenance_history_test_db.get_by_code(
+            "ME-HTTP-EDIT-001"
+        )
+    )
+
+    assert event is not None
+    assert event.event_type == "corrective"
+
+    assert (
+        event.title
+        == "Mantenimiento terminado"
+    )
+
+    assert event.completed_at is not None
+    assert event.is_completed is True
+
+    assert (
+        event.observations
+        == "Equipo liberado."
+    )
+
+
+def test_delete_maintenance_event_should_remove_and_redirect(
+    client,
+    maintenance_history_test_db,
+) -> None:
+
+    maintenance_history_test_db.save(
+        MaintenanceEvent(
+            code="ME-HTTP-DELETE-001",
+            asset_code="S2-480-ES09-T269",
+            event_type="inspection",
+            title="Evento para eliminar",
+            description="Prueba.",
+            performed_by="Fortunato Tenorio",
+            started_at=datetime(
+                2026,
+                8,
+                10,
+                9,
+                0,
+            ),
+        )
+    )
+
+    response = client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "mantenimiento/"
+            "ME-HTTP-DELETE-001/"
+            "eliminar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    event = (
+        maintenance_history_test_db.get_by_code(
+            "ME-HTTP-DELETE-001"
+        )
+    )
+
+    assert event is None

@@ -165,6 +165,32 @@ from app.domains.assets.photos.presentation import (
     PhotosPresenter,
 )
 
+from datetime import datetime
+
+from app.domains.assets.maintenance_history.bootstrap import (
+    create_maintenance_event,
+)
+
+from app.domains.assets.maintenance_history.use_cases import (
+    CreateMaintenanceEventCommand,
+)
+
+from app.domains.assets.maintenance_history.bootstrap import (
+    create_maintenance_event,
+    delete_maintenance_event,
+    get_maintenance_event,
+    list_maintenance_events_by_asset,
+    update_maintenance_event,
+)
+
+from app.domains.assets.maintenance_history.use_cases import (
+    CreateMaintenanceEventCommand,
+    DeleteMaintenanceEventCommand,
+    GetMaintenanceEventQuery,
+    ListMaintenanceEventsByAssetQuery,
+    UpdateMaintenanceEventCommand,
+)
+
 # ============================================================
 # ASSETS INDEX
 # ============================================================
@@ -278,30 +304,34 @@ def asset_detail(codigo: str):
         photos_result.photos
     )
 
+    # --------------------------------------------------------
+# Historial de mantenimiento
+# --------------------------------------------------------
 
-
-
-    # DEBUG TEMPORAL
-    print(
-        "REFACCIONES LEÍDAS:",
-        len(spare_parts_result.spare_parts),
-    )
-
-    print(
-        "VIEWMODEL ITEMS:",
-        len(spare_parts.items),
-    )
-
-    for item in spare_parts.items:
-        print(
-            item.code,
-            item.name,
-            item.quantity,
+    maintenance_result = (
+        list_maintenance_events_by_asset.execute(
+            ListMaintenanceEventsByAssetQuery(
+                asset_code=codigo,
+            )
         )
+    )
+
+    maintenance_history = (
+        MaintenanceHistoryPresenter.present(
+            maintenance_result.events
+        )
+    )
+
 
     # --------------------------------------------------------
     # Vista
     # --------------------------------------------------------
+
+
+
+
+
+
 
     return render_template(
         "pages/asset_detail.html",
@@ -310,6 +340,7 @@ def asset_detail(codigo: str):
         spare_parts=spare_parts,
         documents=documents,
         photos=photos,
+        maintenance_history=maintenance_history,
     )
 
 
@@ -1332,4 +1363,276 @@ def view_document_route(
         mimetype="application/pdf",
         as_attachment=False,
         download_name=document.file_name,
+    )
+
+# ============================================================
+# MAINTENANCE HISTORY
+# ============================================================
+
+from app.domains.assets.maintenance_history.bootstrap import (
+    list_maintenance_events_by_asset,
+)
+
+from app.domains.assets.maintenance_history.use_cases import (
+    ListMaintenanceEventsByAssetQuery,
+)
+
+from app.domains.assets.maintenance_history.presentation import (
+    MaintenanceHistoryPresenter,
+)
+
+# ============================================================
+# CREATE MAINTENANCE EVENT
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/mantenimiento/nuevo",
+    methods=["GET", "POST"],
+)
+def create_maintenance_event_route(
+    codigo: str,
+):
+
+    if request.method == "POST":
+
+        started_at_text = request.form.get(
+            "started_at",
+            "",
+        )
+
+        completed_at_text = request.form.get(
+            "completed_at",
+            "",
+        )
+
+        try:
+            started_at = datetime.fromisoformat(
+                started_at_text
+            )
+
+            completed_at = (
+                datetime.fromisoformat(
+                    completed_at_text
+                )
+                if completed_at_text
+                else None
+            )
+
+        except ValueError:
+            return (
+                "Fecha u hora inválida.",
+                400,
+            )
+
+        result = create_maintenance_event.execute(
+            CreateMaintenanceEventCommand(
+                code=request.form.get(
+                    "code",
+                    "",
+                ),
+                asset_code=codigo,
+                event_type=request.form.get(
+                    "event_type",
+                    "",
+                ),
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                performed_by=request.form.get(
+                    "performed_by",
+                    "",
+                ),
+                started_at=started_at,
+                completed_at=completed_at,
+                observations=request.form.get(
+                    "observations",
+                    "",
+                ),
+            )
+        )
+
+        if result.success:
+
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+        return (
+            result.error
+            or "No fue posible registrar el mantenimiento.",
+            400,
+        )
+
+    return render_template(
+        "pages/create_maintenance_event.html",
+        codigo=codigo,
+    )
+
+# ============================================================
+# EDIT MAINTENANCE EVENT
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/mantenimiento/"
+    "<string:event_code>/editar",
+    methods=["GET", "POST"],
+)
+def edit_maintenance_event_route(
+    codigo: str,
+    event_code: str,
+):
+
+    event_result = get_maintenance_event.execute(
+        GetMaintenanceEventQuery(
+            code=event_code,
+        )
+    )
+
+    event = event_result.event
+
+    if (
+        event is None
+        or event.asset_code != codigo
+    ):
+        return (
+            "Evento de mantenimiento no encontrado.",
+            404,
+        )
+
+    if request.method == "POST":
+
+        started_at_text = request.form.get(
+            "started_at",
+            "",
+        )
+
+        completed_at_text = request.form.get(
+            "completed_at",
+            "",
+        )
+
+        try:
+            started_at = datetime.fromisoformat(
+                started_at_text
+            )
+
+            completed_at = (
+                datetime.fromisoformat(
+                    completed_at_text
+                )
+                if completed_at_text
+                else None
+            )
+
+        except ValueError:
+            return (
+                "Fecha u hora inválida.",
+                400,
+            )
+
+        result = update_maintenance_event.execute(
+            UpdateMaintenanceEventCommand(
+                code=event_code,
+                event_type=request.form.get(
+                    "event_type",
+                    "",
+                ),
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                performed_by=request.form.get(
+                    "performed_by",
+                    "",
+                ),
+                started_at=started_at,
+                completed_at=completed_at,
+                observations=request.form.get(
+                    "observations",
+                    "",
+                ),
+            )
+        )
+
+        if result.success:
+            return redirect(
+                url_for(
+                    "assets.asset_detail",
+                    codigo=codigo,
+                )
+            )
+
+        return (
+            result.error
+            or "No fue posible actualizar el mantenimiento.",
+            400,
+        )
+
+    return render_template(
+        "pages/edit_maintenance_event.html",
+        codigo=codigo,
+        event=event,
+    )
+
+
+# ============================================================
+# DELETE MAINTENANCE EVENT
+# ============================================================
+
+@assets.post(
+    "/activo/<string:codigo>/mantenimiento/"
+    "<string:event_code>/eliminar"
+)
+def delete_maintenance_event_route(
+    codigo: str,
+    event_code: str,
+):
+
+    event_result = get_maintenance_event.execute(
+        GetMaintenanceEventQuery(
+            code=event_code,
+        )
+    )
+
+    event = event_result.event
+
+    if (
+        event is None
+        or event.asset_code != codigo
+    ):
+        return (
+            "Evento de mantenimiento no encontrado.",
+            404,
+        )
+
+    result = delete_maintenance_event.execute(
+        DeleteMaintenanceEventCommand(
+            code=event_code,
+        )
+    )
+
+    if not result.success:
+        return (
+            result.error
+            or "No fue posible eliminar el mantenimiento.",
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "assets.asset_detail",
+            codigo=codigo,
+        )
     )

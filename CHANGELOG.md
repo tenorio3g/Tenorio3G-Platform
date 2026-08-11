@@ -5,6 +5,418 @@ All notable changes to Tenorio3G Platform will be documented in this file.
 The project follows incremental versioning. Each release represents a stable development milestone validated through automated testing.
 
 ---
+
+# [0.7.0] — 2026-08-10
+
+## Status
+
+Stable development milestone.
+
+Major milestone:
+
+**Maintenance History Engine completed.**
+
+Automated test suite:
+
+- 184 passed
+- 0 failed
+- 0 errors
+- 0 skipped
+
+---
+
+## Added
+
+### Maintenance History Engine
+
+Added persistent maintenance-history management associated with industrial assets.
+
+The Maintenance History Engine introduces a chronological operational record for each asset and extends the technical record beyond static technical information.
+
+Implemented capabilities include:
+
+- Maintenance event domain model
+- Asset-maintenance-event relationships
+- Repository abstraction
+- In-memory repository
+- SQLite persistence
+- Create / Read / Update / Delete use cases
+- Bootstrap composition
+- Presenter
+- ViewModel
+- Asset-detail integration
+- Maintenance registration UI
+- Maintenance editing UI
+- Maintenance deletion
+- Flask route integration
+- HTTP integration tests
+
+---
+
+### Maintenance Event Model
+
+Added a dedicated maintenance-event model capable of representing maintenance interventions associated with industrial assets.
+
+Maintenance events can preserve information such as:
+
+- Event code
+- Asset code
+- Maintenance type
+- Title
+- Technical description
+- Technician / responsible person
+- Start timestamp
+- Completion timestamp
+- Maintenance status
+- Technical observations
+
+This creates a structured foundation for preserving the operational history of industrial equipment.
+
+---
+
+### Maintenance Types
+
+Maintenance events can be classified according to their technical purpose.
+
+Current classifications include:
+
+- Corrective maintenance
+- Preventive maintenance
+- Inspection
+- Repair
+
+The architecture can be extended later with additional event classifications without changing the core maintenance-history design.
+
+---
+
+### Maintenance Status
+
+Added maintenance-event status tracking.
+
+Maintenance records can represent interventions that are:
+
+- Open
+- Completed
+
+An event without a completion timestamp remains open.
+
+When a completion timestamp is recorded, the maintenance event is presented as completed.
+
+---
+
+### Maintenance Timestamps
+
+Added chronological information to maintenance events.
+
+Maintenance records can preserve:
+
+- Maintenance start date and time
+- Maintenance completion date and time
+
+The domain validates that a completion timestamp cannot occur before the event start timestamp.
+
+This provides the foundation for a real operational timeline for each industrial asset.
+
+---
+
+### Technician Information
+
+Added technician / responsible-person information to maintenance records.
+
+Maintenance events preserve who performed or was responsible for the intervention.
+
+This provides traceability and prepares the platform for future integration with personnel, teams, work orders, and technician workload information.
+
+---
+
+### Technical Descriptions and Observations
+
+Maintenance events can preserve both technical descriptions and observations.
+
+The technical description records the intervention or equipment condition associated with the event.
+
+Observations provide additional technical context that may become useful during future diagnostics, recurring-failure analysis, or maintenance planning.
+
+---
+
+### SQLite Persistence
+
+Added persistent SQLite storage for maintenance events.
+
+Maintenance-history information survives application restarts and can be retrieved later as part of the asset lifecycle.
+
+The persistence architecture follows:
+
+Domain  
+↓  
+Repository Contract  
+↓  
+SQLite Repository  
+↓  
+Database Model
+
+The SQLite repository supports:
+
+- Save
+- Get by event code
+- List by asset code
+- Update existing event
+- Delete
+
+---
+
+### Maintenance History Use Cases
+
+Added application use cases for maintenance-history management.
+
+Implemented operations include:
+
+- Create maintenance event
+- Get maintenance event
+- List maintenance events by asset
+- Update maintenance event
+- Delete maintenance event
+
+These use cases isolate application behavior from Flask routes and persistence infrastructure.
+
+---
+
+### Maintenance History Presentation
+
+Added presentation-layer support for maintenance history.
+
+Introduced:
+
+- Maintenance History Presenter
+- Maintenance History ViewModel
+- Maintenance event item representation
+- Open / completed status presentation
+- Formatted timestamps
+- Chronological event ordering
+
+Maintenance events are presented with the most recent interventions first.
+
+---
+
+### Asset Maintenance Timeline
+
+Added maintenance history directly to the asset workspace.
+
+An industrial asset can now display a chronological sequence of maintenance events.
+
+The timeline displays information such as:
+
+- Event title
+- Event code
+- Maintenance type
+- Responsible person
+- Start timestamp
+- Completion timestamp
+- Open / completed status
+- Technical description
+- Observations
+
+This converts the asset record into an increasingly complete operational history.
+
+---
+
+## Changed
+
+### Asset Technical Record
+
+Version 0.7.0 expands the industrial asset technical record with persistent maintenance history.
+
+The asset record evolves from:
+
+Asset  
+↓  
+Location  
+↓  
+Technical Data  
+↓  
+Spare Parts  
+↓  
+Technical Documents  
+↓  
+Photographic Evidence
+
+to:
+
+Asset  
+↓  
+Location  
+↓  
+Technical Data  
+↓  
+Spare Parts  
+↓  
+Technical Documents  
+↓  
+Photographic Evidence  
+↓  
+Maintenance History
+
+The platform can now preserve not only what an asset is and what technical information belongs to it, but also what has happened to it throughout its operational lifecycle.
+
+---
+
+### Asset Workspace
+
+The asset workspace now integrates maintenance history as part of the equipment technical record.
+
+Technicians can:
+
+- View the maintenance timeline
+- Register maintenance events
+- Edit maintenance metadata
+- Complete open events
+- Delete maintenance events
+
+Maintenance-history information is presented chronologically with the most recent interventions first.
+
+---
+
+## Testing
+
+The automated test suite reached:
+
+**184 PASSED**
+
+with:
+
+- 0 FAILED
+- 0 ERRORS
+- 0 SKIPPED
+
+Maintenance History Engine coverage includes:
+
+- Maintenance-event domain tests
+- In-memory repository tests
+- SQLite repository tests
+- Create-maintenance-event tests
+- Get-maintenance-event tests
+- List-maintenance-events-by-asset tests
+- Update-maintenance-event tests
+- Delete-maintenance-event tests
+- Bootstrap integration
+- Presenter tests
+- Chronological ordering tests
+- Open / completed status tests
+- Flask route tests
+- Maintenance-event form tests
+- HTTP maintenance creation tests
+- Invalid-date rejection tests
+- Maintenance editing tests
+- Maintenance deletion tests
+
+Temporary SQLite databases are used during integration testing to isolate automated tests from production maintenance data.
+
+---
+
+## Architecture
+
+The Maintenance History Engine follows the established Tenorio3G development pattern:
+
+Idea  
+↓  
+Domain  
+↓  
+Repository  
+↓  
+SQLite  
+↓  
+Use Cases  
+↓  
+Bootstrap  
+↓  
+Presenter  
+↓  
+ViewModel  
+↓  
+UI  
+↓  
+HTTP Integration  
+↓  
+Tests  
+↓  
+Git  
+↓  
+Release
+
+Unlike Documents and Photos, Maintenance History does not require a dedicated physical-file storage layer.
+
+Its primary persistence responsibility is structured maintenance-event information stored through the repository abstraction and SQLite implementation.
+
+---
+
+## Maintenance Knowledge
+
+The completion of Maintenance History establishes an important transition in Tenorio3G Platform.
+
+Previous engines primarily describe the asset:
+
+- What equipment is it?
+- Where is it?
+- What are its technical characteristics?
+- What spare parts does it use?
+- What technical documentation belongs to it?
+- What does the equipment look like?
+
+Maintenance History adds a new question:
+
+**What has happened to the equipment?**
+
+The platform can now begin preserving operational experience as structured technical knowledge.
+
+---
+
+## Completed Engines
+
+Tenorio3G Platform now has eight completed engines:
+
+1. Foundation Engine
+2. Maps Engine
+3. Assets Engine
+4. Technical Data Engine
+5. Spare Parts Engine
+6. Documents Engine
+7. Photos Engine
+8. Maintenance History Engine
+
+---
+
+## Next
+
+The next planned development milestone is:
+
+**Preventive Maintenance Engine**
+
+Its objective is to transform the technical and historical information already associated with industrial assets into structured preventive-maintenance planning.
+
+Planned areas include:
+
+- Preventive maintenance plans
+- Maintenance frequencies
+- Scheduled maintenance dates
+- Recurring maintenance tasks
+- Maintenance checklists
+- Technician assignments
+- Required spare parts
+- Required materials
+- Required tools
+- Technical procedures
+- Safety instructions
+- Due-date tracking
+- Overdue maintenance detection
+- Upcoming maintenance identification
+- Maintenance completion tracking
+- Preventive-maintenance compliance
+- Integration with Maintenance History
+
+This moves Tenorio3G Platform from recording what has already happened toward planning what should happen next.
+
+---
+
 # [0.6.0] — 2026-08-09
 
 ## Status
@@ -33,8 +445,8 @@ Added complete photographic-evidence management associated with industrial asset
 Implemented capabilities include:
 
 - Photo domain model
-- Photo metadata
 - Asset-photo relationships
+- Photo metadata
 - Photo-type classification
 - Repository abstraction
 - In-memory repository
@@ -49,22 +461,23 @@ Implemented capabilities include:
 - Photo deletion
 - HTTP integration tests
 
-Supported photographic evidence includes:
+Supported photographic categories include:
 
 - General equipment photographs
-- Equipment nameplates
+- Nameplate photographs
 - Component photographs
 - Installation evidence
 - Maintenance evidence
+- Before photographs
+- After photographs
 - Failure evidence
 - Inspection evidence
-- Before / after photographs
 
 ---
 
 ### Photo Storage
 
-Added physical file-storage infrastructure for asset photographs.
+Added physical file-storage infrastructure for technical photographs.
 
 Introduced:
 
@@ -92,7 +505,7 @@ User-uploaded image files are excluded from Git version control through `.gitign
 
 Added real image upload support through the Photos web interface.
 
-The photo-registration workflow now supports:
+The photo-registration workflow supports:
 
 Browser  
 ↓  
@@ -112,7 +525,7 @@ SQLite metadata
 ↓  
 Asset technical record
 
-Supported image formats include:
+Supported image extensions include:
 
 - JPG
 - JPEG
@@ -120,97 +533,38 @@ Supported image formats include:
 
 Stored file names use the photo code together with a safe version of the original file name.
 
-Example:
-
-`PHOTO-ES09-001__equipment.jpg`
-
 ---
 
 ### Image Visualization
 
-Added photographic visualization through the application.
+Added image visualization through the application.
 
-Stored photographs can be displayed directly from the asset technical record.
+Technical photographs can be opened directly from the asset technical record.
 
-The application connects:
+The application verifies:
 
-Photo metadata  
-↓  
-Asset relationship  
-↓  
-Physical image storage  
-↓  
-Flask route  
-↓  
-Browser visualization
+- Photo metadata exists
+- Photo belongs to the requested asset
+- Physical image exists
 
-Photographs can also be opened individually from the asset interface.
-
----
-
-### Asset Photo Gallery
-
-Added photographic evidence directly to the asset workspace.
-
-The asset technical record can now display multiple photographs associated with the equipment.
-
-Each photograph can preserve information such as:
-
-- Code
-- Title
-- Photo type
-- File name
-- Description
-- Registration date
-
-This provides a visual technical-history foundation for future maintenance events.
-
----
-
-### Primary Asset Photograph
-
-Added automatic primary-photo selection.
-
-Photographs classified as:
-
-`photo_type = "general"`
-
-are candidates for the main asset photograph.
-
-When multiple general photographs exist, the most recently registered general photograph becomes the primary photograph.
-
-Previous general photographs remain stored as historical visual evidence.
-
-This allows the visible representation of an asset to evolve without destroying previous photographs.
-
----
-
-### Photo Metadata Editing
-
-Added photo metadata editing through the web interface.
-
-Editable information includes:
-
-- Title
-- Photo type
-- Description
-
-Metadata can be modified without replacing or unnecessarily modifying the physical image file.
+before returning the image to the browser.
 
 ---
 
 ### Physical Photo Deletion
 
-Photo deletion now removes both:
+Photo deletion removes both:
 
 - SQLite photo metadata
 - Associated physical image file
 
-Automated HTTP testing verifies that the database record and physical file are removed correctly.
+The physical image is removed only after the photo record has been successfully deleted.
+
+This helps prevent orphaned technical image files.
 
 ---
 
-### File Validation
+### Image Validation
 
 Added image file-type validation to photo uploads.
 
@@ -224,45 +578,54 @@ Automated tests verify that invalid files:
 
 ---
 
-## Changed
+### Photo Metadata Editing
 
-### Asset Summary
+Added photo metadata editing.
 
-The asset summary can now display the primary equipment photograph.
+Registered photographs can update technical information without requiring the physical image to be replaced.
 
-The previous photographic placeholder has been integrated with the Photos Engine.
+Editable information includes:
 
-When a general photograph exists, the asset summary displays the current primary photograph.
+- Title
+- Photo type
+- Description
 
-When no general photograph exists, the interface preserves the empty photographic state and provides access to photo registration.
+This allows photographic evidence to be classified and documented after initial registration.
 
 ---
 
-### Asset Workspace
+### Main Asset Photograph
 
-The asset workspace now integrates photographic evidence as part of the equipment technical record.
+Added a primary-photo rule for the asset summary.
 
-The asset record evolves from:
+Photographs classified as:
 
-Asset  
-↓  
-Technical Data  
-↓  
-Spare Parts  
-↓  
-Technical Documents
+`photo_type = "general"`
 
-to:
+are candidates to become the main asset photograph.
 
-Asset  
-↓  
-Technical Data  
-↓  
-Spare Parts  
-↓  
-Technical Documents  
-↓  
-Photographic Evidence
+When multiple general photographs exist, the most recently registered general photograph becomes the primary photograph.
+
+Previous general photographs remain stored as historical visual evidence.
+
+This allows the asset workspace to present a current visual identification of the equipment while preserving previous photographs.
+
+---
+
+### Photo Gallery
+
+Added photographic evidence to the asset workspace.
+
+The asset technical record can display:
+
+- Main equipment photograph
+- Photograph title
+- Photo classification
+- Description
+- Registration date
+- Additional photographic evidence
+
+This provides visual confirmation of the physical equipment and its technical condition.
 
 ---
 
@@ -283,8 +646,8 @@ Photos Engine coverage includes:
 - Photo domain tests
 - Repository tests
 - SQLite repository tests
-- Create-photo use-case tests
-- Get-photo use-case tests
+- Create-photo tests
+- Get-photo tests
 - List-photos-by-asset tests
 - Update-photo tests
 - Delete-photo tests
@@ -292,20 +655,20 @@ Photos Engine coverage includes:
 - Primary-photo selection tests
 - Storage tests
 - Flask route tests
-- HTTP photo creation tests
 - Multipart image upload tests
 - Image visualization tests
-- Invalid-file rejection tests
 - Photo metadata editing tests
 - Physical image deletion tests
+- Invalid-image rejection tests
+- HTTP integration tests
 
-Temporary SQLite databases and temporary filesystem storage are used during HTTP integration testing to isolate automated tests from production data.
+Temporary SQLite databases and temporary filesystem storage are used where appropriate to isolate automated tests from production data.
 
 ---
 
 ## Architecture
 
-Photos Engine reuses and extends the storage-oriented architectural pattern established by Documents Engine:
+The Photos Engine follows the established Tenorio3G development pattern:
 
 Idea  
 ↓  
@@ -317,10 +680,6 @@ SQLite
 ↓  
 Use Cases  
 ↓  
-Storage Contract  
-↓  
-Storage Implementation  
-↓  
 Bootstrap  
 ↓  
 Presenter  
@@ -329,15 +688,49 @@ ViewModel
 ↓  
 UI  
 ↓  
-HTTP Integration  
-↓  
 Tests  
 ↓  
 Git  
 ↓  
 Release
 
-The successful reuse of this pattern demonstrates that Tenorio3G engines can share architectural principles while maintaining independent domain responsibilities.
+As a file-oriented engine, Photos additionally follows:
+
+Storage Contract  
+↓  
+Storage Implementation  
+↓  
+Physical Storage  
+↓  
+Storage Tests  
+↓  
+HTTP Integration
+
+This reuses and validates the storage architecture established by the Documents Engine.
+
+---
+
+## Asset Technical Record
+
+Version 0.6.0 expands the industrial asset technical record with persistent photographic evidence.
+
+An asset can integrate:
+
+Asset  
+↓  
+Technical Data  
+↓  
+Spare Parts  
+↓  
+Technical Documents  
+↓  
+Physical PDF Files  
+↓  
+Photographic Evidence  
+↓  
+Physical Image Storage
+
+This allows the technical record to preserve both structured information and visual evidence associated with industrial equipment.
 
 ---
 
@@ -357,46 +750,6 @@ Only:
 
 is version controlled to preserve the required directory structure.
 
-This prevents operational photographs and test images from entering source-control history.
-
----
-
-## Asset Technical Record
-
-Version 0.6.0 expands the industrial asset technical record with persistent visual evidence.
-
-An asset can now integrate:
-
-Asset  
-↓  
-Location  
-↓  
-Technical Data  
-↓  
-Spare Parts  
-↓  
-Technical Documents  
-↓  
-Photographic Evidence
-
-The asset record can therefore preserve both structured technical information and physical technical evidence.
-
-This establishes the foundation required for future maintenance events to reference photographs, documents, spare parts, and other technical evidence.
-
----
-
-## Completed Engines
-
-Tenorio3G Platform now has seven completed engines:
-
-1. Foundation Engine
-2. Maps Engine
-3. Assets Engine
-4. Technical Data Engine
-5. Spare Parts Engine
-6. Documents Engine
-7. Photos Engine
-
 ---
 
 ## Next
@@ -405,25 +758,24 @@ The next planned development milestone is:
 
 **Maintenance History Engine**
 
-Its objective is to create a structured historical record of everything that happens to an industrial asset throughout its operational lifecycle.
+Its objective is to associate chronological maintenance events with industrial assets.
 
 Planned areas include:
 
 - Maintenance events
-- Failures
-- Repairs
+- Corrective maintenance records
+- Preventive maintenance records
 - Inspections
-- Corrective actions
+- Repairs
+- Failure interventions
 - Technician information
-- Materials used
-- Spare parts replaced
-- Technical observations
-- Documents
-- Photographic evidence
-- Event timestamps
+- Maintenance timestamps
+- Technical descriptions
+- Observations
 - Historical asset timeline
-
-The Maintenance History Engine will begin connecting information generated by the previously completed engines into a chronological operational record.
+- Persistent maintenance-event storage
+- Asset-maintenance relationships
+- Automated tests
 
 ---
 
@@ -513,7 +865,7 @@ User-uploaded PDF files are excluded from Git version control through `.gitignor
 
 Added real PDF upload support through the Documents web interface.
 
-The document-registration workflow now supports:
+The document-registration workflow supports:
 
 Browser  
 ↓  
@@ -545,7 +897,7 @@ Example:
 
 Added secure document visualization through the application.
 
-Technical PDFs can now be opened directly from the asset technical record.
+Technical PDFs can be opened directly from the asset technical record.
 
 The application verifies:
 
@@ -559,14 +911,14 @@ before returning the PDF to the browser.
 
 ### Physical Document Deletion
 
-Document deletion now removes both:
+Document deletion removes both:
 
 - SQLite document metadata
 - Associated physical PDF file
 
 The physical file is removed only after the document record has been successfully deleted.
 
-This prevents unnecessary orphaned technical files.
+This helps prevent orphaned technical files.
 
 ---
 
@@ -596,12 +948,16 @@ with:
 - 0 ERRORS
 - 0 SKIPPED
 
-New Documents Engine coverage includes:
+Documents Engine coverage includes:
 
-- Domain tests
+- Document domain tests
 - Repository tests
 - SQLite repository tests
-- Use-case tests
+- Create-document tests
+- Get-document tests
+- List-documents-by-asset tests
+- Update-document tests
+- Delete-document tests
 - Presenter tests
 - Storage tests
 - Flask route tests
@@ -609,7 +965,7 @@ New Documents Engine coverage includes:
 - Multipart PDF upload tests
 - PDF visualization tests
 - Physical file deletion tests
-- Invalid file rejection tests
+- Invalid-file rejection tests
 
 Temporary SQLite databases and temporary filesystem storage are used where appropriate to isolate automated tests from production data.
 
@@ -663,7 +1019,7 @@ This storage pattern can be reused by future engines such as Photos Engine.
 
 Version 0.5.0 expands the industrial asset technical record.
 
-An asset can now integrate:
+An asset can integrate:
 
 Asset  
 ↓  
@@ -888,22 +1244,68 @@ Its objective is to associate technical documentation with industrial assets, in
 ---
 
 # Version History
+
+## v0.7.0
+
+**Maintenance History Engine completed.**
+
+Major additions:
+
+- Persistent maintenance events
+- SQLite maintenance-history persistence
+- Maintenance-event CRUD
+- Maintenance type classification
+- Technician / responsible-person information
+- Start and completion timestamps
+- Open / completed maintenance status
+- Technical descriptions
+- Maintenance observations
+- Historical maintenance timeline
+- Chronological presentation
+- Asset-detail integration
+- Maintenance registration UI
+- Maintenance editing UI
+- Maintenance deletion
+- HTTP integration testing
+
+Completed engines:
+
+1. Foundation
+2. Maps
+3. Assets
+4. Technical Data
+5. Spare Parts
+6. Documents
+7. Photos
+8. Maintenance History
+
+Test baseline:
+
+**184 PASSED**
+
+Next development target:
+
+**Preventive Maintenance Engine**
+
+---
+
 ## v0.6.0
 
 **Photos Engine completed.**
 
 Major additions:
 
-- Photographic-evidence CRUD
+- Photo CRUD
 - SQLite photo persistence
+- Physical image storage
 - JPG / JPEG / PNG upload
-- Local photo storage
 - Image visualization
-- Asset photo gallery
-- Primary asset photograph
+- Photo gallery
 - Photo metadata editing
 - Physical image deletion
-- Image file-type validation
+- Image validation
+- Main asset photograph
+- Automated primary-photo selection
 - HTTP integration testing
 
 Completed engines:
@@ -925,6 +1327,7 @@ Next development target:
 **Maintenance History Engine**
 
 ---
+
 ## v0.5.0
 
 **Documents Engine completed.**

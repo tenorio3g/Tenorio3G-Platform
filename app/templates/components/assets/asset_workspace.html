@@ -182,3 +182,37 @@
     </div>
 
 </section>
+
+<article class="asset-workspace-card">
+
+    <div class="asset-workspace-card__header">
+            <a
+                class="btn btn-primary"
+                href="{{ url_for(
+                    'assets.create_maintenance_event_route',
+                    codigo=activo.codigo
+                ) }}"
+            >
+                Registrar mantenimiento
+            </a>
+        <div>
+            <p class="asset-workspace-card__eyebrow">
+                Hoja de vida
+            </p>
+
+            <h3>
+                Historial de mantenimiento
+            </h3>
+        </div>
+
+    </div>
+
+    <div class="asset-workspace-card__body">
+
+        {% include
+            "components/assets/maintenance_history_card.html"
+        %}
+
+    </div>
+
+</article>
