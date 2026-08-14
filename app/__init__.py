@@ -1,4 +1,5 @@
 from flask import Flask
+from app.identity import identity
 
 from config.config import Config
 
@@ -10,6 +11,9 @@ from app.operations import operations
 from app.work_orders import work_orders
 from app.maps import maps
 
+from app.domains.identity.authentication import (
+    can,
+)
 
 def create_app(config_class=Config) -> Flask:
     """
@@ -28,6 +32,7 @@ def create_app(config_class=Config) -> Flask:
     app = Flask(__name__)
 
     app.config.from_object(config_class)
+    app.jinja_env.globals["can"] = can
 
     _validate_foundation_registry()
     _register_blueprints(app)
@@ -62,6 +67,7 @@ def _register_blueprints(app: Flask) -> None:
         foundation,
         assets,
         maps,
+        identity,
         work_orders,
         operations,
     )

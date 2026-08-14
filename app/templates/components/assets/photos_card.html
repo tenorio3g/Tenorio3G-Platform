@@ -104,7 +104,7 @@
                     >
                         Ver
                     </a>
-                    
+                {% if can("photos.manage") %}    
                     <a
                         class="btn"
                         href="{{ url_for(
@@ -138,7 +138,7 @@
                             Eliminar
                         </button>
                     </form>
-
+                {% endif %}
                 </div>
 
             </article>

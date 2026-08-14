@@ -39,7 +39,8 @@
                 </p>
 
             {% endif %}
-
+        
+        {% if can("photos.manage") %}
             <a
                 href="{{ url_for(
                     'assets.create_photo_route',
@@ -49,6 +50,7 @@
             >
                 Agregar fotografía
             </a>
+        {% endif %}
 
         {% else %}
 

@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Roles
+            </h1>
+
+            <p>
+                Roles de acceso registrados en Tenorio3G Platform.
+            </p>
+        </div>
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for(
+                'identity.create_role_route'
+            ) }}"
+        >
+            Registrar rol
+        </a>
+
+    </div>
+
+
+    {% if roles and roles.has_items %}
+
+        <div class="spare-parts-list">
+
+            {% for role in roles.items %}
+
+                <article class="spare-part-item">
+
+
+                    <div class="spare-part-item__actions">
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'identity.edit_role_route',
+                                code=role.code
+                            ) }}"
+                        >
+                            Editar
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'identity.toggle_role_status_route',
+                                code=role.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="btn"
+                            >
+                                {% if role.is_active %}
+                                    Desactivar
+                                {% else %}
+                                    Activar
+                                {% endif %}
+                            </button>
+                        </form>
+
+                    </div>
+
+                    <div class="spare-part-item__header">
+
+                        <div>
+                            <strong>
+                                {{ role.name }}
+                            </strong>
+
+                            <span>
+                                {{ role.code }}
+                            </span>
+                        </div>
+
+                        <span>
+                            {{ role.status }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="spare-part-item__grid">
+
+                        <div>
+                            <span>
+                                Descripción
+                            </span>
+
+                            <strong>
+                                {{ role.description }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-workspace-card__placeholder">
+            Todavía no hay roles registrados.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

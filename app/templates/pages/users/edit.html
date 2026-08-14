@@ -1,0 +1,130 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Editar usuario
+            </h1>
+
+            <p>
+                Actualiza la persona asociada,
+                el rol o el estado de la cuenta.
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label>
+                Usuario
+            </label>
+
+            <input
+                type="text"
+                value="{{ user.username }}"
+                disabled
+            >
+        </div>
+
+        <div>
+            <label for="person_code">
+                Persona
+            </label>
+
+            <select
+                id="person_code"
+                name="person_code"
+                required
+            >
+
+                {% for person in people %}
+
+                    {% if person.is_active %}
+
+                        <option
+                            value="{{ person.code }}"
+                            {% if person.code == user.person_code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ person.name }}
+                            — {{ person.code }}
+                        </option>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </select>
+        </div>
+
+        <div>
+            <label for="role_code">
+                Rol
+            </label>
+
+            <select
+                id="role_code"
+                name="role_code"
+                required
+            >
+
+                {% for role in roles %}
+
+                    {% if role.is_active %}
+
+                        <option
+                            value="{{ role.code }}"
+                            {% if role.code == user.role_code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ role.name }}
+                        </option>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </select>
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'identity.users_index'
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

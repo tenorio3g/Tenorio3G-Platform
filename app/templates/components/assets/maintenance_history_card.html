@@ -93,6 +93,9 @@
 
                         
                         </div>
+
+
+                        {% if can("maintenance.manage") %}
                             <div class="spare-part-item__actions">
 
                                 <a
@@ -128,7 +131,7 @@
                                 </form>
 
                             </div>
-
+                        {% endif %}
 
                     {% endif %}
 

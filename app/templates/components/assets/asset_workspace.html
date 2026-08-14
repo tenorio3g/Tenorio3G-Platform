@@ -85,7 +85,7 @@
                 </div>
 
                 <div class="asset-workspace-card__actions">
-
+                {% if can("documents.manage") %}
                     <a
                         href="{{ url_for(
                             'assets.create_document_route',
@@ -95,7 +95,7 @@
                     >
                         + Registrar
                     </a>
-
+                {% endif %}   
                     <span aria-hidden="true">
                         📄
                     </span>
@@ -125,7 +125,7 @@
 
         <span aria-hidden="true">
             <div class="asset-workspace-card__actions">
-
+{% if can("photos.manage") %}
     <a
         href="{{ url_for(
             'assets.create_photo_route',
@@ -135,7 +135,7 @@
     >
         + Registrar
     </a>
-
+{% endif %}
     <span aria-hidden="true">
         📷
     </span>
@@ -186,6 +186,9 @@
 <article class="asset-workspace-card">
 
     <div class="asset-workspace-card__header">
+
+        {% if can("maintenance.manage") %}
+
             <a
                 class="btn btn-primary"
                 href="{{ url_for(
@@ -195,6 +198,8 @@
             >
                 Registrar mantenimiento
             </a>
+
+        {% endif %}    
         <div>
             <p class="asset-workspace-card__eyebrow">
                 Hoja de vida
@@ -211,6 +216,36 @@
 
         {% include
             "components/assets/maintenance_history_card.html"
+        %}
+
+    </div>
+
+</article>
+<article
+    class="asset-workspace-card"
+    aria-labelledby="preventive-maintenance-title"
+>
+
+    <div class="asset-workspace-card__header">
+
+        <div>
+
+            <p class="asset-workspace-card__eyebrow">
+                Planificación
+            </p>
+
+            <h3 id="preventive-maintenance-title">
+                Mantenimiento preventivo
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="asset-workspace-card__body">
+
+        {% include
+            "components/assets/preventive_maintenance_card.html"
         %}
 
     </div>

@@ -1,0 +1,75 @@
+{% if preventive_maintenance
+    and preventive_maintenance.has_items %}
+
+    <div class="spare-parts-list">
+
+        {% for item in preventive_maintenance.items %}
+
+            <article class="spare-part-item">
+
+                <div class="spare-part-item__header">
+
+                    <div>
+                        <strong>
+                            {{ item.title }}
+                        </strong>
+
+                        <span>
+                            {{ item.code }}
+                        </span>
+                    </div>
+
+                    <span>
+                        {{ item.status }}
+                    </span>
+
+                </div>
+
+                <div class="spare-part-item__grid">
+
+                    <div>
+                        <span>
+                            Próxima fecha
+                        </span>
+
+                        <strong>
+                            {{ item.next_due_at }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Frecuencia
+                        </span>
+
+                        <strong>
+                            Cada {{ item.frequency_days }} días
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Responsable
+                        </span>
+
+                        <strong>
+                            {{ item.responsible_person_code }}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="asset-workspace-card__placeholder">
+        Todavía no hay planes de mantenimiento
+        preventivo registrados para este activo.
+    </div>
+
+{% endif %}

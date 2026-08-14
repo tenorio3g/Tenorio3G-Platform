@@ -31,6 +31,33 @@ from app.domains.assets.maintenance_history.bootstrap import (
     maintenance_event_repository,
 )
 
+
+from app.domains.identity.people.models import (
+    PersonModel,
+)
+
+from app.domains.identity.people.bootstrap import (
+    person_repository,
+)
+
+
+from app.domains.identity.roles.models import (
+    RoleModel,
+)
+
+from app.domains.identity.roles.bootstrap import (
+    role_repository,
+)
+
+
+from app.domains.identity.users.models import (
+    UserModel,
+)
+
+from app.domains.identity.users.bootstrap import (
+    user_repository,
+)
+
 @pytest.fixture
 def app():
     app = create_app()
@@ -43,6 +70,19 @@ def app():
 def client(app):
     return app.test_client()
 
+
+@pytest.fixture
+def authenticated_client(
+    client,
+):
+
+    with client.session_transaction() as session:
+
+        session["username"] = "test-admin"
+        session["person_code"] = "TEST-001"
+        session["role_code"] = "ADMIN"
+
+    return client
 
 @pytest.fixture
 def documents_test_db(
@@ -160,6 +200,132 @@ def maintenance_history_test_db(
     )
 
     yield maintenance_event_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+@pytest.fixture
+def people_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    database_path = (
+        tmp_path
+        / "people_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        person_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield person_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+
+
+@pytest.fixture
+def roles_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    database_path = (
+        tmp_path
+        / "roles_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        role_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield role_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+
+@pytest.fixture
+def users_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    database_path = (
+        tmp_path
+        / "users_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        user_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield user_repository
 
     Base.metadata.drop_all(
         test_engine

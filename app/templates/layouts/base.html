@@ -85,8 +85,71 @@
     <header>
 
         <div class="logo">
-            <h1>Tenorio3G Platform</h1>
+            <h1>
+                Tenorio3G Platform
+            </h1>
         </div>
+
+        {% if session.get("username") %}
+
+            <div class="session-user">
+
+                <div class="session-user__info">
+
+                    <div>
+                        <span>
+                            Usuario:
+                        </span>
+
+                        <strong>
+                            {{ session.get("username") }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Rol:
+                        </span>
+
+                        <strong>
+                            {{ session.get("role_code") }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                <form
+                    method="post"
+                    action="{{ url_for(
+                        'identity.logout_route'
+                    ) }}"
+                >
+                    <button
+                        type="submit"
+                        class="btn"
+                    >
+                        Cerrar sesión
+                    </button>
+                </form>
+
+            </div>
+
+        {% else %}
+
+            <div class="session-user">
+
+                <a
+                    class="btn"
+                    href="{{ url_for(
+                        'identity.login_route'
+                    ) }}"
+                >
+                    Iniciar sesión
+                </a>
+
+            </div>
+
+        {% endif %}
 
     </header>
 

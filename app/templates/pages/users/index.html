@@ -1,0 +1,143 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Usuarios
+            </h1>
+
+            <p>
+                Cuentas de acceso registradas
+                en Tenorio3G Platform.
+            </p>
+        </div>
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for(
+                'identity.create_user_route'
+            ) }}"
+        >
+            Registrar usuario
+        </a>
+
+    </div>
+
+
+    {% if users and users.has_items %}
+
+        <div class="spare-parts-list">
+
+            {% for user in users.items %}
+
+                <article class="spare-part-item">
+                        <div class="spare-part-item__actions">
+
+                            <a
+                                class="btn"
+                                href="{{ url_for(
+                                    'identity.edit_user_route',
+                                    username=user.username
+                                ) }}"
+                            >
+                                Editar
+                            </a>
+
+                            <form
+                                method="post"
+                                action="{{ url_for(
+                                    'identity.toggle_user_status_route',
+                                    username=user.username
+                                ) }}"
+                            >
+                                <button
+                                    type="submit"
+                                    class="btn"
+                                >
+                                    {% if user.is_active %}
+                                        Desactivar
+                                    {% else %}
+                                        Activar
+                                    {% endif %}
+                                </button>
+                            </form>
+
+                        </div>
+                    <div class="spare-part-item__header">
+
+                        <div>
+                            <strong>
+                                {{ user.username }}
+                            </strong>
+
+                            <span>
+                                {{ user.person_name }}
+                            </span>
+                        </div>
+
+                        <span>
+                            {{ user.status }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="spare-part-item__grid">
+
+                        <div>
+                            <span>
+                                Persona
+                            </span>
+
+                            <strong>
+                                {{ user.person_name }}
+                            </strong>
+
+                            <small>
+                                {{ user.person_code }}
+                            </small>
+                        </div>
+
+
+                        <div>
+                            <span>
+                                Rol
+                            </span>
+
+                            <strong>
+                                {{ user.role_name }}
+                            </strong>
+
+                            <small>
+                                {{ user.role_code }}
+                            </small>
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-workspace-card__placeholder">
+            Todavía no hay usuarios registrados.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

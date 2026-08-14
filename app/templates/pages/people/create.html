@@ -1,0 +1,95 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Registrar persona
+            </h1>
+
+            <p>
+                Agrega personal técnico u operativo
+                a Tenorio3G Platform.
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="code">
+                Código
+            </label>
+
+            <input
+                id="code"
+                name="code"
+                type="text"
+                placeholder="TECH-001"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="name">
+                Nombre
+            </label>
+
+            <input
+                id="name"
+                name="name"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="position">
+                Puesto
+            </label>
+
+            <input
+                id="position"
+                name="position"
+                type="text"
+                placeholder="Técnico"
+            >
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'identity.people_index'
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Registrar persona
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

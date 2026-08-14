@@ -1,0 +1,98 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Registrar rol
+            </h1>
+
+            <p>
+                Agrega un rol de acceso a Tenorio3G Platform.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="code">
+                Código
+            </label>
+
+            <input
+                id="code"
+                name="code"
+                type="text"
+                placeholder="TECHNICIAN"
+                required
+            >
+        </div>
+
+
+        <div>
+            <label for="name">
+                Nombre
+            </label>
+
+            <input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Técnico"
+                required
+            >
+        </div>
+
+
+        <div>
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                placeholder="Personal técnico de mantenimiento"
+            ></textarea>
+        </div>
+
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'identity.roles_index'
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Registrar rol
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

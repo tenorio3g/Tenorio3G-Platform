@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Personas
+            </h1>
+
+            <p>
+                Personal registrado en Tenorio3G Platform.
+            </p>
+        </div>
+
+        <a
+            class="btn btn-primary"
+            href="{{ url_for(
+                'identity.create_person_route'
+            ) }}"
+        >
+            Registrar persona
+        </a>
+
+    </div>
+
+
+    {% if people and people.has_items %}
+
+        <div class="spare-parts-list">
+
+            {% for person in people.items %}
+
+                <article class="spare-part-item">
+
+                    <div class="spare-part-item__header">
+
+                        <div>
+                            <strong>
+                                {{ person.name }}
+                            </strong>
+
+                            <span>
+                                {{ person.code }}
+                            </span>
+                        </div>
+
+                        <span>
+                            {{ person.status }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="spare-part-item__grid">
+
+                        <div>
+                            <span>
+                                Puesto
+                            </span>
+
+                            <strong>
+                                {{ person.position }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="spare-part-item__actions">
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'identity.edit_person_route',
+                                code=person.code
+                            ) }}"
+                        >
+                            Editar
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'identity.toggle_person_status_route',
+                                code=person.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="btn"
+                            >
+                                {% if person.is_active %}
+                                    Desactivar
+                                {% else %}
+                                    Activar
+                                {% endif %}
+                            </button>
+                        </form>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="asset-workspace-card__placeholder">
+            Todavía no hay personas registradas.
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

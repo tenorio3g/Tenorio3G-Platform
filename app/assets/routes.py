@@ -6,6 +6,9 @@ from flask import (
     send_file,
     url_for,
 )
+from app.domains.identity.authentication import (
+    login_required,
+)
 
 from . import assets
 
@@ -191,11 +194,29 @@ from app.domains.assets.maintenance_history.use_cases import (
     UpdateMaintenanceEventCommand,
 )
 
+
+from app.domains.identity.authentication import (
+    permission_required,
+)
+
+
+from app.domains.assets.preventive_maintenance.bootstrap import (
+    list_preventive_maintenance_plans_by_asset,
+)
+
+from app.domains.assets.preventive_maintenance.presentation import (
+    PreventiveMaintenancePresenter,
+)
+
+from app.domains.assets.preventive_maintenance.use_cases import (
+    ListPreventiveMaintenancePlansByAssetQuery,
+)
 # ============================================================
 # ASSETS INDEX
 # ============================================================
 
 @assets.route("/activos")
+@permission_required("assets.view")
 def index():
     """
     Pantalla principal del módulo Assets.
@@ -321,7 +342,24 @@ def asset_detail(codigo: str):
             maintenance_result.events
         )
     )
+    # --------------------------------------------------------
+    # Mantenimiento preventivo
+    # --------------------------------------------------------
 
+    preventive_result = (
+        list_preventive_maintenance_plans_by_asset.execute(
+            ListPreventiveMaintenancePlansByAssetQuery(
+                asset_code=codigo,
+            )
+        )
+    )
+
+    preventive_maintenance = (
+        PreventiveMaintenancePresenter.present(
+            preventive_result.plans,
+            reference_at=datetime.now(),
+        )
+    )
 
     # --------------------------------------------------------
     # Vista
@@ -341,6 +379,7 @@ def asset_detail(codigo: str):
         documents=documents,
         photos=photos,
         maintenance_history=maintenance_history,
+        preventive_maintenance=preventive_maintenance,
     )
 
 
@@ -355,6 +394,7 @@ def asset_detail(codigo: str):
     "/activo/<string:codigo>/fotografias/nueva",
     methods=["GET", "POST"],
 )
+@permission_required("photos.manage")
 def create_photo_route(codigo: str):
     """
     Registra una fotografía técnica asociada a un activo.
@@ -489,6 +529,7 @@ def create_photo_route(codigo: str):
     "/activo/<string:codigo>/fotografias/"
     "<string:photo_code>/ver"
 )
+@permission_required("photos.view")
 def view_photo_route(
     codigo: str,
     photo_code: str,
@@ -561,6 +602,7 @@ def view_photo_route(
     "/activo/<string:codigo>/fotografias/"
     "<string:photo_code>/eliminar"
 )
+@permission_required("photos.manage")
 def delete_photo_route(
     codigo: str,
     photo_code: str,
@@ -627,6 +669,7 @@ def delete_photo_route(
     "<string:photo_code>/editar",
     methods=["GET", "POST"],
 )
+@permission_required("photos.manage")
 def edit_photo_route(
     codigo: str,
     photo_code: str,
@@ -705,6 +748,7 @@ def edit_photo_route(
     "/activo/<string:codigo>/documentos/nuevo",
     methods=["GET", "POST"],
 )
+@permission_required("documents.manage")
 def create_document_route(codigo: str):
     """
     Registra un documento técnico asociado a un activo.
@@ -1172,6 +1216,7 @@ def delete_spare_part_route(
     "/activo/<string:codigo>/documentos/<string:document_code>/editar",
     methods=["GET", "POST"],
 )
+@permission_required("documents.manage")
 def edit_document_route(
     codigo: str,
     document_code: str,
@@ -1252,6 +1297,7 @@ def edit_document_route(
     "/activo/<string:codigo>/documentos/"
     "<string:document_code>/eliminar"
 )
+@permission_required("documents.manage")
 def delete_document_route(
     codigo: str,
     document_code: str,
@@ -1320,6 +1366,7 @@ def delete_document_route(
     "/activo/<string:codigo>/documentos/"
     "<string:document_code>/ver"
 )
+@permission_required("documents.view")
 def view_document_route(
     codigo: str,
     document_code: str,
@@ -1389,6 +1436,7 @@ from app.domains.assets.maintenance_history.presentation import (
     "/activo/<string:codigo>/mantenimiento/nuevo",
     methods=["GET", "POST"],
 )
+@permission_required("maintenance.manage")
 def create_maintenance_event_route(
     codigo: str,
 ):
@@ -1485,6 +1533,7 @@ def create_maintenance_event_route(
     "<string:event_code>/editar",
     methods=["GET", "POST"],
 )
+@permission_required("maintenance.manage")
 def edit_maintenance_event_route(
     codigo: str,
     event_code: str,
@@ -1595,6 +1644,7 @@ def edit_maintenance_event_route(
     "/activo/<string:codigo>/mantenimiento/"
     "<string:event_code>/eliminar"
 )
+@permission_required("maintenance.manage")
 def delete_maintenance_event_route(
     codigo: str,
     event_code: str,

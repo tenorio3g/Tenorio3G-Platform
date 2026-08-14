@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Identity
+            </p>
+
+            <h1>
+                Editar rol
+            </h1>
+
+            <p>
+                Actualiza la información del rol.
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="code">
+                Código
+            </label>
+
+            <input
+                id="code"
+                type="text"
+                value="{{ role.code }}"
+                disabled
+            >
+        </div>
+
+        <div>
+            <label for="name">
+                Nombre
+            </label>
+
+            <input
+                id="name"
+                name="name"
+                type="text"
+                value="{{ role.name }}"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+            >{{ role.description }}</textarea>
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'identity.roles_index'
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

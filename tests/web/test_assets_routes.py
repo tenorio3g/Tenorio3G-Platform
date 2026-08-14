@@ -4,11 +4,36 @@ from datetime import datetime
 from app.domains.assets.maintenance_history.entities import (
     MaintenanceEvent,
 )
+from app.domains.identity.users.bootstrap import (
+    password_hasher,
+)
 
 
-def test_assets_index_should_respond(
+def test_assets_index_should_require_login(
     client,
 ) -> None:
+
+    response = client.get(
+        "/activos",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert (
+        "/login"
+        in response.headers["Location"]
+    )
+
+def test_assets_index_should_respond_when_authenticated(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
 
     response = client.get(
         "/activos"
@@ -18,10 +43,10 @@ def test_assets_index_should_respond(
 
 
 def test_create_document_form_should_respond(
-    client,
+    authenticated_client,
 ) -> None:
 
-    response = client.get(
+    response = authenticated_client.get(
         "/activo/S2-480-ES09-T269/documentos/nuevo"
     )
 
@@ -31,11 +56,11 @@ def test_create_document_form_should_respond(
 
 
 def test_create_document_should_persist_and_redirect(
-    client,
+    authenticated_client,
     documents_test_db,
 ) -> None:
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -70,12 +95,12 @@ def test_create_document_should_persist_and_redirect(
 
 
 def test_edit_document_should_update_and_redirect(
-    client,
+    authenticated_client,
     documents_test_db,
 ) -> None:
 
     # Primero creamos el documento de prueba.
-    client.post(
+    authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -93,7 +118,7 @@ def test_edit_document_should_update_and_redirect(
     )
 
     # Ahora lo editamos mediante HTTP.
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -124,12 +149,12 @@ def test_edit_document_should_update_and_redirect(
     assert persisted.description == "Versión actualizada."
 
 def test_delete_document_should_remove_and_redirect(
-    client,
+    authenticated_client,
     documents_test_db,
 ) -> None:
 
     # Creamos primero el documento de prueba.
-    client.post(
+    authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -153,7 +178,7 @@ def test_delete_document_should_remove_and_redirect(
     assert persisted is not None
 
     # Lo eliminamos mediante la ruta HTTP.
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -173,7 +198,7 @@ def test_delete_document_should_remove_and_redirect(
     assert deleted is None
 
 def test_upload_pdf_should_persist_document(
-    client,
+    authenticated_client,
     documents_test_db,
     tmp_path,
     monkeypatch,
@@ -195,7 +220,7 @@ def test_upload_pdf_should_persist_document(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -235,7 +260,7 @@ def test_upload_pdf_should_persist_document(
 
 
 def test_view_document_should_return_pdf(
-    client,
+    authenticated_client,
     documents_test_db,
     tmp_path,
     monkeypatch,
@@ -258,7 +283,7 @@ def test_view_document_should_return_pdf(
     )
 
     # Crear y subir un PDF mediante HTTP.
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -282,7 +307,7 @@ def test_view_document_should_return_pdf(
     assert response.status_code == 302
 
     # Solicitar el PDF desde la nueva ruta.
-    response = client.get(
+    response = authenticated_client.get(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -304,7 +329,7 @@ def test_view_document_should_return_pdf(
     )
 
 def test_delete_document_should_remove_pdf_file(
-    client,
+    authenticated_client,
     documents_test_db,
     tmp_path,
     monkeypatch,
@@ -326,7 +351,7 @@ def test_delete_document_should_remove_pdf_file(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -363,7 +388,7 @@ def test_delete_document_should_remove_pdf_file(
 
     assert document is not None
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -385,7 +410,7 @@ def test_delete_document_should_remove_pdf_file(
     ) is False
 
 def test_upload_non_pdf_should_be_rejected(
-    client,
+   authenticated_client,
     documents_test_db,
     tmp_path,
     monkeypatch,
@@ -407,7 +432,7 @@ def test_upload_non_pdf_should_be_rejected(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -439,10 +464,10 @@ def test_upload_non_pdf_should_be_rejected(
     ) is False
 
 def test_create_photo_form_should_respond(
-    client,
+    authenticated_client,
 ) -> None:
 
-    response = client.get(
+    response = authenticated_client.get(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -459,7 +484,7 @@ def test_create_photo_form_should_respond(
 
 
 def test_upload_image_should_persist_photo(
-    client,
+    authenticated_client,
     photos_test_db,
     tmp_path,
     monkeypatch,
@@ -481,7 +506,7 @@ def test_upload_image_should_persist_photo(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -537,7 +562,7 @@ def test_upload_image_should_persist_photo(
     assert photo.file_name == stored_name
 
 def test_view_photo_should_return_image(
-    client,
+    authenticated_client,
     photos_test_db,
     tmp_path,
     monkeypatch,
@@ -559,7 +584,7 @@ def test_view_photo_should_return_image(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -583,7 +608,7 @@ def test_view_photo_should_return_image(
 
     assert response.status_code == 302
 
-    response = client.get(
+    response = authenticated_client.get(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -603,7 +628,7 @@ def test_view_photo_should_return_image(
 
 
 def test_upload_non_image_should_be_rejected(
-    client,
+    authenticated_client,
     photos_test_db,
     tmp_path,
     monkeypatch,
@@ -625,7 +650,7 @@ def test_upload_non_image_should_be_rejected(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -658,7 +683,7 @@ def test_upload_non_image_should_be_rejected(
     ) is False
 
 def test_edit_photo_should_update_and_redirect(
-    client,
+    authenticated_client,
     photos_test_db,
     tmp_path,
     monkeypatch,
@@ -681,7 +706,7 @@ def test_edit_photo_should_update_and_redirect(
     )
 
     # Crear primero una fotografía real.
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -714,7 +739,7 @@ def test_edit_photo_should_update_and_redirect(
     original_file_name = original.file_name
 
     # Editar únicamente metadata.
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -757,7 +782,7 @@ def test_edit_photo_should_update_and_redirect(
 
 
 def test_delete_photo_should_remove_image_file(
-    client,
+    authenticated_client,
     photos_test_db,
     tmp_path,
     monkeypatch,
@@ -779,7 +804,7 @@ def test_delete_photo_should_remove_image_file(
         test_storage,
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -815,7 +840,7 @@ def test_delete_photo_should_remove_image_file(
         stored_name
     ) is True
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -837,10 +862,10 @@ def test_delete_photo_should_remove_image_file(
     ) is False
 
 def test_create_maintenance_event_form_should_respond(
-    client,
+    authenticated_client,
 ) -> None:
 
-    response = client.get(
+    response = authenticated_client.get(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -857,11 +882,11 @@ def test_create_maintenance_event_form_should_respond(
 
 
 def test_create_maintenance_event_should_persist_and_redirect(
-    client,
+    authenticated_client,
     maintenance_history_test_db,
 ) -> None:
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -901,11 +926,11 @@ def test_create_maintenance_event_should_persist_and_redirect(
 
 
 def test_create_maintenance_event_should_reject_invalid_date(
-    client,
+    authenticated_client,
     maintenance_history_test_db,
 ) -> None:
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -934,7 +959,7 @@ def test_create_maintenance_event_should_reject_invalid_date(
     )
 
 def test_edit_maintenance_event_should_update_and_redirect(
-    client,
+    authenticated_client,
     maintenance_history_test_db,
 ) -> None:
 
@@ -956,7 +981,7 @@ def test_edit_maintenance_event_should_update_and_redirect(
         )
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -1002,7 +1027,7 @@ def test_edit_maintenance_event_should_update_and_redirect(
 
 
 def test_delete_maintenance_event_should_remove_and_redirect(
-    client,
+    authenticated_client,
     maintenance_history_test_db,
 ) -> None:
 
@@ -1024,7 +1049,7 @@ def test_delete_maintenance_event_should_remove_and_redirect(
         )
     )
 
-    response = client.post(
+    response = authenticated_client.post(
         (
             "/activo/"
             "S2-480-ES09-T269/"
@@ -1044,3 +1069,1084 @@ def test_delete_maintenance_event_should_remove_and_redirect(
     )
 
     assert event is None
+
+def test_people_index_should_respond(
+    authenticated_client,
+    people_test_db,
+) -> None:
+
+    response = authenticated_client.get(
+        "/personas"
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Personas"
+        in response.get_data(as_text=True)
+    )
+
+
+def test_create_person_should_persist_and_redirect(
+    authenticated_client,
+    people_test_db,
+) -> None:
+
+    response = authenticated_client.post(
+        "/personas/nueva",
+        data={
+            "code": "TECH-HTTP-001",
+            "name": "Angel",
+            "position": "Técnico",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    person = people_test_db.get_by_code(
+        "TECH-HTTP-001"
+    )
+
+    assert person is not None
+    assert person.name == "Angel"
+    assert person.position == "Técnico"
+    assert person.is_active is True
+
+
+def test_edit_person_should_update_and_redirect(
+    authenticated_client,
+    people_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import (
+        Person,
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-HTTP-EDIT-001",
+            name="Angel",
+            position="Técnico",
+        )
+    )
+
+    response = authenticated_client.post(
+        (
+            "/personas/"
+            "TECH-HTTP-EDIT-001/"
+            "editar"
+        ),
+        data={
+            "name": "Angel Updated",
+            "position": "Técnico Senior",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    person = people_test_db.get_by_code(
+        "TECH-HTTP-EDIT-001"
+    )
+
+    assert person is not None
+    assert person.name == "Angel Updated"
+    assert person.position == "Técnico Senior"
+
+
+def test_toggle_person_status_should_persist(
+    authenticated_client,
+    people_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import (
+        Person,
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-HTTP-STATUS-001",
+            name="Daniel",
+            position="Técnico",
+        )
+    )
+
+    response = authenticated_client.post(
+        (
+            "/personas/"
+            "TECH-HTTP-STATUS-001/"
+            "estado"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    person = people_test_db.get_by_code(
+        "TECH-HTTP-STATUS-001"
+    )
+
+    assert person is not None
+    assert person.is_active is False
+
+    response = authenticated_client.post(
+        (
+            "/personas/"
+            "TECH-HTTP-STATUS-001/"
+            "estado"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    person = people_test_db.get_by_code(
+        "TECH-HTTP-STATUS-001"
+    )
+
+    assert person is not None
+    assert person.is_active is True
+
+
+
+def test_roles_index_should_respond(
+    authenticated_client,
+    roles_test_db,
+) -> None:
+
+    response = authenticated_client.get(
+        "/roles"
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Roles"
+        in response.get_data(as_text=True)
+    )
+
+
+def test_create_role_should_persist_and_redirect(
+    authenticated_client,
+    roles_test_db,
+) -> None:
+
+    response = authenticated_client.post(
+        "/roles/nuevo",
+        data={
+            "code": "SUPERVISOR",
+            "name": "Supervisor",
+            "description": (
+                "Supervisor de mantenimiento"
+            ),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    role = roles_test_db.get_by_code(
+        "SUPERVISOR"
+    )
+
+    assert role is not None
+    assert role.code == "SUPERVISOR"
+    assert role.name == "Supervisor"
+    assert (
+        role.description
+        == "Supervisor de mantenimiento"
+    )
+    assert role.is_active is True
+
+
+def test_edit_role_should_update_and_redirect(
+    authenticated_client,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.roles.entities import (
+        Role,
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+            description="Rol técnico",
+        )
+    )
+
+    response = authenticated_client.post(
+        "/roles/TECHNICIAN/editar",
+        data={
+            "name": "Técnico Senior",
+            "description": (
+                "Rol técnico actualizado"
+            ),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    role = roles_test_db.get_by_code(
+        "TECHNICIAN"
+    )
+
+    assert role is not None
+    assert role.name == "Técnico Senior"
+    assert (
+        role.description
+        == "Rol técnico actualizado"
+    )
+
+
+def test_toggle_role_status_should_persist(
+    authenticated_client,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.roles.entities import (
+        Role,
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    response = authenticated_client.post(
+        "/roles/TECHNICIAN/estado",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    role = roles_test_db.get_by_code(
+        "TECHNICIAN"
+    )
+
+    assert role is not None
+    assert role.is_active is False
+
+    response = authenticated_client.post(
+        "/roles/TECHNICIAN/estado",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    role = roles_test_db.get_by_code(
+        "TECHNICIAN"
+    )
+
+    assert role is not None
+    assert role.is_active is True
+
+
+def test_create_user_should_hash_password(
+    authenticated_client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import (
+        Person,
+    )
+
+    from app.domains.identity.roles.entities import (
+        Role,
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    plain_password = "Secret123"
+
+    response = authenticated_client.post(
+        "/usuarios/nuevo",
+        data={
+            "username": "angel",
+            "password": plain_password,
+            "person_code": "TECH-001",
+            "role_code": "TECHNICIAN",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    user = users_test_db.get_by_username(
+        "angel"
+    )
+
+    assert user is not None
+
+    assert (
+        user.password_hash
+        != plain_password
+    )
+
+    assert password_hasher.verify(
+        plain_password,
+        user.password_hash,
+    ) is True
+
+def test_edit_user_should_preserve_password_hash(
+    authenticated_client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import (
+        Person,
+    )
+
+    from app.domains.identity.roles.entities import (
+        Role,
+    )
+
+    from app.domains.identity.users.entities import (
+        User,
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-002",
+            name="Daniel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="SUPERVISOR",
+            name="Supervisor",
+        )
+    )
+
+    original_hash = password_hasher.hash(
+        "Secret123"
+    )
+
+    users_test_db.save(
+        User(
+            username="angel",
+            password_hash=original_hash,
+            person_code="TECH-001",
+            role_code="TECHNICIAN",
+        )
+    )
+
+    response = authenticated_client.post(
+        "/usuarios/angel/editar",
+        data={
+            "person_code": "TECH-002",
+            "role_code": "SUPERVISOR",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    user = users_test_db.get_by_username(
+        "angel"
+    )
+
+    assert user is not None
+
+    assert (
+        user.password_hash
+        == original_hash
+    )
+
+    assert (
+        user.person_code
+        == "TECH-002"
+    )
+
+    assert (
+        user.role_code
+        == "SUPERVISOR"
+    )
+
+    assert password_hasher.verify(
+        "Secret123",
+        user.password_hash,
+    ) is True
+
+
+def test_toggle_user_status_should_preserve_identity_data(
+    authenticated_client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import (
+        Person,
+    )
+
+    from app.domains.identity.roles.entities import (
+        Role,
+    )
+
+    from app.domains.identity.users.entities import (
+        User,
+    )
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    password_hash = password_hasher.hash(
+        "Secret123"
+    )
+
+    users_test_db.save(
+        User(
+            username="angel",
+            password_hash=password_hash,
+            person_code="TECH-001",
+            role_code="TECHNICIAN",
+        )
+    )
+
+    response = authenticated_client.post(
+        "/usuarios/angel/estado",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    user = users_test_db.get_by_username(
+        "angel"
+    )
+
+    assert user is not None
+    assert user.is_active is False
+
+    assert user.username == "angel"
+    assert user.person_code == "TECH-001"
+    assert user.role_code == "TECHNICIAN"
+
+    assert (
+        user.password_hash
+        == password_hash
+    )
+
+    response = authenticated_client.post(
+        "/usuarios/angel/estado",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    user = users_test_db.get_by_username(
+        "angel"
+    )
+
+    assert user is not None
+    assert user.is_active is True
+
+
+
+def test_login_should_create_session(
+    client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import Person
+    from app.domains.identity.roles.entities import Role
+    from app.domains.identity.users.entities import User
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    password_hash = password_hasher.hash(
+        "Secret123"
+    )
+
+    users_test_db.save(
+        User(
+            username="angel",
+            password_hash=password_hash,
+            person_code="TECH-001",
+            role_code="TECHNICIAN",
+        )
+    )
+
+    response = client.post(
+        "/login",
+        data={
+            "username": "angel",
+            "password": "Secret123",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    with client.session_transaction() as session:
+        assert session["username"] == "angel"
+        assert session["person_code"] == "TECH-001"
+        assert session["role_code"] == "TECHNICIAN"
+
+
+def test_login_should_reject_invalid_password(
+    client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import Person
+    from app.domains.identity.roles.entities import Role
+    from app.domains.identity.users.entities import User
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    users_test_db.save(
+        User(
+            username="angel",
+            password_hash=password_hasher.hash(
+                "Secret123"
+            ),
+            person_code="TECH-001",
+            role_code="TECHNICIAN",
+        )
+    )
+
+    response = client.post(
+        "/login",
+        data={
+            "username": "angel",
+            "password": "WrongPassword",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 401
+
+    with client.session_transaction() as session:
+        assert "username" not in session
+
+
+def test_login_should_reject_inactive_user(
+    client,
+    users_test_db,
+    people_test_db,
+    roles_test_db,
+) -> None:
+
+    from app.domains.identity.people.entities import Person
+    from app.domains.identity.roles.entities import Role
+    from app.domains.identity.users.entities import User
+
+    people_test_db.save(
+        Person(
+            code="TECH-001",
+            name="Angel",
+        )
+    )
+
+    roles_test_db.save(
+        Role(
+            code="TECHNICIAN",
+            name="Técnico",
+        )
+    )
+
+    users_test_db.save(
+        User(
+            username="angel",
+            password_hash=password_hasher.hash(
+                "Secret123"
+            ),
+            person_code="TECH-001",
+            role_code="TECHNICIAN",
+            is_active=False,
+        )
+    )
+
+    response = client.post(
+        "/login",
+        data={
+            "username": "angel",
+            "password": "Secret123",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 401
+
+    with client.session_transaction() as session:
+        assert "username" not in session
+
+
+def test_logout_should_clear_session(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.post(
+        "/logout",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    with client.session_transaction() as session:
+        assert "username" not in session
+        assert "person_code" not in session
+        assert "role_code" not in session
+
+
+
+def test_people_index_should_require_login(
+    client,
+) -> None:
+
+    response = client.get(
+        "/personas",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert (
+        "/login"
+        in response.headers["Location"]
+    )
+
+
+def test_roles_index_should_require_login(
+    client,
+) -> None:
+
+    response = client.get(
+        "/roles",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert (
+        "/login"
+        in response.headers["Location"]
+    )
+
+
+def test_users_index_should_require_login(
+    client,
+) -> None:
+
+    response = client.get(
+        "/usuarios",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert (
+        "/login"
+        in response.headers["Location"]
+    )
+
+def test_admin_should_access_users(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/usuarios"
+    )
+
+    assert response.status_code == 200
+
+
+def test_technician_should_not_access_users(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/usuarios"
+    )
+
+    assert response.status_code == 403
+
+def test_admin_should_access_roles(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/roles"
+    )
+
+    assert response.status_code == 200
+
+
+def test_technician_should_not_access_roles(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/roles"
+    )
+
+    assert response.status_code == 403
+
+def test_admin_should_access_people(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/personas"
+    )
+
+    assert response.status_code == 200
+
+
+def test_supervisor_should_access_people(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "supervisor"
+        session["person_code"] = "SUP-001"
+        session["role_code"] = "SUPERVISOR"
+
+    response = client.get(
+        "/personas"
+    )
+
+    assert response.status_code == 200
+
+
+def test_technician_should_not_access_people(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/personas"
+    )
+
+    assert response.status_code == 403
+
+
+def test_technician_should_access_assets(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/activos"
+    )
+
+    assert response.status_code == 200
+
+
+def test_unknown_role_should_not_access_assets(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "unknown"
+        session["person_code"] = "UNKNOWN-001"
+        session["role_code"] = "UNKNOWN"
+
+    response = client.get(
+        "/activos"
+    )
+
+    assert response.status_code == 403
+
+def test_admin_should_manage_documents(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/documentos/nuevo"
+    )
+
+    assert response.status_code == 200
+
+
+def test_supervisor_should_manage_documents(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "supervisor"
+        session["person_code"] = "SUP-001"
+        session["role_code"] = "SUPERVISOR"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/documentos/nuevo"
+    )
+
+    assert response.status_code == 200
+
+
+def test_manager_should_not_manage_documents(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "manager"
+        session["person_code"] = "MGR-001"
+        session["role_code"] = "MANAGER"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/documentos/nuevo"
+    )
+
+    assert response.status_code == 403
+
+
+def test_technician_should_not_manage_documents(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/documentos/nuevo"
+    )
+
+    assert response.status_code == 403
+
+def test_admin_should_manage_photos(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/fotografias/nueva"
+    )
+
+    assert response.status_code == 200
+
+
+def test_supervisor_should_manage_photos(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "supervisor"
+        session["person_code"] = "SUP-001"
+        session["role_code"] = "SUPERVISOR"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/fotografias/nueva"
+    )
+
+    assert response.status_code == 200
+
+
+def test_manager_should_not_manage_photos(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "manager"
+        session["person_code"] = "MGR-001"
+        session["role_code"] = "MANAGER"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/fotografias/nueva"
+    )
+
+    assert response.status_code == 403
+
+
+def test_technician_should_not_manage_photos(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/fotografias/nueva"
+    )
+
+    assert response.status_code == 403
+
+def test_admin_should_manage_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/mantenimiento/nuevo"
+    )
+
+    assert response.status_code == 200
+
+
+def test_supervisor_should_manage_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "supervisor"
+        session["person_code"] = "SUP-001"
+        session["role_code"] = "SUPERVISOR"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/mantenimiento/nuevo"
+    )
+
+    assert response.status_code == 200
+
+
+def test_technician_should_manage_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/mantenimiento/nuevo"
+    )
+
+    assert response.status_code == 200
+
+
+def test_manager_should_not_manage_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "manager"
+        session["person_code"] = "MGR-001"
+        session["role_code"] = "MANAGER"
+
+    response = client.get(
+        "/activo/S2-480-ES09-T269/mantenimiento/nuevo"
+    )
+
+    assert response.status_code == 403
