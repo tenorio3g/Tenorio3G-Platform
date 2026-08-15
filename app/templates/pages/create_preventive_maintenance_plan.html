@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Mantenimiento preventivo
+            </p>
+
+            <h1>
+                Registrar plan preventivo
+            </h1>
+
+            <p>
+                Activo:
+                <strong>{{ codigo }}</strong>
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="code">
+                Código del plan
+            </label>
+
+            <input
+                id="code"
+                name="code"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="title">
+                Título
+            </label>
+
+            <input
+                id="title"
+                name="title"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="frequency_days">
+                Frecuencia en días
+            </label>
+
+            <input
+                id="frequency_days"
+                name="frequency_days"
+                type="number"
+                min="1"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="responsible_person_code">
+                Código de responsable
+            </label>
+
+            <input
+                id="responsible_person_code"
+                name="responsible_person_code"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="next_due_at">
+                Próxima fecha
+            </label>
+
+            <input
+                id="next_due_at"
+                name="next_due_at"
+                type="datetime-local"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="description">
+                Descripción
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+            ></textarea>
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=codigo
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Registrar plan
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

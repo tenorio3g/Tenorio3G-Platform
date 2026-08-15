@@ -58,6 +58,66 @@
                     </div>
 
                 </div>
+                
+                {% if can("preventive.execute") %}
+
+                    <div class="spare-part-item__actions">
+
+                        <a
+                            class="btn btn-primary"
+                            href="{{ url_for(
+                                'assets.complete_preventive_maintenance_plan_route',
+                                codigo=activo.codigo,
+                                plan_code=item.code
+                            ) }}"
+                        >
+                            Completar
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+
+                {% if can("preventive.manage") %}
+
+                    <div class="spare-part-item__actions">
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'assets.edit_preventive_maintenance_plan_route',
+                                codigo=activo.codigo,
+                                plan_code=item.code
+                            ) }}"
+                        >
+                            Editar
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'assets.delete_preventive_maintenance_plan_route',
+                                codigo=activo.codigo,
+                                plan_code=item.code
+                            ) }}"
+                            onsubmit="
+                                return confirm(
+                                    '¿Deseas eliminar este plan preventivo?'
+                                );
+                            "
+                        >
+                            <button
+                                type="submit"
+                                class="btn"
+                            >
+                                Eliminar
+                            </button>
+                        </form>
+
+                    </div>
+
+                {% endif %}
 
             </article>
 

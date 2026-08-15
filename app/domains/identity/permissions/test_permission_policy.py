@@ -167,3 +167,35 @@ def test_technician_should_view_but_not_manage_preventive_maintenance():
         "TECHNICIAN",
         "preventive.manage",
     ) is False
+
+
+def test_admin_should_execute_preventive_maintenance():
+
+    assert PermissionPolicy.has_permission(
+        "ADMIN",
+        "preventive.execute",
+    ) is True
+
+
+def test_supervisor_should_execute_preventive_maintenance():
+
+    assert PermissionPolicy.has_permission(
+        "SUPERVISOR",
+        "preventive.execute",
+    ) is True
+
+
+def test_technician_should_execute_preventive_maintenance():
+
+    assert PermissionPolicy.has_permission(
+        "TECHNICIAN",
+        "preventive.execute",
+    ) is True
+
+
+def test_manager_should_not_execute_preventive_maintenance():
+
+    assert PermissionPolicy.has_permission(
+        "MANAGER",
+        "preventive.execute",
+    ) is False

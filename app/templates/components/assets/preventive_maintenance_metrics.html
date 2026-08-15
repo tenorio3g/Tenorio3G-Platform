@@ -1,0 +1,107 @@
+<div class="asset-metrics-grid">
+
+    <div class="asset-metric-card">
+        <span>
+            Planes activos
+        </span>
+
+        <strong>
+            {{ preventive_metrics.active_plans }}
+        </strong>
+    </div>
+
+    <div class="asset-metric-card">
+        <span>
+            Programados
+        </span>
+
+        <strong>
+            {{ preventive_metrics.programmed }}
+        </strong>
+    </div>
+
+    <div class="
+        asset-metric-card
+        {% if preventive_metrics.due_today > 0 %}
+            asset-metric-card--warning
+        {% endif %}
+    ">
+        <span>
+            Para hoy
+        </span>
+
+        <strong>
+            {{ preventive_metrics.due_today }}
+        </strong>
+    </div>
+
+    <div class="
+        asset-metric-card
+        {% if preventive_metrics.overdue > 0 %}
+            asset-metric-card--danger
+        {% endif %}
+    ">
+        <span>
+            Vencidos
+        </span>
+
+        <strong>
+            {{ preventive_metrics.overdue }}
+        </strong>
+    </div>
+
+    <div class="asset-metric-card">
+        <span>
+            Ejecuciones
+        </span>
+
+        <strong>
+            {{ preventive_metrics.executions }}
+        </strong>
+    </div>
+
+    <div class="asset-metric-card">
+    <span>
+        A tiempo
+    </span>
+
+    <strong>
+        {{ preventive_metrics.on_time_executions }}
+    </strong>
+</div>
+
+<div class="
+    asset-metric-card
+    {% if preventive_metrics.late_executions > 0 %}
+        asset-metric-card--danger
+    {% endif %}
+">
+    <span>
+        Atrasadas
+    </span>
+
+    <strong>
+        {{ preventive_metrics.late_executions }}
+    </strong>
+</div>
+
+<div class="
+    asset-metric-card
+    {% if preventive_metrics.compliance_percent < 80
+        and preventive_metrics.executions > 0 %}
+        asset-metric-card--danger
+    {% elif preventive_metrics.compliance_percent < 95
+        and preventive_metrics.executions > 0 %}
+        asset-metric-card--warning
+    {% endif %}
+">
+    <span>
+        Cumplimiento
+    </span>
+
+    <strong>
+        {{ preventive_metrics.compliance_percent }}%
+    </strong>
+</div>
+
+</div>

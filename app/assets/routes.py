@@ -200,17 +200,40 @@ from app.domains.identity.authentication import (
 )
 
 
-from app.domains.assets.preventive_maintenance.bootstrap import (
-    list_preventive_maintenance_plans_by_asset,
-)
 
 from app.domains.assets.preventive_maintenance.presentation import (
     PreventiveMaintenancePresenter,
+    PreventiveMaintenanceExecutionsPresenter,
+    PreventiveMaintenanceMetricsPresenter,
+)
+
+
+
+from app.domains.assets.preventive_maintenance.bootstrap import (
+    create_preventive_maintenance_plan,
+    list_preventive_maintenance_plans_by_asset,
+    get_preventive_maintenance_plan,
+    update_preventive_maintenance_plan,
+    delete_preventive_maintenance_plan,
+    complete_preventive_maintenance_plan,
+    list_preventive_maintenance_executions_by_asset,
 )
 
 from app.domains.assets.preventive_maintenance.use_cases import (
+    CreatePreventiveMaintenancePlanCommand,
     ListPreventiveMaintenancePlansByAssetQuery,
+    GetPreventiveMaintenancePlanQuery,
+    UpdatePreventiveMaintenancePlanCommand,
+    DeletePreventiveMaintenancePlanCommand,
+    CompletePreventiveMaintenancePlanCommand,
+    ListPreventiveMaintenanceExecutionsByAssetQuery,
 )
+
+
+
+
+
+
 # ============================================================
 # ASSETS INDEX
 # ============================================================
@@ -361,6 +384,37 @@ def asset_detail(codigo: str):
         )
     )
 
+   # --------------------------------------------------------
+    # Ejecuciones de mantenimiento preventivo
+    # --------------------------------------------------------
+
+    preventive_executions_result = (
+        list_preventive_maintenance_executions_by_asset.execute(
+            ListPreventiveMaintenanceExecutionsByAssetQuery(
+                asset_code=codigo,
+            )
+        )
+    )
+
+    preventive_executions = (
+        PreventiveMaintenanceExecutionsPresenter.present(
+            preventive_executions_result.executions
+        )
+    )
+
+    # --------------------------------------------------------
+    # Métricas de mantenimiento preventivo
+    # --------------------------------------------------------
+
+    preventive_metrics = (
+        PreventiveMaintenanceMetricsPresenter.present(
+            preventive_result.plans,
+            preventive_executions_result.executions,
+            reference_at=datetime.now(),
+        )
+    )
+
+
     # --------------------------------------------------------
     # Vista
     # --------------------------------------------------------
@@ -380,7 +434,9 @@ def asset_detail(codigo: str):
         photos=photos,
         maintenance_history=maintenance_history,
         preventive_maintenance=preventive_maintenance,
-    )
+        preventive_executions=preventive_executions,
+        preventive_metrics=preventive_metrics,
+    )   
 
 
 
@@ -1411,6 +1467,349 @@ def view_document_route(
         as_attachment=False,
         download_name=document.file_name,
     )
+
+# ============================================================
+# CREATE PREVENTIVE MAINTENANCE PLAN
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/preventivo/nuevo",
+    methods=["GET", "POST"],
+)
+@permission_required("preventive.manage")
+def create_preventive_maintenance_plan_route(
+    codigo: str,
+):
+
+    if request.method == "POST":
+
+        next_due_at_text = request.form.get(
+            "next_due_at",
+            "",
+        )
+
+        try:
+            next_due_at = datetime.fromisoformat(
+                next_due_at_text
+            )
+
+            frequency_days = int(
+                request.form.get(
+                    "frequency_days",
+                    "0",
+                )
+            )
+
+        except ValueError:
+            return (
+                "Fecha o frecuencia inválida.",
+                400,
+            )
+
+        try:
+            create_preventive_maintenance_plan.execute(
+                CreatePreventiveMaintenancePlanCommand(
+                    code=request.form.get(
+                        "code",
+                        "",
+                    ),
+                    asset_code=codigo,
+                    title=request.form.get(
+                        "title",
+                        "",
+                    ),
+                    frequency_days=frequency_days,
+                    responsible_person_code=(
+                        request.form.get(
+                            "responsible_person_code",
+                            "",
+                        )
+                    ),
+                    next_due_at=next_due_at,
+                    description=request.form.get(
+                        "description",
+                        "",
+                    ),
+                    is_active=True,
+                )
+            )
+
+        except ValueError as exc:
+            return (
+                str(exc),
+                400,
+            )
+
+        return redirect(
+            url_for(
+                "assets.asset_detail",
+                codigo=codigo,
+            )
+        )
+
+    return render_template(
+        "pages/create_preventive_maintenance_plan.html",
+        codigo=codigo,
+    )
+
+# ============================================================
+# EDIT PREVENTIVE MAINTENANCE PLAN
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/preventivo/"
+    "<string:plan_code>/editar",
+    methods=["GET", "POST"],
+)
+@permission_required("preventive.manage")
+def edit_preventive_maintenance_plan_route(
+    codigo: str,
+    plan_code: str,
+):
+
+    plan_result = (
+        get_preventive_maintenance_plan.execute(
+            GetPreventiveMaintenancePlanQuery(
+                code=plan_code,
+            )
+        )
+    )
+
+    plan = plan_result.plan
+
+    if (
+        plan is None
+        or plan.asset_code != codigo
+    ):
+        return (
+            "Plan preventivo no encontrado.",
+            404,
+        )
+
+    if request.method == "POST":
+
+        next_due_at_text = request.form.get(
+            "next_due_at",
+            "",
+        )
+
+        try:
+            next_due_at = datetime.fromisoformat(
+                next_due_at_text
+            )
+
+            frequency_days = int(
+                request.form.get(
+                    "frequency_days",
+                    "0",
+                )
+            )
+
+        except ValueError:
+            return (
+                "Fecha o frecuencia inválida.",
+                400,
+            )
+
+        try:
+            update_preventive_maintenance_plan.execute(
+                UpdatePreventiveMaintenancePlanCommand(
+                    code=plan.code,
+                    asset_code=codigo,
+                    title=request.form.get(
+                        "title",
+                        "",
+                    ),
+                    frequency_days=frequency_days,
+                    responsible_person_code=(
+                        request.form.get(
+                            "responsible_person_code",
+                            "",
+                        )
+                    ),
+                    next_due_at=next_due_at,
+                    description=request.form.get(
+                        "description",
+                        "",
+                    ),
+                    is_active=(
+                        request.form.get(
+                            "is_active"
+                        )
+                        == "on"
+                    ),
+                )
+            )
+
+        except ValueError as exc:
+            return (
+                str(exc),
+                400,
+            )
+
+        return redirect(
+            url_for(
+                "assets.asset_detail",
+                codigo=codigo,
+            )
+        )
+
+    return render_template(
+        "pages/edit_preventive_maintenance_plan.html",
+        codigo=codigo,
+        plan=plan,
+    )
+
+
+
+# ============================================================
+# COMPLETE PREVENTIVE MAINTENANCE PLAN
+# ============================================================
+
+@assets.route(
+    "/activo/<string:codigo>/preventivo/"
+    "<string:plan_code>/completar",
+    methods=["GET", "POST"],
+)
+@permission_required("preventive.execute")
+def complete_preventive_maintenance_plan_route(
+    codigo: str,
+    plan_code: str,
+):
+
+    plan_result = (
+        get_preventive_maintenance_plan.execute(
+            GetPreventiveMaintenancePlanQuery(
+                code=plan_code,
+            )
+        )
+    )
+
+    plan = plan_result.plan
+
+    if (
+        plan is None
+        or plan.asset_code != codigo
+    ):
+        return (
+            "Plan preventivo no encontrado.",
+            404,
+        )
+
+    if request.method == "POST":
+
+        completed_at_text = request.form.get(
+            "completed_at",
+            "",
+        )
+
+        try:
+            completed_at = datetime.fromisoformat(
+                completed_at_text
+            )
+
+        except ValueError:
+            return (
+                "Fecha u hora inválida.",
+                400,
+            )
+
+        try:
+            complete_preventive_maintenance_plan.execute(
+                CompletePreventiveMaintenancePlanCommand(
+                    execution_code=request.form.get(
+                        "execution_code",
+                        "",
+                    ),
+                    plan_code=plan.code,
+                    performed_by=request.form.get(
+                        "performed_by",
+                        "",
+                    ),
+                    completed_at=completed_at,
+                    observations=request.form.get(
+                        "observations",
+                        "",
+                    ),
+                )
+            )
+
+        except ValueError as exc:
+            return (
+                str(exc),
+                400,
+            )
+
+        return redirect(
+            url_for(
+                "assets.asset_detail",
+                codigo=codigo,
+            )
+        )
+
+    return render_template(
+        "pages/complete_preventive_maintenance_plan.html",
+        codigo=codigo,
+        plan=plan,
+    )
+
+
+
+
+    # ============================================================
+# DELETE PREVENTIVE MAINTENANCE PLAN
+# ============================================================
+
+@assets.post(
+    "/activo/<string:codigo>/preventivo/"
+    "<string:plan_code>/eliminar"
+)
+@permission_required("preventive.manage")
+def delete_preventive_maintenance_plan_route(
+    codigo: str,
+    plan_code: str,
+):
+
+    plan_result = (
+        get_preventive_maintenance_plan.execute(
+            GetPreventiveMaintenancePlanQuery(
+                code=plan_code,
+            )
+        )
+    )
+
+    plan = plan_result.plan
+
+    if (
+        plan is None
+        or plan.asset_code != codigo
+    ):
+        return (
+            "Plan preventivo no encontrado.",
+            404,
+        )
+
+    result = (
+        delete_preventive_maintenance_plan.execute(
+            DeletePreventiveMaintenancePlanCommand(
+                code=plan.code,
+            )
+        )
+    )
+
+    if not result.deleted:
+        return (
+            "No fue posible eliminar el plan preventivo.",
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "assets.asset_detail",
+            codigo=codigo,
+        )
+    )
+
 
 # ============================================================
 # MAINTENANCE HISTORY

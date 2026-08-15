@@ -26,6 +26,9 @@ class PermissionPolicy:
 
             "preventive.view",
             "preventive.manage",
+            "preventive.view",
+            "preventive.manage",
+            "preventive.execute",
         },
 
         "MANAGER": {
@@ -39,6 +42,7 @@ class PermissionPolicy:
 
             "maintenance.view",
             "maintenance.view",
+            "preventive.view",
             "preventive.view",
         },
 
@@ -61,6 +65,9 @@ class PermissionPolicy:
 
             "preventive.view",
             "preventive.manage",
+            "preventive.view",
+            "preventive.manage",
+            "preventive.execute",
         },
 
         "TECHNICIAN": {
@@ -76,6 +83,8 @@ class PermissionPolicy:
             "maintenance.manage",
 
             "preventive.view",
+            "preventive.view",
+            "preventive.execute",
         },
     }
 

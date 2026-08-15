@@ -2150,3 +2150,762 @@ def test_manager_should_not_manage_maintenance(
     )
 
     assert response.status_code == 403
+
+
+def test_create_preventive_maintenance_form_should_respond(
+    authenticated_client,
+) -> None:
+
+    response = authenticated_client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        )
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Registrar plan preventivo"
+        in response.get_data(
+            as_text=True
+        )
+    )
+
+def test_create_preventive_maintenance_should_persist_and_redirect(
+    authenticated_client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    response = authenticated_client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        ),
+        data={
+            "code": "PM-HTTP-001",
+            "title": "Inspección trimestral",
+            "frequency_days": "90",
+            "responsible_person_code": "55464",
+            "next_due_at": "2026-09-01T08:00",
+            "description": (
+                "Inspección preventiva general."
+            ),
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    plan = (
+        preventive_maintenance_test_db
+        .get_by_code(
+            "PM-HTTP-001"
+        )
+    )
+
+    assert plan is not None
+
+    assert (
+        plan.asset_code
+        == "S2-480-ES09-T269"
+    )
+
+    assert (
+        plan.title
+        == "Inspección trimestral"
+    )
+
+    assert plan.frequency_days == 90
+
+    assert (
+        plan.responsible_person_code
+        == "55464"
+    )
+
+    assert plan.is_active is True
+
+
+def test_preventive_maintenance_should_require_login(
+    client,
+) -> None:
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert (
+        "/login"
+        in response.headers["Location"]
+    )
+
+
+def test_admin_should_manage_preventive_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "admin"
+        session["person_code"] = "ADMIN-001"
+        session["role_code"] = "ADMIN"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        )
+    )
+
+    assert response.status_code == 200
+
+
+def test_supervisor_should_manage_preventive_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "supervisor"
+        session["person_code"] = "SUP-001"
+        session["role_code"] = "SUPERVISOR"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        )
+    )
+
+    assert response.status_code == 200
+
+
+def test_technician_should_not_manage_preventive_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "technician"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        )
+    )
+
+    assert response.status_code == 403
+
+
+def test_manager_should_not_manage_preventive_maintenance(
+    client,
+) -> None:
+
+    with client.session_transaction() as session:
+        session["username"] = "manager"
+        session["person_code"] = "MGR-001"
+        session["role_code"] = "MANAGER"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/nuevo"
+        )
+    )
+
+    assert response.status_code == 403
+
+def test_edit_preventive_maintenance_form_should_respond(
+    authenticated_client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    preventive_maintenance_test_db.save(
+        PreventiveMaintenancePlan(
+            code="PM-EDIT-001",
+            asset_code="S2-480-ES09-T269",
+            title="Plan original",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+                8,
+                0,
+            ),
+            description="Original.",
+        )
+    )
+
+    response = authenticated_client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-EDIT-001/"
+            "editar"
+        )
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Editar plan preventivo"
+        in response.get_data(
+            as_text=True
+        )
+    )
+
+
+def test_edit_preventive_maintenance_should_update_and_redirect(
+    authenticated_client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    preventive_maintenance_test_db.save(
+        PreventiveMaintenancePlan(
+            code="PM-EDIT-002",
+            asset_code="S2-480-ES09-T269",
+            title="Plan original",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+                8,
+                0,
+            ),
+            description="Original.",
+        )
+    )
+
+    response = authenticated_client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-EDIT-002/"
+            "editar"
+        ),
+        data={
+            "title": "Plan actualizado",
+            "frequency_days": "60",
+            "responsible_person_code": "55464",
+            "next_due_at": "2026-10-15T09:30",
+            "description": "Actualizado.",
+            "is_active": "on",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    persisted = (
+        preventive_maintenance_test_db
+        .get_by_code(
+            "PM-EDIT-002"
+        )
+    )
+
+    assert persisted is not None
+    assert persisted.title == "Plan actualizado"
+    assert persisted.frequency_days == 60
+    assert persisted.description == "Actualizado."
+    assert persisted.is_active is True
+
+
+def test_technician_should_not_edit_preventive_maintenance(
+    client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    preventive_maintenance_test_db.save(
+        PreventiveMaintenancePlan(
+            code="PM-EDIT-003",
+            asset_code="S2-480-ES09-T269",
+            title="Plan técnico",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+            ),
+        )
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "technician"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-EDIT-003/"
+            "editar"
+        )
+    )
+
+    assert response.status_code == 403
+
+def test_delete_preventive_maintenance_should_remove_and_redirect(
+    authenticated_client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    preventive_maintenance_test_db.save(
+        PreventiveMaintenancePlan(
+            code="PM-DELETE-001",
+            asset_code="S2-480-ES09-T269",
+            title="Plan para eliminar",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+            ),
+        )
+    )
+
+    response = authenticated_client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-DELETE-001/"
+            "eliminar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    persisted = (
+        preventive_maintenance_test_db
+        .get_by_code(
+            "PM-DELETE-001"
+        )
+    )
+
+    assert persisted is None
+
+
+def test_delete_unknown_preventive_maintenance_should_return_404(
+    authenticated_client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    response = authenticated_client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-NOT-FOUND/"
+            "eliminar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 404
+
+
+def test_technician_should_not_delete_preventive_maintenance(
+    client,
+    preventive_maintenance_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    preventive_maintenance_test_db.save(
+        PreventiveMaintenancePlan(
+            code="PM-DELETE-TECH-001",
+            asset_code="S2-480-ES09-T269",
+            title="Plan protegido",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+            ),
+        )
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "technician"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-DELETE-TECH-001/"
+            "eliminar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 403
+
+    persisted = (
+        preventive_maintenance_test_db
+        .get_by_code(
+            "PM-DELETE-TECH-001"
+        )
+    )
+
+    assert persisted is not None
+
+
+def test_complete_preventive_maintenance_form_should_respond(
+    authenticated_client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    plan_repository, _ = (
+        preventive_execution_web_test_db
+    )
+
+    plan_repository.save(
+        PreventiveMaintenancePlan(
+            code="PM-COMPLETE-001",
+            asset_code="S2-480-ES09-T269",
+            title="Inspección trimestral",
+            frequency_days=90,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+                8,
+                0,
+            ),
+        )
+    )
+
+    response = authenticated_client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-COMPLETE-001/"
+            "completar"
+        )
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        "Completar preventivo"
+        in response.get_data(
+            as_text=True
+        )
+    )
+
+
+def test_complete_preventive_maintenance_should_persist_and_reschedule(
+    authenticated_client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    (
+        plan_repository,
+        execution_repository,
+    ) = preventive_execution_web_test_db
+
+    plan_repository.save(
+        PreventiveMaintenancePlan(
+            code="PM-COMPLETE-002",
+            asset_code="S2-480-ES09-T269",
+            title="Inspección trimestral",
+            frequency_days=90,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+                8,
+                0,
+            ),
+        )
+    )
+
+    response = authenticated_client.post(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-COMPLETE-002/"
+            "completar"
+        ),
+        data={
+            "execution_code": "PME-WEB-001",
+            "performed_by": "Fortunato Tenorio",
+            "completed_at": "2026-09-01T10:00",
+            "observations": "Sin anomalías.",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    execution = (
+        execution_repository.get_by_code(
+            "PME-WEB-001"
+        )
+    )
+
+    assert execution is not None
+
+    assert (
+        execution.plan_code
+        == "PM-COMPLETE-002"
+    )
+
+    plan = plan_repository.get_by_code(
+        "PM-COMPLETE-002"
+    )
+
+    assert plan is not None
+
+    assert (
+        plan.next_due_at
+        == datetime(
+            2026,
+            11,
+            30,
+            10,
+            0,
+        )
+    )
+
+def test_technician_should_execute_preventive_maintenance(
+    client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    plan_repository, _ = (
+        preventive_execution_web_test_db
+    )
+
+    plan_repository.save(
+        PreventiveMaintenancePlan(
+            code="PM-TECH-EXEC-001",
+            asset_code="S2-480-ES09-T269",
+            title="Preventivo técnico",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+            ),
+        )
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "technician"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-TECH-EXEC-001/"
+            "completar"
+        )
+    )
+
+    assert response.status_code == 200
+
+def test_manager_should_not_execute_preventive_maintenance(
+    client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenancePlan,
+    )
+
+    plan_repository, _ = (
+        preventive_execution_web_test_db
+    )
+
+    plan_repository.save(
+        PreventiveMaintenancePlan(
+            code="PM-MANAGER-EXEC-001",
+            asset_code="S2-480-ES09-T269",
+            title="Preventivo protegido",
+            frequency_days=30,
+            responsible_person_code="55464",
+            next_due_at=datetime(
+                2026,
+                9,
+                1,
+            ),
+        )
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "manager"
+        session["person_code"] = "MGR-001"
+        session["role_code"] = "MANAGER"
+
+    response = client.get(
+        (
+            "/activo/"
+            "S2-480-ES09-T269/"
+            "preventivo/"
+            "PM-MANAGER-EXEC-001/"
+            "completar"
+        )
+    )
+
+    assert response.status_code == 403
+
+
+def test_asset_detail_should_show_preventive_execution(
+    authenticated_client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    from datetime import datetime
+
+    from app.domains.assets.preventive_maintenance.entities import (
+        PreventiveMaintenanceExecution,
+    )
+
+    _, execution_repository = (
+        preventive_execution_web_test_db
+    )
+
+    execution_repository.save(
+        PreventiveMaintenanceExecution(
+            code="PME-VIEW-001",
+            plan_code="PM-VIEW-001",
+            asset_code="S2-480-ES09-T269",
+            performed_by="Fortunato Tenorio",
+            scheduled_at=datetime(
+                2026,
+                8,
+                14,
+                18,
+                0,
+            ),
+            completed_at=datetime(
+                2026,
+                8,
+                14,
+                19,
+                4,
+            ),
+            observations="Inspección terminada.",
+        )
+    )
+
+    response = authenticated_client.get(
+        "/activo/S2-480-ES09-T269"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "Ejecuciones preventivas" in html
+    assert "PME-VIEW-001" in html
+    assert "PM-VIEW-001" in html
+    assert "Fortunato Tenorio" in html
+    assert "Inspección terminada." in html
+
+def test_asset_detail_should_show_empty_preventive_execution_message(
+    authenticated_client,
+    preventive_execution_web_test_db,
+) -> None:
+
+    response = authenticated_client.get(
+        "/activo/S2-480-ES09-T269"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert (
+        "Todavía no hay ejecuciones preventivas"
+        in html
+    )

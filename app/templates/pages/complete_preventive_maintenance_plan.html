@@ -1,0 +1,113 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+            <p class="asset-section-heading__eyebrow">
+                Mantenimiento preventivo
+            </p>
+
+            <h1>
+                Completar preventivo
+            </h1>
+
+            <p>
+                {{ plan.title }}
+                ·
+                <strong>{{ plan.code }}</strong>
+            </p>
+
+            <p>
+                Activo:
+                <strong>{{ codigo }}</strong>
+            </p>
+        </div>
+
+    </div>
+
+    <form
+        method="post"
+        class="spare-part-form"
+    >
+
+        <div>
+            <label for="execution_code">
+                Código de ejecución
+            </label>
+
+            <input
+                id="execution_code"
+                name="execution_code"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="performed_by">
+                Realizado por
+            </label>
+
+            <input
+                id="performed_by"
+                name="performed_by"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="completed_at">
+                Fecha y hora de finalización
+            </label>
+
+            <input
+                id="completed_at"
+                name="completed_at"
+                type="datetime-local"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="observations">
+                Observaciones
+            </label>
+
+            <textarea
+                id="observations"
+                name="observations"
+                rows="5"
+            ></textarea>
+        </div>
+
+        <div class="spare-part-item__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=codigo
+                ) }}"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Completar preventivo
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

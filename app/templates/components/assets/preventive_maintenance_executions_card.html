@@ -1,0 +1,85 @@
+{% if preventive_executions
+    and preventive_executions.has_items %}
+
+    <div class="spare-parts-list">
+
+        {% for item in preventive_executions.items %}
+
+            <article class="spare-part-item">
+
+                <div class="spare-part-item__header">
+
+                    <div>
+                        <strong>
+                            Plan: {{ item.plan_code }}
+                        </strong>
+
+                        <span>
+                            Ejecución: {{ item.code }}
+                        </span>
+                    </div>
+
+                    <span>
+                        {{ item.status }}
+                    </span>
+
+                </div>
+
+                <div class="spare-part-item__grid">
+
+                    <div>
+                        <span>
+                            Programado
+                        </span>
+
+                        <strong>
+                            {{ item.scheduled_at }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Ejecutado
+                        </span>
+
+                        <strong>
+                            {{ item.completed_at }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            Realizado por
+                        </span>
+
+                        <strong>
+                            {{ item.performed_by }}
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div>
+                    <span>
+                        Observaciones
+                    </span>
+
+                    <strong>
+                        {{ item.observations }}
+                    </strong>
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="asset-workspace-card__placeholder">
+        Todavía no hay ejecuciones preventivas
+        registradas para este activo.
+    </div>
+
+{% endif %}

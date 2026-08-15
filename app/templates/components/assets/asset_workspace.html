@@ -240,9 +240,30 @@
 
         </div>
 
+        {% if can("preventive.manage") %}
+
+            <div class="asset-workspace-card__actions">
+
+                <a
+                    class="btn btn-primary"
+                    href="{{ url_for(
+                        'assets.create_preventive_maintenance_plan_route',
+                        codigo=activo.codigo
+                    ) }}"
+                >
+                    + Registrar plan
+                </a>
+
+            </div>
+
+        {% endif %}
+
     </div>
 
     <div class="asset-workspace-card__body">
+        {% include
+            "components/assets/preventive_maintenance_metrics.html"
+        %}
 
         {% include
             "components/assets/preventive_maintenance_card.html"
@@ -251,3 +272,33 @@
     </div>
 
 </article>
+<article
+    class="asset-workspace-card"
+    aria-labelledby="preventive-executions-title"
+>
+
+    <div class="asset-workspace-card__header">
+
+        <div>
+
+            <p class="asset-workspace-card__eyebrow">
+                Historial preventivo
+            </p>
+
+            <h3 id="preventive-executions-title">
+                Ejecuciones preventivas
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="asset-workspace-card__body">
+
+        {% include
+            "components/assets/preventive_maintenance_executions_card.html"
+        %}
+
+    </div>
+
+</article>  

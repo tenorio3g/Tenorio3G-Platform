@@ -27,7 +27,17 @@ from .update_preventive_maintenance_plan import (
     UpdatePreventiveMaintenancePlanCommand,
     UpdatePreventiveMaintenancePlanResult,
 )
+from .complete_preventive_maintenance_plan import (
+    CompletePreventiveMaintenancePlan,
+    CompletePreventiveMaintenancePlanCommand,
+    CompletePreventiveMaintenancePlanResult,
+)
 
+from .list_preventive_maintenance_executions_by_asset import (
+    ListPreventiveMaintenanceExecutionsByAsset,
+    ListPreventiveMaintenanceExecutionsByAssetQuery,
+    ListPreventiveMaintenanceExecutionsByAssetResult,
+)
 __all__ = [
     "CreatePreventiveMaintenancePlan",
     "CreatePreventiveMaintenancePlanCommand",
@@ -44,4 +54,10 @@ __all__ = [
     "UpdatePreventiveMaintenancePlan",
     "UpdatePreventiveMaintenancePlanCommand",
     "UpdatePreventiveMaintenancePlanResult",
+    "CompletePreventiveMaintenancePlan",
+    "CompletePreventiveMaintenancePlanCommand",
+    "CompletePreventiveMaintenancePlanResult",
+    "ListPreventiveMaintenanceExecutionsByAsset",
+    "ListPreventiveMaintenanceExecutionsByAssetQuery",
+    "ListPreventiveMaintenanceExecutionsByAssetResult",
 ]
