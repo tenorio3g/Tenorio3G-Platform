@@ -479,3 +479,53 @@ def preventive_execution_web_test_db(
     )
 
     test_engine.dispose()
+
+@pytest.fixture
+def work_orders_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.foundation.database import Base
+
+    from app.domains.work_orders.bootstrap import (
+        work_order_repository,
+    )
+
+    database_path = (
+        tmp_path
+        / "work_orders_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        work_order_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield work_order_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()

@@ -19,6 +19,32 @@ from app.work_orders.services.assign_technician_service import AssignTechnicianS
 from app.work_orders.services.add_activity_service import AddActivityService
 from app.work_orders.services.add_material_service import AddMaterialService
 
+from app.domains.work_orders.bootstrap import (
+    assign_work_order,
+    cancel_work_order,
+    close_work_order,
+    complete_work_order,
+    get_work_order_detail,
+    hold_work_order,
+    resume_work_order,
+    start_work_order,
+)
+
+from app.domains.work_orders.presentation import (
+    WorkOrderDetailPresenter,
+)
+
+from app.domains.work_orders.use_cases import (
+    AssignWorkOrderCommand,
+    CancelWorkOrderCommand,
+    CloseWorkOrderCommand,
+    CompleteWorkOrderCommand,
+    GetWorkOrderDetailQuery,
+    HoldWorkOrderCommand,
+    ResumeWorkOrderCommand,
+    StartWorkOrderCommand,
+)
+
 
 # =====================================================
 # Repositorios
@@ -87,14 +113,29 @@ def nueva_orden():
 @work_orders.route("/ordenes/<numero>")
 def detalle(numero):
 
-    orden = work_order_repository.obtener_por_numero(numero)
+    try:
+        result = get_work_order_detail.execute(
+            GetWorkOrderDetailQuery(
+                code=numero,
+            )
+        )
 
-    if orden is None:
-        return "Orden no encontrada", 404
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        result.work_order,
+        result.asset,
+        result.requester,
+        result.supervisor,
+    )
 
     return render_template(
-        "pages/work_order_detail.html",
-        orden=orden
+        "pages/work_order_detail_v2.html",
+        orden=orden,
     )
 
 
@@ -226,3 +267,198 @@ def agregar_material(numero):
             error=str(error),
             datos=request.form
         )
+
+@work_orders.post(
+    "/ordenes/<numero>/asignar"
+)
+def assign_work_order_route(
+    numero: str,
+):
+
+    try:
+        assign_work_order.execute(
+            AssignWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/iniciar"
+)
+def start_work_order_route(
+    numero: str,
+):
+
+    try:
+        start_work_order.execute(
+            StartWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.post(
+    "/ordenes/<numero>/pausar"
+)
+def hold_work_order_route(
+    numero: str,
+):
+
+    try:
+        hold_work_order.execute(
+            HoldWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/reanudar"
+)
+def resume_work_order_route(
+    numero: str,
+):
+
+    try:
+        resume_work_order.execute(
+            ResumeWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/completar"
+)
+def complete_work_order_route(
+    numero: str,
+):
+
+    try:
+        complete_work_order.execute(
+            CompleteWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/cerrar"
+)
+def close_work_order_route(
+    numero: str,
+):
+
+    try:
+        close_work_order.execute(
+            CloseWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/cancelar"
+)
+def cancel_work_order_route(
+    numero: str,
+):
+
+    try:
+        cancel_work_order.execute(
+            CancelWorkOrderCommand(
+                code=numero,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+

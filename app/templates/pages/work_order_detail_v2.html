@@ -1,0 +1,326 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Orden {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+            <p class="page-eyebrow">
+                Orden de trabajo
+            </p>
+
+            <h1>
+                {{ orden.code }}
+            </h1>
+
+            <p>
+                {{ orden.title }}
+            </p>
+        </div>
+
+        <div>
+            <span class="badge">
+                {{ orden.status }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="asset-workspace-grid">
+
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Información
+                    </p>
+
+                    <h3>
+                        Datos generales
+                    </h3>
+                </div>
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                <p>
+                    <strong>Tipo:</strong>
+                    {{ orden.work_type }}
+                </p>
+
+                <p>
+                    <strong>Prioridad:</strong>
+                    {{ orden.priority }}
+                </p>
+
+                <p>
+                    <strong>Estado:</strong>
+                    {{ orden.status }}
+                                    <div class="form-actions">
+
+                    {% if orden.status == "CREATED" %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.assign_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-primary"
+                            >
+                                Asignar
+                            </button>
+                        </form>
+
+                    {% elif orden.status == "ASSIGNED" %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.start_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-primary"
+                            >
+                                Iniciar
+                            </button>
+                        </form>
+
+                    {% endif %}
+                    {% if orden.status == "IN_PROGRESS" %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.hold_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-secondary"
+                            >
+                                Pausar
+                            </button>
+                        </form>
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.complete_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-primary"
+                            >
+                                Completar
+                            </button>
+                        </form>
+
+                    {% elif orden.status == "ON_HOLD" %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.resume_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-primary"
+                            >
+                                Reanudar
+                            </button>
+                        </form>
+
+                    {% elif orden.status == "COMPLETED" %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.close_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            <button
+                                type="submit"
+                                class="button button-primary"
+                            >
+                                Cerrar
+                            </button>
+                        </form>
+
+                    {% endif %} 
+                    
+                    {% if orden.status in [
+                        "CREATED",
+                        "ASSIGNED",
+                        "IN_PROGRESS",
+                        "ON_HOLD"
+                    ] %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'work_orders.cancel_work_order_route',
+                                numero=orden.code
+                            ) }}"
+                            onsubmit="
+                                return confirm(
+                                    '¿Deseas cancelar esta orden?'
+                                );
+                            "
+                        >
+                            <button
+                                type="submit"
+                                class="button button-secondary"
+                            >
+                                Cancelar
+                            </button>
+                        </form>
+
+                    {% endif %}
+                </div>
+                </p>
+
+
+
+                <p>
+                    <strong>Creada:</strong>
+                    {{ orden.created_at }}
+                </p>
+
+                <p>
+                    <strong>Descripción:</strong>
+                    {{ orden.description or "Sin descripción." }}
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Activo
+                    </p>
+
+                    <h3>
+                        {{ orden.asset.name }}
+                    </h3>
+                </div>
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                <p>
+                    <strong>Código:</strong>
+                    {{ orden.asset.code }}
+                </p>
+
+                <p>
+                    <strong>Ubicación:</strong>
+                    {{ orden.asset.location_code }}
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Personal
+                    </p>
+
+                    <h3>
+                        Solicitante
+                    </h3>
+                </div>
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                <p>
+                    <strong>Número:</strong>
+                    {{ orden.requester.code }}
+                </p>
+
+                <p>
+                    <strong>Nombre:</strong>
+                    {{ orden.requester.name }}
+                </p>
+
+                <p>
+                    <strong>Puesto:</strong>
+                    {{ orden.requester.position }}
+                </p>
+
+            </div>
+
+        </article>
+
+
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div>
+                    <p class="asset-workspace-card__eyebrow">
+                        Personal
+                    </p>
+
+                    <h3>
+                        Supervisor
+                    </h3>
+                </div>
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                <p>
+                    <strong>Número:</strong>
+                    {{ orden.supervisor.code }}
+                </p>
+
+                <p>
+                    <strong>Nombre:</strong>
+                    {{ orden.supervisor.name }}
+                </p>
+
+                <p>
+                    <strong>Puesto:</strong>
+                    {{ orden.supervisor.position }}
+                </p>
+
+            </div>
+
+        </article>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -7,6 +7,7 @@ class PersonItemViewModel:
     name: str
     position: str
     status: str
+    is_active: bool
 
 
 @dataclass
@@ -20,11 +21,3 @@ class PeopleViewModel:
     @property
     def total(self) -> int:
         return len(self.items)
-
-@dataclass
-class PersonItemViewModel:
-    code: str
-    name: str
-    position: str
-    status: str
-    is_active: bool
