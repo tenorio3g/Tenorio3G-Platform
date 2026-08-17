@@ -607,6 +607,129 @@ Orden {{ orden.code }}
             </div>
         </article>
 
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div class="asset-workspace-card__actions">
+
+                    <a
+                        class="button button-primary"
+                        href="{{ url_for(
+                            'work_orders.add_spare_part_to_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        + Registrar refacción
+                    </a>
+
+                </div>
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Materiales
+                    </p>
+
+                    <h3>
+                        Refacciones utilizadas
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                {% if spare_parts.has_items %}
+
+                    <p>
+                        <strong>
+                            {{ spare_parts.total_items }}
+                        </strong>
+                        registros de consumo
+                    </p>
+
+                    <p>
+                        Costo total:
+                        <strong>
+                            ${{ "%.2f"|format(spare_parts.total_cost) }}
+                        </strong>
+                    </p>
+
+                    <hr>
+
+                    {% for item in spare_parts.items %}
+
+                        <div>
+
+                            <h3>
+                                {{ item.name }}
+                            </h3>
+
+                            <p>
+                                <strong>Código:</strong>
+                                {{ item.code }}
+                            </p>
+
+                            <p>
+                                <strong>Fabricante:</strong>
+                                {{ item.manufacturer }}
+                            </p>
+
+                            <p>
+                                <strong>Número de parte:</strong>
+                                {{ item.part_number }}
+                            </p>
+
+                            <p>
+                                <strong>Cantidad:</strong>
+                                {{ item.quantity }}
+                                {{ item.unit }}
+                            </p>
+
+                            <p>
+                                <strong>Costo unitario:</strong>
+                                ${{ "%.2f"|format(item.unit_cost) }}
+                            </p>
+
+                            <p>
+                                <strong>Total:</strong>
+                                ${{ "%.2f"|format(item.total_cost) }}
+                            </p>
+
+                            <p>
+                                <strong>Utilizado:</strong>
+                                {{ item.used_at }}
+                            </p>
+
+                            {% if item.observations %}
+
+                                <p>
+                                    <strong>Observaciones:</strong>
+                                    {{ item.observations }}
+                                </p>
+
+                            {% endif %}
+
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Esta orden todavía no tiene refacciones utilizadas.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
     </div>
 
 </div>

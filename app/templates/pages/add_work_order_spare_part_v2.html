@@ -1,0 +1,144 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Registrar refacción - {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Orden de trabajo
+                </p>
+
+                <h3>
+                    Registrar refacción utilizada
+                </h3>
+
+                <p>
+                    {{ orden.code }} · {{ orden.title }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-grid">
+
+                    <div class="form-field">
+
+                        <label for="spare_part_code">
+                            Código de refacción
+                        </label>
+
+                        <input
+                            id="spare_part_code"
+                            name="spare_part_code"
+                            type="text"
+                            required
+                            value="{{ data.get('spare_part_code', '') if data else '' }}"
+                            placeholder="Ej. SP-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="quantity">
+                            Cantidad
+                        </label>
+
+                        <input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            required
+                            value="{{ data.get('quantity', '') if data else '' }}"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="unit_cost">
+                            Costo unitario
+                        </label>
+
+                        <input
+                            id="unit_cost"
+                            name="unit_cost"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value="{{ data.get('unit_cost', '') if data else '' }}"
+                        >
+
+                    </div>
+
+                    <div class="form-field form-field-full">
+
+                        <label for="observations">
+                            Observaciones
+                        </label>
+
+                        <textarea
+                            id="observations"
+                            name="observations"
+                            rows="4"
+                        >{{ data.get('observations', '') if data else '' }}</textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Registrar refacción
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="{{ url_for(
+                            'work_orders.detalle',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

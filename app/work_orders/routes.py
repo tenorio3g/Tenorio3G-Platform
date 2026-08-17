@@ -79,7 +79,19 @@ from app.domains.work_orders.activities.use_cases import (
     StartWorkOrderActivityCommand,
 )
 
+from app.domains.work_orders.materials.bootstrap import (
+    list_work_order_spare_parts,
+    add_spare_part_to_work_order,
+)
 
+from app.domains.work_orders.materials.presentation import (
+    WorkOrderSparePartsPresenter,
+)
+
+from app.domains.work_orders.materials.use_cases import (
+    ListWorkOrderSparePartsQuery,
+    AddSparePartToWorkOrderCommand,
+)
 
 # =====================================================
 # Repositorios
@@ -196,11 +208,27 @@ def detalle(numero):
         )
     )
 
+    spare_parts_result = (
+        list_work_order_spare_parts.execute(
+            ListWorkOrderSparePartsQuery(
+                work_order_code=numero
+            )
+        )
+    )
+
+    spare_parts = (
+        WorkOrderSparePartsPresenter.present(
+            spare_parts_result
+        )
+    )
+
+
     return render_template(
         "pages/work_order_detail_v2.html",
         orden=orden,
         technicians=technicians,
         activities=activities,
+        spare_parts=spare_parts,
     )
 
 # =====================================================
@@ -731,6 +759,102 @@ def complete_work_order_activity_route(
         return (
             str(exc),
             400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.route(
+    "/ordenes/<numero>/refacciones/nueva",
+    methods=["GET", "POST"],
+)
+def add_spare_part_to_work_order_route(
+    numero: str,
+):
+
+    try:
+        detail_result = (
+            get_work_order_detail.execute(
+                GetWorkOrderDetailQuery(
+                    code=numero,
+                )
+            )
+        )
+
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        detail_result.work_order,
+        detail_result.asset,
+        detail_result.requester,
+        detail_result.supervisor,
+    )
+
+    if request.method == "GET":
+        return render_template(
+            "pages/add_work_order_spare_part_v2.html",
+            orden=orden,
+        )
+
+    quantity_raw = (
+        request.form.get(
+            "quantity",
+            "",
+        )
+        .strip()
+    )
+
+    unit_cost_raw = (
+        request.form.get(
+            "unit_cost",
+            "",
+        )
+        .strip()
+    )
+
+    try:
+        quantity = float(
+            quantity_raw
+        )
+
+        unit_cost = (
+            float(unit_cost_raw)
+            if unit_cost_raw
+            else 0
+        )
+
+        add_spare_part_to_work_order.execute(
+            AddSparePartToWorkOrderCommand(
+                work_order_code=numero,
+                spare_part_code=request.form.get(
+                    "spare_part_code",
+                    "",
+                ),
+                quantity=quantity,
+                unit_cost=unit_cost,
+                used_at=datetime.now(),
+                observations=request.form.get(
+                    "observations",
+                    "",
+                ),
+            )
+        )
+
+    except (ValueError, TypeError) as exc:
+        return render_template(
+            "pages/add_work_order_spare_part_v2.html",
+            orden=orden,
+            error=str(exc),
+            data=request.form,
         )
 
     return redirect(

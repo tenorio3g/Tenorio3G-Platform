@@ -443,3 +443,205 @@ def test_should_complete_activity_from_web(
         persisted.actual_minutes
         is not None
     )
+
+def test_should_render_add_spare_part_form(
+    authenticated_client,
+):
+
+    response = authenticated_client.get(
+        "/ordenes/WO-REAL-001/refacciones/nueva"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "Registrar refacción utilizada" in html
+    assert "Código de refacción" in html
+    assert "Cantidad" in html
+
+
+def test_should_add_spare_part_from_web(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_materials_test_db,
+    monkeypatch,
+):
+
+    from app.domains.assets.spare_parts.entities import (
+        SparePart,
+    )
+
+    from app.domains.assets.spare_parts.repositories import (
+        InMemorySparePartRepository,
+    )
+
+    from app.domains.work_orders.materials.bootstrap import (
+        add_spare_part_to_work_order,
+    )
+
+    work_order = create_web_work_order(
+        code="WO-WEB-SPARE"
+    )
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    spare_part_repository = (
+        InMemorySparePartRepository()
+    )
+
+    spare_part_repository.save_spare_part(
+        SparePart(
+            code="SP-WEB-001",
+            name="Balero web",
+            manufacturer="SKF",
+            part_number="6206",
+            unit="pieza",
+        )
+    )
+
+    monkeypatch.setattr(
+        add_spare_part_to_work_order,
+        "_spare_part_repository",
+        spare_part_repository,
+    )
+
+    response = authenticated_client.post(
+        "/ordenes/WO-WEB-SPARE/refacciones/nueva",
+        data={
+            "spare_part_code": "SP-WEB-001",
+            "quantity": "2",
+            "unit_cost": "15.50",
+            "observations": "Prueba web.",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    usages = (
+        work_order_materials_test_db
+        .list_by_work_order(
+            "WO-WEB-SPARE"
+        )
+    )
+
+    assert len(usages) == 1
+
+    usage = usages[0]
+
+    assert usage.spare_part_code == "SP-WEB-001"
+    assert usage.quantity == 2
+    assert usage.unit_cost == 15.5
+    assert usage.total_cost == 31.0
+
+    assert (
+        usage.observations
+        == "Prueba web."
+    )
+
+
+def test_should_reject_unknown_spare_part_from_web(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_materials_test_db,
+    monkeypatch,
+):
+
+    from app.domains.assets.spare_parts.repositories import (
+        InMemorySparePartRepository,
+    )
+
+    from app.domains.work_orders.materials.bootstrap import (
+        add_spare_part_to_work_order,
+    )
+
+    work_order = create_web_work_order(
+        code="WO-WEB-SPARE-MISSING"
+    )
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    monkeypatch.setattr(
+        add_spare_part_to_work_order,
+        "_spare_part_repository",
+        InMemorySparePartRepository(),
+    )
+
+    response = authenticated_client.post(
+        "/ordenes/WO-WEB-SPARE-MISSING/refacciones/nueva",
+        data={
+            "spare_part_code": "SP-NOT-FOUND",
+            "quantity": "1",
+            "unit_cost": "10",
+            "observations": "",
+        },
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "spare part not found" in html
+
+    assert (
+        work_order_materials_test_db
+        .list_by_work_order(
+            "WO-WEB-SPARE-MISSING"
+        )
+        == []
+    )
+
+
+def test_should_reject_invalid_spare_part_quantity_from_web(
+    authenticated_client,
+):
+
+    response = authenticated_client.post(
+        "/ordenes/WO-REAL-001/refacciones/nueva",
+        data={
+            "spare_part_code": "TEST-BRG-6206",
+            "quantity": "abc",
+            "unit_cost": "10",
+            "observations": "",
+        },
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "abc" in html
+
+
+def test_should_reject_invalid_spare_part_unit_cost_from_web(
+    authenticated_client,
+):
+
+    response = authenticated_client.post(
+        "/ordenes/WO-REAL-001/refacciones/nueva",
+        data={
+            "spare_part_code": "TEST-BRG-6206",
+            "quantity": "1",
+            "unit_cost": "abc",
+            "observations": "",
+        },
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "abc" in html

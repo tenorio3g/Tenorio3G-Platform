@@ -572,3 +572,48 @@ def work_order_activities_test_db(
     )
 
     test_engine.dispose()
+
+@pytest.fixture
+def work_order_materials_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    from app.domains.work_orders.materials.bootstrap import (
+        work_order_spare_part_usage_repository,
+    )
+
+    database_path = (
+        tmp_path
+        / "work_order_materials_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        work_order_spare_part_usage_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield work_order_spare_part_usage_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
