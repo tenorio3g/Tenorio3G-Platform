@@ -1,33 +1,442 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}
-Centro de Operaciones
+Centro de Operaciones | Tenorio3G
 {% endblock %}
 
 {% block content %}
 
-<section class="dashboard">
+<div class="container">
 
-    <h2>Bienvenido Ingeniero</h2>
+    <section class="dashboard-widget">
 
-    <p>
-        La plataforma ha iniciado correctamente.
-    </p>
+        <div class="dashboard-widget-header">
 
-    <div class="search-box">
+            <div>
 
-        <input
-            type="text"
-            placeholder="Buscar activo...">
+                <p class="dashboard-widget-label">
+                    TENORIO3G PLATFORM
+                </p>
 
-        <button>
+                <h1 class="dashboard-widget-title">
+                    Centro de Operaciones
+                </h1>
 
-            Buscar
+                <p>
+                    Supervisión general de mantenimiento,
+                    activos y operación.
+                </p>
 
-        </button>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         KPI
+    ====================================================== -->
+
+    <div class="dashboard-kpi-grid">
+
+        <article class="dashboard-kpi-card">
+
+            <p class="dashboard-widget-label">
+                ACTIVOS
+            </p>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.total_assets }}
+            </strong>
+
+            <span class="dashboard-kpi-description">
+                Activos registrados
+            </span>
+
+        </article>
+
+
+        <article class="dashboard-kpi-card">
+
+            <p class="dashboard-widget-label">
+                WORK ORDERS
+            </p>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.total_work_orders }}
+            </strong>
+
+            <span class="dashboard-kpi-description">
+                Órdenes registradas
+            </span>
+
+        </article>
+
+
+        <article class="dashboard-kpi-card">
+
+            <p class="dashboard-widget-label">
+                PERSONAL
+            </p>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.active_people }}
+            </strong>
+
+            <span class="dashboard-kpi-description">
+                Personas activas
+            </span>
+
+        </article>
+
+
+        <article class="dashboard-kpi-card">
+
+            <p class="dashboard-widget-label">
+                ACTIVIDADES
+            </p>
+
+            <strong class="dashboard-kpi-value">
+                {{ dashboard.pending_activities }}
+            </strong>
+
+            <span class="dashboard-kpi-description">
+                Actividades pendientes
+            </span>
+
+        </article>
 
     </div>
 
-</section>
+
+    <!-- =====================================================
+         BLOQUE CENTRAL
+    ====================================================== -->
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-grid-item">
+
+            <article class="dashboard-widget">
+
+                <div class="dashboard-widget-header">
+
+                    <div>
+
+                        <p class="dashboard-widget-label">
+                            MANTENIMIENTO
+                        </p>
+
+                        <h2 class="dashboard-widget-title">
+                            Estado de órdenes
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-status-grid">
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.created_work_orders }}
+                        </strong>
+
+                        <span>
+                            Creadas
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.assigned_work_orders }}
+                        </strong>
+
+                        <span>
+                            Asignadas
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.in_progress_work_orders }}
+                        </strong>
+
+                        <span>
+                            En proceso
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.on_hold_work_orders }}
+                        </strong>
+
+                        <span>
+                            En espera
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.completed_work_orders }}
+                        </strong>
+
+                        <span>
+                            Completadas
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.closed_work_orders }}
+                        </strong>
+
+                        <span>
+                            Cerradas
+                        </span>
+
+                    </div>
+
+                    <div class="dashboard-status-item">
+
+                        <strong>
+                            {{ dashboard.cancelled_work_orders }}
+                        </strong>
+
+                        <span>
+                            Canceladas
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+
+        <div class="dashboard-grid-item">
+
+            <article class="dashboard-widget">
+
+                <div class="dashboard-widget-header">
+
+                    <div>
+
+                        <p class="dashboard-widget-label">
+                            ACCESO RÁPIDO
+                        </p>
+
+                        <h2 class="dashboard-widget-title">
+                            Módulos
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="dashboard-module-grid">
+
+                    <a
+                        class="dashboard-module-card"
+                        href="{{ url_for('assets.index') }}"
+                    >
+                        <span class="dashboard-module-icon">
+                            ⚙
+                        </span>
+
+                        <strong>
+                            Activos
+                        </strong>
+
+                        <small>
+                            Hoja de vida y mantenimiento
+                        </small>
+                    </a>
+
+
+                    <a
+                        class="dashboard-module-card"
+                        href="{{ url_for(
+                            'work_orders.nueva_orden'
+                        ) }}"
+                    >
+                        <span class="dashboard-module-icon">
+                            🛠
+                        </span>
+
+                        <strong>
+                            Work Orders
+                        </strong>
+
+                        <small>
+                            Crear nueva orden
+                        </small>
+                    </a>
+
+
+                    <a
+                        class="dashboard-module-card"
+                        href="{{ url_for(
+                            'identity.people_index'
+                        ) }}"
+                    >
+                        <span class="dashboard-module-icon">
+                            👥
+                        </span>
+
+                        <strong>
+                            Personal
+                        </strong>
+
+                        <small>
+                            Personas y organización
+                        </small>
+                    </a>
+
+
+                    <a
+                        class="dashboard-module-card"
+                        href="{{ url_for(
+                            'operations.index'
+                        ) }}"
+                    >
+                        <span class="dashboard-module-icon">
+                            📊
+                        </span>
+
+                        <strong>
+                            Operaciones
+                        </strong>
+
+                        <small>
+                            Indicadores operativos
+                        </small>
+                    </a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ÓRDENES RECIENTES
+    ====================================================== -->
+
+    <section class="dashboard-section">
+
+        <article class="dashboard-widget">
+
+            <div class="dashboard-widget-header">
+
+                <div>
+
+                    <p class="dashboard-widget-label">
+                        ACTIVIDAD RECIENTE
+                    </p>
+
+                    <h2 class="dashboard-widget-title">
+                        Últimas órdenes de trabajo
+                    </h2>
+
+                </div>
+
+            </div>
+
+            {% if dashboard.recent_work_orders %}
+
+                <div class="recent-orders-list">
+
+                    {% for work_order in dashboard.recent_work_orders %}
+
+                        <div class="recent-order-item">
+
+                            <div class="recent-order-main">
+
+                                <a
+                                    class="recent-order-number"
+                                    href="{{ url_for(
+                                        'work_orders.detalle',
+                                        numero=work_order.code
+                                    ) }}"
+                                >
+                                    {{ work_order.code }}
+                                </a>
+
+                                <h3 class="recent-order-title">
+                                    {{ work_order.title }}
+                                </h3>
+
+                                <p class="recent-order-responsible">
+                                    Activo:
+                                    {{ work_order.asset_code }}
+                                </p>
+
+                                <p class="recent-order-priority">
+                                    Prioridad:
+                                    {{ work_order.priority }}
+                                </p>
+
+                            </div>
+
+                            <div class="recent-order-meta">
+
+                                <strong>
+                                    {{ work_order.status }}
+                                </strong>
+
+                                <small>
+                                    {{ work_order.created_at }}
+                                </small>
+
+                                <a
+                                    class="button button-secondary"
+                                    href="{{ url_for(
+                                        'work_orders.detalle',
+                                        numero=work_order.code
+                                    ) }}"
+                                >
+                                    Ver orden
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="dashboard-empty">
+                    Todavía no existen órdenes de trabajo.
+                </div>
+
+            {% endif %}
+
+        </article>
+
+    </section>
+
+</div>
 
 {% endblock %}

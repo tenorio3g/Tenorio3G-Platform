@@ -622,7 +622,7 @@ def login_route():
 
         return redirect(
             url_for(
-                "assets.index"
+                "core.dashboard"
             )
         )
 
