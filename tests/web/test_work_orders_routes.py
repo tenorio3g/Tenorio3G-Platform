@@ -7,7 +7,17 @@ from app.domains.work_orders.entities import (
 from app.domains.work_orders.value_objects import (
     WorkOrderStatus,
 )
+from app.domains.work_orders.activities.bootstrap import (
+    work_order_activity_repository,
+)
 
+from app.domains.work_orders.activities.entities import (
+    WorkOrderActivity,
+)
+
+from app.domains.work_orders.activities.value_objects import (
+    ActivityStatus,
+)
 def create_web_work_order(
     code,
 ):
@@ -292,3 +302,144 @@ def test_work_order_detail_should_return_404_when_not_found(
     )
 
     assert response.status_code == 404
+
+def test_should_unassign_technician_from_web(
+    authenticated_client,
+    work_orders_test_db,
+):
+
+    from datetime import datetime
+
+    from app.domains.work_orders.technicians.bootstrap import (
+        technician_assignment_repository,
+    )
+
+    from app.domains.work_orders.technicians.entities import (
+        WorkOrderTechnicianAssignment,
+    )
+
+    work_order = create_web_work_order(
+        code="WO-WEB-UNASSIGN"
+    )
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-WEB-UNASSIGN",
+            person_code="55464",
+            assigned_at=datetime(
+                2026,
+                8,
+                16,
+                14,
+                30,
+            ),
+        )
+    )
+
+    response = authenticated_client.post(
+        "/ordenes/WO-WEB-UNASSIGN/"
+        "tecnicos/55464/quitar",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert technician_assignment_repository.exists(
+        "WO-WEB-UNASSIGN",
+        "55464",
+    ) is False
+
+
+def test_should_start_activity_from_web(
+    authenticated_client,
+    work_order_activities_test_db,
+):
+
+    activity = WorkOrderActivity(
+        code="ACT-WEB-START",
+        work_order_code="WO-REAL-001",
+        title="Actividad web",
+        responsible_person_code="55464",
+        estimated_minutes=30,
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+    
+
+    response = authenticated_client.post(
+        "/ordenes/WO-REAL-001/"
+        "actividades/ACT-WEB-START/iniciar",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    persisted = (
+        work_order_activities_test_db.get_by_code(
+            "ACT-WEB-START"
+        )
+    )
+
+    assert (
+        persisted.status
+        == ActivityStatus.IN_PROGRESS
+    )
+
+    assert persisted.started_at is not None
+
+
+def test_should_complete_activity_from_web(
+    authenticated_client,
+    work_order_activities_test_db,
+):
+
+    activity = WorkOrderActivity(
+        code="ACT-WEB-COMPLETE",
+        work_order_code="WO-REAL-001",
+        title="Actividad web",
+        responsible_person_code="55464",
+        estimated_minutes=30,
+    )
+
+    activity.start(
+        datetime.now()
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.post(
+        "/ordenes/WO-REAL-001/"
+        "actividades/ACT-WEB-COMPLETE/finalizar",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    persisted = (
+        work_order_activities_test_db.get_by_code(
+            "ACT-WEB-COMPLETE"
+        )
+    )
+
+    assert (
+        persisted.status
+        == ActivityStatus.COMPLETED
+    )
+
+    assert (
+        persisted.completed_at
+        is not None
+    )
+
+    assert (
+        persisted.actual_minutes
+        is not None
+    )

@@ -62,7 +62,9 @@ from app.domains.assets.preventive_maintenance.bootstrap import (
     preventive_maintenance_execution_repository,
     preventive_maintenance_repository,
 )
-
+from app.domains.work_orders.activities.bootstrap import (
+    work_order_activity_repository,
+)
 @pytest.fixture
 def app():
     app = create_app()
@@ -523,6 +525,47 @@ def work_orders_test_db(
     )
 
     yield work_order_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+@pytest.fixture
+def work_order_activities_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    database_path = (
+        tmp_path
+        / "work_order_activities_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        work_order_activity_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield work_order_activity_repository
 
     Base.metadata.drop_all(
         test_engine

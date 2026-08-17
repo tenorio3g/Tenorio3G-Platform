@@ -1,0 +1,93 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Asignar técnico - {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Orden de trabajo
+                </p>
+
+                <h3>
+                    Asignar técnico
+                </h3>
+
+                <p>
+                    {{ orden.code }} · {{ orden.title }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-field">
+
+                    <label for="person_code">
+                        Código del técnico
+                    </label>
+
+                    <input
+                        id="person_code"
+                        name="person_code"
+                        type="text"
+                        required
+                        value="{{ person_code|default('') }}"
+                        placeholder="Ej. 55464"
+                    >
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Asignar técnico
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="{{ url_for(
+                            'work_orders.detalle',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+                
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

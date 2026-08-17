@@ -45,6 +45,41 @@ from app.domains.work_orders.use_cases import (
     StartWorkOrderCommand,
 )
 
+from app.domains.work_orders.technicians.bootstrap import (
+    list_work_order_technicians,
+    assign_technician_to_work_order,
+    unassign_technician_from_work_order,
+)
+
+from app.domains.work_orders.technicians.use_cases import (
+    ListWorkOrderTechniciansQuery,
+    AssignTechnicianToWorkOrderCommand,
+    UnassignTechnicianFromWorkOrderCommand,
+)
+
+from app.domains.work_orders.technicians.presentation import (
+    WorkOrderTechniciansPresenter,
+)
+from datetime import datetime
+from app.domains.work_orders.activities.bootstrap import (
+    list_work_order_activities,
+    create_work_order_activity,
+    complete_work_order_activity,
+    start_work_order_activity,
+)
+
+from app.domains.work_orders.activities.presentation import (
+    WorkOrderActivitiesPresenter,
+)
+
+from app.domains.work_orders.activities.use_cases import (
+    ListWorkOrderActivitiesQuery,
+    CreateWorkOrderActivityCommand,
+    CompleteWorkOrderActivityCommand,
+    StartWorkOrderActivityCommand,
+)
+
+
 
 # =====================================================
 # Repositorios
@@ -133,48 +168,109 @@ def detalle(numero):
         result.supervisor,
     )
 
+    technicians_result = (
+        list_work_order_technicians.execute(
+            ListWorkOrderTechniciansQuery(
+                work_order_code=numero,
+            )
+        )
+    )
+
+    technicians = (
+        WorkOrderTechniciansPresenter.present(
+            technicians_result
+        )
+    )
+
+    activities_result = (
+        list_work_order_activities.execute(
+            ListWorkOrderActivitiesQuery(
+                work_order_code=numero
+            )
+        )
+    )
+
+    activities = (
+        WorkOrderActivitiesPresenter.present(
+            activities_result
+        )
+    )
+
     return render_template(
         "pages/work_order_detail_v2.html",
         orden=orden,
+        technicians=technicians,
+        activities=activities,
     )
-
 
 # =====================================================
 # Asignar Técnico
 # =====================================================
 
-@work_orders.route("/ordenes/<numero>/asignar-tecnico", methods=["GET", "POST"])
-def asignar_tecnico(numero):
+@work_orders.route(
+    "/ordenes/<numero>/asignar-tecnico",
+    methods=["GET", "POST"],
+)
+def asignar_tecnico(
+    numero: str,
+):
 
-    orden = work_order_repository.obtener_por_numero(numero)
+    try:
+        detail_result = (
+            get_work_order_detail.execute(
+                GetWorkOrderDetailQuery(
+                    code=numero,
+                )
+            )
+        )
 
-    if orden is None:
-        return "Orden no encontrada", 404
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        detail_result.work_order,
+        detail_result.asset,
+        detail_result.requester,
+        detail_result.supervisor,
+    )
 
     if request.method == "GET":
         return render_template(
-            "pages/assign_technician.html",
-            orden=orden
+            "pages/assign_technician_v2.html",
+            orden=orden,
         )
 
-    request_dto = AssignTechnicianRequest(
-        numero_orden=numero,
-        numero_tecnico=request.form.get("numero_tecnico"),
-        usuario="Fortunato Tenorio" # TODO: Replace with dynamic current_user
+    person_code = request.form.get(
+        "person_code",
+        "",
     )
 
     try:
-        assign_technician_service.ejecutar(request_dto)
-        return redirect(url_for("work_orders.detalle", numero=numero))
-
-    except (ValueError, TypeError) as error:
-        return render_template(
-            "pages/assign_technician.html",
-            orden=orden,
-            error=str(error),
-            numero_tecnico=request.form.get("numero_tecnico", "")
+        assign_technician_to_work_order.execute(
+            AssignTechnicianToWorkOrderCommand(
+                work_order_code=numero,
+                person_code=person_code,
+                assigned_at=datetime.now(),
+            )
         )
 
+    except ValueError as exc:
+        return render_template(
+            "pages/assign_technician_v2.html",
+            orden=orden,
+            error=str(exc),
+            person_code=person_code,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
 
 # =====================================================
 # Agregar Actividad
@@ -462,3 +558,184 @@ def cancel_work_order_route(
         )
     )
 
+@work_orders.post(
+    "/ordenes/<numero>/tecnicos/<person_code>/quitar"
+)
+def unassign_technician_route(
+    numero: str,
+    person_code: str,
+):
+
+    try:
+        unassign_technician_from_work_order.execute(
+            UnassignTechnicianFromWorkOrderCommand(
+                work_order_code=numero,
+                person_code=person_code,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.route(
+    "/ordenes/<numero>/actividades/nueva",
+    methods=["GET", "POST"],
+)
+def create_work_order_activity_route(
+    numero: str,
+):
+
+    try:
+        detail_result = (
+            get_work_order_detail.execute(
+                GetWorkOrderDetailQuery(
+                    code=numero,
+                )
+            )
+        )
+
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        detail_result.work_order,
+        detail_result.asset,
+        detail_result.requester,
+        detail_result.supervisor,
+    )
+
+    if request.method == "GET":
+        return render_template(
+            "pages/create_work_order_activity_v2.html",
+            orden=orden,
+        )
+
+    estimated_minutes_raw = (
+        request.form.get(
+            "estimated_minutes",
+            "",
+        )
+        .strip()
+    )
+
+    estimated_minutes = (
+        int(estimated_minutes_raw)
+        if estimated_minutes_raw
+        else None
+    )
+
+    try:
+        create_work_order_activity.execute(
+            CreateWorkOrderActivityCommand(
+                code=request.form.get(
+                    "code",
+                    "",
+                ),
+                work_order_code=numero,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                responsible_person_code=(
+                    request.form.get(
+                        "responsible_person_code",
+                        "",
+                    )
+                ),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                estimated_minutes=(
+                    estimated_minutes
+                ),
+            )
+        )
+
+    except (ValueError, TypeError) as exc:
+        return render_template(
+            "pages/create_work_order_activity_v2.html",
+            orden=orden,
+            error=str(exc),
+            data=request.form,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/iniciar"
+)
+def start_work_order_activity_route(
+    numero: str,
+    activity_code: str,
+):
+
+    try:
+        start_work_order_activity.execute(
+            StartWorkOrderActivityCommand(
+                code=activity_code,
+                started_at=datetime.now(),
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/finalizar"
+)
+def complete_work_order_activity_route(
+    numero: str,
+    activity_code: str,
+):
+
+    try:
+        complete_work_order_activity.execute(
+            CompleteWorkOrderActivityCommand(
+                code=activity_code,
+                completed_at=datetime.now(),
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )

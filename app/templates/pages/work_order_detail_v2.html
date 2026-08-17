@@ -318,6 +318,294 @@ Orden {{ orden.code }}
             </div>
 
         </article>
+                <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Personal
+                    </p>
+
+                    <h3>
+                        Técnicos asignados
+                    </h3>
+
+                </div>
+
+                <div class="asset-workspace-card__actions">
+
+                    <a
+                        class="button button-primary"
+                        href="{{ url_for(
+                            'work_orders.asignar_tecnico',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        + Asignar técnico
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                {% if technicians.has_items %}
+
+                    {% for technician in technicians.items %}
+
+                        <div>
+
+                            <p>
+                                <strong>Nombre:</strong>
+                                {{ technician.name }}
+                            </p>
+
+                            <p>
+                                <strong>Número:</strong>
+                                {{ technician.person_code }}
+                            </p>
+
+                            <p>
+                                <strong>Puesto:</strong>
+                                {{ technician.position }}
+                            </p>
+
+                            <p>
+                                <strong>Asignado:</strong>
+                                {{ technician.assigned_at }}
+                            </p>
+
+                            <form
+                                method="post"
+                                action="{{ url_for(
+                                    'work_orders.unassign_technician_route',
+                                    numero=orden.code,
+                                    person_code=technician.person_code
+                                ) }}"
+                                onsubmit="
+                                    return confirm(
+                                        '¿Deseas quitar este técnico de la orden?'
+                                    );
+                                "
+                            >
+                                <button
+                                    type="submit"
+                                    class="button button-secondary"
+                                >
+                                    Quitar
+                                </button>
+                            </form>
+
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        No hay técnicos asignados.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
+
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Trabajo
+                    </p>
+
+                    <h3>
+                        Actividades de la orden
+                    </h3>
+
+                </div>
+
+                <div class="asset-workspace-card__actions">
+
+                    <a
+                        class="button button-primary"
+                        href="{{ url_for(
+                            'work_orders.create_work_order_activity_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        + Nueva actividad
+                    </a>
+
+                </div>
+
+            </div>
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                <p>
+                    Avance:
+                    <strong>
+                        {{ activities.progress_percent }}%
+                    </strong>
+                </p>
+
+                <p>
+                    {{ activities.completed }}
+                    de
+                    {{ activities.total }}
+                    actividades finalizadas
+                </p>
+
+                <hr>
+
+                {% if activities.has_items %}
+
+                    {% for activity in activities.items %}
+
+                        <div>
+
+                            <h3>
+                                {{ activity.title }}
+                            </h3>
+
+                            <p>
+                                <strong>Código:</strong>
+                                {{ activity.code }}
+                            </p>
+
+                            {% if activity.description %}
+                                <p>
+                                    {{ activity.description }}
+                                </p>
+                            {% endif %}
+
+                            <p>
+                                <strong>Responsable:</strong>
+                                {{ activity.responsible_person_name }}
+                            </p>
+
+                            <p>
+                                <strong>Estado:</strong>
+                                {{ activity.status_label }}
+                            </p>
+
+                            <div class="form-actions">
+
+                                {% if activity.status == "PENDING" %}
+
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'work_orders.start_work_order_activity_route',
+                                            numero=orden.code,
+                                            activity_code=activity.code
+                                        ) }}"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="button button-primary"
+                                        >
+                                            Iniciar
+                                        </button>
+                                    </form>
+
+                                {% elif activity.status == "IN_PROGRESS" %}
+
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'work_orders.complete_work_order_activity_route',
+                                            numero=orden.code,
+                                            activity_code=activity.code
+                                        ) }}"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="button button-primary"
+                                        >
+                                            Finalizar
+                                        </button>
+                                    </form>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            {% if activity.estimated_minutes %}
+                                <p>
+                                    <strong>Tiempo estimado:</strong>
+                                    {{ activity.estimated_minutes }}
+                                    min
+                                </p>
+                            {% endif %}
+                            
+                            {% if activity.actual_minutes is not none %}
+                                <p>
+                                    <strong>Tiempo real:</strong>
+                                    {{ activity.actual_minutes }}
+                                    min
+                                </p>
+                            {% endif %}
+
+                            {% if activity.started_at %}
+                                <p>
+                                    <strong>Inicio:</strong>
+                                    {{ activity.started_at }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.completed_at %}
+                                <p>
+                                    <strong>Finalización:</strong>
+                                    {{ activity.completed_at }}
+                                </p>
+                            {% endif %}
+
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Esta orden todavía no tiene actividades registradas.
+                    </p>
+
+                {% endif %}
+
+            </div>
+            <div class="asset-workspace-card__actions">
+
+                <a
+                    class="button button-primary"
+                    href="{{ url_for(
+                        'work_orders.create_work_order_activity_route',
+                        numero=orden.code
+                    ) }}"
+                >
+                    + Nueva actividad
+                </a>
+
+            </div>
+        </article>
 
     </div>
 

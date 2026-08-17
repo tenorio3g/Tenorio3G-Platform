@@ -1,0 +1,160 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Nueva actividad - {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Orden de trabajo
+                </p>
+
+                <h3>
+                    Nueva actividad
+                </h3>
+
+                <p>
+                    {{ orden.code }} · {{ orden.title }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-grid">
+
+                    <div class="form-field">
+
+                        <label for="code">
+                            Código
+                        </label>
+
+                        <input
+                            id="code"
+                            name="code"
+                            type="text"
+                            required
+                            value="{{ data.get('code', '') if data else '' }}"
+                            placeholder="Ej. ACT-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="title">
+                            Título
+                        </label>
+
+                        <input
+                            id="title"
+                            name="title"
+                            type="text"
+                            required
+                            value="{{ data.get('title', '') if data else '' }}"
+                            placeholder="Ej. Inspección visual"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="responsible_person_code">
+                            Responsable
+                        </label>
+
+                        <input
+                            id="responsible_person_code"
+                            name="responsible_person_code"
+                            type="text"
+                            required
+                            value="{{ data.get('responsible_person_code', '') if data else '' }}"
+                            placeholder="Ej. 55464"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="estimated_minutes">
+                            Tiempo estimado
+                        </label>
+
+                        <input
+                            id="estimated_minutes"
+                            name="estimated_minutes"
+                            type="number"
+                            min="1"
+                            value="{{ data.get('estimated_minutes', '') if data else '' }}"
+                            placeholder="Ej. 30"
+                        >
+
+                    </div>
+
+                    <div class="form-field form-field-full">
+
+                        <label for="description">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                        >{{ data.get('description', '') if data else '' }}</textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Crear actividad
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="{{ url_for(
+                            'work_orders.detalle',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}
