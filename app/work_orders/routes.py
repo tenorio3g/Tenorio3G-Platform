@@ -92,7 +92,30 @@ from app.domains.work_orders.materials.use_cases import (
     ListWorkOrderSparePartsQuery,
     AddSparePartToWorkOrderCommand,
 )
+from app.domains.work_orders.tools.bootstrap import (
+    issue_tool_to_work_order,
+    list_work_order_tools,
+)
 
+from app.domains.work_orders.tools.use_cases import (
+    IssueToolToWorkOrderCommand,
+    ListWorkOrderToolsQuery,
+)
+
+from app.domains.work_orders.tools.presentation import (
+    WorkOrderToolsPresenter,
+)
+from app.domains.work_orders.tools.bootstrap import (
+    issue_tool_to_work_order,
+    list_work_order_tools,
+    return_tool_from_work_order,
+)
+
+from app.domains.work_orders.tools.use_cases import (
+    IssueToolToWorkOrderCommand,
+    ListWorkOrderToolsQuery,
+    ReturnToolFromWorkOrderCommand,
+)
 # =====================================================
 # Repositorios
 # =====================================================
@@ -222,6 +245,20 @@ def detalle(numero):
         )
     )
 
+    tools_result = (
+        list_work_order_tools.execute(
+            ListWorkOrderToolsQuery(
+                work_order_code=numero
+            )
+        )
+    )
+
+    tools = (
+        WorkOrderToolsPresenter.present(
+            tools_result
+        )
+    )
+
 
     return render_template(
         "pages/work_order_detail_v2.html",
@@ -229,6 +266,7 @@ def detalle(numero):
         technicians=technicians,
         activities=activities,
         spare_parts=spare_parts,
+        tools=tools,
     )
 
 # =====================================================
@@ -855,6 +893,114 @@ def add_spare_part_to_work_order_route(
             orden=orden,
             error=str(exc),
             data=request.form,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.route(
+    "/ordenes/<numero>/herramientas/nueva",
+    methods=["GET", "POST"],
+)
+def issue_tool_to_work_order_route(
+    numero: str,
+):
+
+    try:
+        detail_result = (
+            get_work_order_detail.execute(
+                GetWorkOrderDetailQuery(
+                    code=numero,
+                )
+            )
+        )
+
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        detail_result.work_order,
+        detail_result.asset,
+        detail_result.requester,
+        detail_result.supervisor,
+    )
+
+    if request.method == "GET":
+        return render_template(
+            "pages/issue_work_order_tool_v2.html",
+            orden=orden,
+        )
+
+    try:
+        issue_tool_to_work_order.execute(
+            IssueToolToWorkOrderCommand(
+                usage_id=request.form.get(
+                    "usage_id",
+                    "",
+                ),
+                work_order_code=numero,
+                tool_code=request.form.get(
+                    "tool_code",
+                    "",
+                ),
+                tool_name=request.form.get(
+                    "tool_name",
+                    "",
+                ),
+                quantity=request.form.get(
+                    "quantity",
+                    "",
+                ),
+                issued_at=datetime.now(),
+                observations=request.form.get(
+                    "observations",
+                    "",
+                ),
+            )
+        )
+
+    except (ValueError, TypeError) as exc:
+        return render_template(
+            "pages/issue_work_order_tool_v2.html",
+            orden=orden,
+            error=str(exc),
+            data=request.form,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.post(
+    "/ordenes/<numero>/herramientas/<usage_id>/devolver"
+)
+def return_tool_from_work_order_route(
+    numero: str,
+    usage_id: str,
+):
+
+    try:
+        return_tool_from_work_order.execute(
+            ReturnToolFromWorkOrderCommand(
+                usage_id=usage_id,
+                returned_at=datetime.now(),
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
         )
 
     return redirect(

@@ -1,0 +1,161 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Registrar herramienta - {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Orden de trabajo
+                </p>
+
+                <h3>
+                    Registrar herramienta
+                </h3>
+
+                <p>
+                    {{ orden.code }} · {{ orden.title }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-grid">
+
+                    <div class="form-field">
+
+                        <label for="usage_id">
+                            ID de movimiento
+                        </label>
+
+                        <input
+                            id="usage_id"
+                            name="usage_id"
+                            type="text"
+                            required
+                            value="{{ data.get('usage_id', '') if data else '' }}"
+                            placeholder="Ej. TU-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="tool_code">
+                            Código de herramienta
+                        </label>
+
+                        <input
+                            id="tool_code"
+                            name="tool_code"
+                            type="text"
+                            required
+                            value="{{ data.get('tool_code', '') if data else '' }}"
+                            placeholder="Ej. TL-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="tool_name">
+                            Nombre
+                        </label>
+
+                        <input
+                            id="tool_name"
+                            name="tool_name"
+                            type="text"
+                            required
+                            value="{{ data.get('tool_name', '') if data else '' }}"
+                            placeholder="Ej. Multímetro"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="quantity">
+                            Cantidad
+                        </label>
+
+                        <input
+                            id="quantity"
+                            name="quantity"
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value="{{ data.get('quantity', '1') if data else '1' }}"
+                        >
+
+                    </div>
+
+                    <div class="form-field form-field-full">
+
+                        <label for="observations">
+                            Observaciones
+                        </label>
+
+                        <textarea
+                            id="observations"
+                            name="observations"
+                            rows="4"
+                        >{{ data.get('observations', '') if data else '' }}</textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Registrar herramienta
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="{{ url_for(
+                            'work_orders.detalle',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

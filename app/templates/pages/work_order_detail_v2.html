@@ -730,6 +730,156 @@ Orden {{ orden.code }}
 
         </article>
 
+        <article class="asset-workspace-card">
+
+            <div class="asset-workspace-card__header">
+                <div class="asset-workspace-card__actions">
+
+                    <a
+                        class="button button-primary"
+                        href="{{ url_for(
+                            'work_orders.issue_tool_to_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        + Registrar herramienta
+                    </a>
+
+                </div>
+
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Recursos
+                    </p>
+
+                    <h3>
+                        Herramientas utilizadas
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                {% if tools.has_items %}
+
+                    <p>
+                        <strong>
+                            {{ tools.total }}
+                        </strong>
+                        registros de herramientas
+                    </p>
+
+                    <p>
+                        Prestadas:
+                        <strong>
+                            {{ tools.issued }}
+                        </strong>
+
+                        &nbsp; | &nbsp;
+
+                        Devueltas:
+                        <strong>
+                            {{ tools.returned }}
+                        </strong>
+                    </p>
+
+                    <hr>
+
+                    {% for item in tools.items %}
+
+                        <div>
+
+                            <h3>
+                                {{ item.tool_name }}
+                            </h3>
+
+                            <p>
+                                <strong>Código:</strong>
+                                {{ item.tool_code }}
+                            </p>
+
+                            <p>
+                                <strong>Cantidad:</strong>
+                                {{ item.quantity }}
+                            </p>
+
+                            <p>
+                                <strong>Estado:</strong>
+                                {{ item.status_label }}
+                                {% if item.status == "ISSUED" %}
+
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'work_orders.return_tool_from_work_order_route',
+                                            numero=orden.code,
+                                            usage_id=item.usage_id
+                                        ) }}"
+                                        onsubmit="
+                                            return confirm(
+                                                '¿Deseas registrar la devolución de esta herramienta?'
+                                            );
+                                        "
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="button button-secondary"
+                                        >
+                                            Devolver herramienta
+                                        </button>
+                                    </form>
+
+                                {% endif %}
+                            </p>
+
+                            <p>
+                                <strong>Prestada:</strong>
+                                {{ item.issued_at }}
+                            </p>
+
+                            {% if item.returned_at %}
+
+                                <p>
+                                    <strong>Devuelta:</strong>
+                                    {{ item.returned_at }}
+                                </p>
+
+                            {% endif %}
+
+                            {% if item.observations %}
+
+                                <p>
+                                    <strong>Observaciones:</strong>
+                                    {{ item.observations }}
+                                </p>
+
+                            {% endif %}
+
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Esta orden todavía no tiene herramientas registradas.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+
+
     </div>
 
 </div>
