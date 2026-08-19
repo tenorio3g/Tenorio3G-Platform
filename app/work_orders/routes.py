@@ -1,10 +1,18 @@
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+
 from flask import (
     render_template,
     request,
     redirect,
-    url_for
+    session,
+    send_file,
+    url_for,
 )
 
+from werkzeug.utils import (
+    secure_filename,
+)
 from . import work_orders
 
 from app.work_orders.dto.create_work_order_request import CreateWorkOrderRequest
@@ -115,6 +123,25 @@ from app.domains.work_orders.tools.use_cases import (
     IssueToolToWorkOrderCommand,
     ListWorkOrderToolsQuery,
     ReturnToolFromWorkOrderCommand,
+)
+from app.domains.work_orders.evidence.bootstrap import (
+    create_work_order_evidence,
+    evidence_storage,
+    get_work_order_evidence,
+    list_work_order_evidence,
+)
+
+from app.domains.work_orders.evidence.presentation import (
+    WorkOrderEvidencePresenter,
+)
+
+from app.domains.work_orders.evidence.use_cases import (
+    CreateWorkOrderEvidenceCommand,
+    GetWorkOrderEvidenceQuery,
+    ListWorkOrderEvidenceQuery,
+)
+from app.domains.work_orders.evidence.value_objects import (
+    EvidenceType,
 )
 # =====================================================
 # Repositorios
@@ -259,6 +286,20 @@ def detalle(numero):
         )
     )
 
+    evidence_result = (
+        list_work_order_evidence.execute(
+            ListWorkOrderEvidenceQuery(
+                work_order_code=numero
+            )
+        )
+    )
+
+    evidence = (
+        WorkOrderEvidencePresenter.present(
+            evidence_result
+        )
+    )
+    
 
     return render_template(
         "pages/work_order_detail_v2.html",
@@ -267,6 +308,7 @@ def detalle(numero):
         activities=activities,
         spare_parts=spare_parts,
         tools=tools,
+        evidence=evidence,
     )
 
 # =====================================================
@@ -1008,4 +1050,276 @@ def return_tool_from_work_order_route(
             "work_orders.detalle",
             numero=numero,
         )
+    )
+
+@work_orders.route(
+    "/ordenes/<numero>/evidencias/nueva",
+    methods=["GET", "POST"],
+)
+def create_work_order_evidence_route(
+    numero: str,
+):
+
+    try:
+        detail_result = (
+            get_work_order_detail.execute(
+                GetWorkOrderDetailQuery(
+                    code=numero,
+                )
+            )
+        )
+
+    except ValueError:
+        return (
+            "Orden no encontrada",
+            404,
+        )
+
+    orden = WorkOrderDetailPresenter.present(
+        detail_result.work_order,
+        detail_result.asset,
+        detail_result.requester,
+        detail_result.supervisor,
+    )
+
+    if request.method == "GET":
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=[
+                EvidenceType.BEFORE_PHOTO,
+                EvidenceType.AFTER_PHOTO,
+                EvidenceType.MEASUREMENT,
+                EvidenceType.DOCUMENT,
+                EvidenceType.OTHER,
+            ],
+        )
+
+    uploaded_file = request.files.get(
+        "evidence_file"
+    )
+
+    if (
+        uploaded_file is None
+        or not uploaded_file.filename
+    ):
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=list(
+                EvidenceType
+            ),
+            error="Debe seleccionar un archivo.",
+            data=request.form,
+        )
+
+    original_name = secure_filename(
+        uploaded_file.filename
+    )
+
+    extension = Path(
+        original_name
+    ).suffix.lower()
+
+    allowed_extensions = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".pdf",
+    }
+
+    if extension not in allowed_extensions:
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=list(
+                EvidenceType
+            ),
+            error=(
+                "Solo se permiten archivos "
+                "JPG, JPEG, PNG o PDF."
+            ),
+            data=request.form,
+        )
+
+    evidence_id = secure_filename(
+        request.form.get(
+            "evidence_id",
+            "",
+        )
+    )
+
+    if not evidence_id:
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=list(
+                EvidenceType
+            ),
+            error="El ID de evidencia es obligatorio.",
+            data=request.form,
+        )
+
+    stored_file_name = (
+        f"{evidence_id}__{original_name}"
+    )
+
+    try:
+        evidence_type = EvidenceType(
+            request.form.get(
+                "evidence_type",
+                "",
+            )
+        )
+
+    except ValueError:
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=list(
+                EvidenceType
+            ),
+            error="Tipo de evidencia inválido.",
+            data=request.form,
+        )
+
+    person_code = session.get(
+        "person_code"
+    )
+
+    if not person_code:
+        return (
+            "Usuario no autenticado.",
+            401,
+        )
+
+    with NamedTemporaryFile(
+        delete=False,
+        suffix=extension,
+    ) as temporary_file:
+
+        temporary_path = Path(
+            temporary_file.name
+        )
+
+        uploaded_file.save(
+            temporary_file
+        )
+
+    stored = False
+
+    try:
+        evidence_storage.save(
+            temporary_path,
+            stored_file_name,
+        )
+
+        stored = True
+
+        create_work_order_evidence.execute(
+            CreateWorkOrderEvidenceCommand(
+                evidence_id=evidence_id,
+                work_order_code=numero,
+                title=request.form.get(
+                    "title",
+                    "",
+                ),
+                evidence_type=evidence_type,
+                file_name=stored_file_name,
+                registered_by_person_code=person_code,
+                created_at=datetime.now(),
+                description=request.form.get(
+                    "description",
+                    "",
+                ),
+                activity_code=(
+                    request.form.get(
+                        "activity_code",
+                        "",
+                    )
+                    or None
+                ),
+            )
+        )
+
+    except (
+        ValueError,
+        TypeError,
+        FileNotFoundError,
+    ) as exc:
+
+        if stored:
+            evidence_storage.delete(
+                stored_file_name
+            )
+
+        return render_template(
+            "pages/create_work_order_evidence_v2.html",
+            orden=orden,
+            evidence_types=list(
+                EvidenceType
+            ),
+            error=str(exc),
+            data=request.form,
+        )
+
+    finally:
+        temporary_path.unlink(
+            missing_ok=True
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.get(
+    "/ordenes/<numero>/evidencias/<evidence_id>/archivo"
+)
+def work_order_evidence_file_route(
+    numero: str,
+    evidence_id: str,
+):
+
+    try:
+        result = (
+            get_work_order_evidence.execute(
+                GetWorkOrderEvidenceQuery(
+                    evidence_id=evidence_id
+                )
+            )
+        )
+
+    except ValueError:
+        return (
+            "Evidencia no encontrada",
+            404,
+        )
+
+    evidence = result.evidence
+
+    if (
+        evidence.work_order_code
+        != str(numero).strip().upper()
+    ):
+        return (
+            "Evidencia no pertenece a esta orden",
+            404,
+        )
+
+    file_path = evidence_storage.get_path(
+        evidence.file_name
+    )
+
+    if not file_path.exists():
+        return (
+            "Archivo de evidencia no encontrado",
+            404,
+        )
+
+    return send_file(
+        file_path,
+        as_attachment=False,
     )

@@ -1,0 +1,187 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Registrar evidencia - {{ orden.code }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Orden de trabajo
+                </p>
+
+                <h3>
+                    Registrar evidencia
+                </h3>
+
+                <p>
+                    {{ orden.code }} · {{ orden.title }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+            >
+
+                <div class="form-grid">
+
+                    <div class="form-field">
+
+                        <label for="evidence_id">
+                            ID de evidencia
+                        </label>
+
+                        <input
+                            id="evidence_id"
+                            name="evidence_id"
+                            type="text"
+                            required
+                            value="{{ data.get('evidence_id', '') if data else '' }}"
+                            placeholder="Ej. EVID-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="title">
+                            Título
+                        </label>
+
+                        <input
+                            id="title"
+                            name="title"
+                            type="text"
+                            required
+                            value="{{ data.get('title', '') if data else '' }}"
+                            placeholder="Ej. Contactor dañado"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="evidence_type">
+                            Tipo de evidencia
+                        </label>
+
+                        <select
+                            id="evidence_type"
+                            name="evidence_type"
+                            required
+                        >
+
+                            {% for type in evidence_types %}
+
+                                <option
+                                    value="{{ type.value }}"
+                                >
+                                    {{ type.value }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="activity_code">
+                            Actividad
+                        </label>
+
+                        <input
+                            id="activity_code"
+                            name="activity_code"
+                            type="text"
+                            value="{{ data.get('activity_code', '') if data else '' }}"
+                            placeholder="Opcional. Ej. ACT-001"
+                        >
+
+                    </div>
+
+                    <div class="form-field form-field-full">
+
+                        <label for="description">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            rows="4"
+                        >{{ data.get('description', '') if data else '' }}</textarea>
+
+                    </div>
+
+                    <div class="form-field form-field-full">
+
+                        <label for="evidence_file">
+                            Archivo
+                        </label>
+
+                        <input
+                            id="evidence_file"
+                            name="evidence_file"
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Registrar evidencia
+                    </button>
+
+                    <a
+                        class="button button-secondary"
+                        href="{{ url_for(
+                            'work_orders.detalle',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

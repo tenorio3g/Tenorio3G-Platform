@@ -531,3 +531,23 @@
     }
 
 }
+
+.work-order-evidence-file {
+    margin-top: 12px;
+}
+
+.work-order-evidence-thumbnail {
+    display: block;
+    width: 180px;
+    max-width: 100%;
+    height: 120px;
+
+    object-fit: cover;
+
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+}
+
+.work-order-evidence-thumbnail:hover {
+    opacity: 0.9;
+}

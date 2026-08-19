@@ -878,7 +878,167 @@ Orden {{ orden.code }}
             </div>
 
         </article>
+        <article class="asset-workspace-card">
 
+            <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Evidencia
+                    </p>
+
+                    <h3>
+                        Evidencias de la orden
+                        <div class="asset-workspace-card__actions">
+
+                            <a
+                                class="button button-primary"
+                                href="{{ url_for(
+                                    'work_orders.create_work_order_evidence_route',
+                                    numero=orden.code
+                                ) }}"
+                            >
+                                + Registrar evidencia
+                            </a>
+
+                        </div>
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="asset-workspace-card__body">
+
+                {% if evidence.has_items %}
+
+                    <p>
+                        <strong>{{ evidence.total }}</strong>
+                        evidencias registradas
+                    </p>
+
+                    <hr>
+
+                    {% for item in evidence.items %}
+
+                        <div>
+
+                            <h3>
+                                {{ item.title }}
+                            </h3>
+
+                            <p>
+                                <strong>Tipo:</strong>
+                                {{ item.evidence_type_label }}
+                            </p>
+
+                            <div class="work-order-evidence-file">
+
+                                {% if item.is_image %}
+
+                                    <a
+                                        href="{{ url_for(
+                                            'work_orders.work_order_evidence_file_route',
+                                            numero=orden.code,
+                                            evidence_id=item.evidence_id
+                                        ) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        <img
+                                            src="{{ url_for(
+                                                'work_orders.work_order_evidence_file_route',
+                                                numero=orden.code,
+                                                evidence_id=item.evidence_id
+                                            ) }}"
+                                            alt="{{ item.title }}"
+                                            class="work-order-evidence-thumbnail"
+                                        >
+                                    </a>
+
+                                {% elif item.is_pdf %}
+
+                                    <a
+                                        class="button button-secondary"
+                                        href="{{ url_for(
+                                            'work_orders.work_order_evidence_file_route',
+                                            numero=orden.code,
+                                            evidence_id=item.evidence_id
+                                        ) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        Abrir PDF
+                                    </a>
+
+                                {% else %}
+
+                                    <a
+                                        class="button button-secondary"
+                                        href="{{ url_for(
+                                            'work_orders.work_order_evidence_file_route',
+                                            numero=orden.code,
+                                            evidence_id=item.evidence_id
+                                        ) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        Ver archivo
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                            <p>
+                                <strong>Registrado por:</strong>
+                                {{ item.registered_by_person_code }}
+                            </p>
+
+                            <p>
+                                <strong>Fecha:</strong>
+                                {{ item.created_at }}
+                            </p>
+
+                            {% if item.activity_code %}
+
+                                <p>
+                                    <strong>Actividad:</strong>
+                                    {{ item.activity_code }}
+                                </p>
+
+                            {% endif %}
+
+                            {% if item.description %}
+
+                                <p>
+                                    <strong>Descripción:</strong>
+                                    {{ item.description }}
+                                </p>
+
+                            {% endif %}
+
+                            {% if not loop.last %}
+                                <hr>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>
+                        Esta orden todavía no tiene evidencias registradas.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </article>
 
     </div>
 
