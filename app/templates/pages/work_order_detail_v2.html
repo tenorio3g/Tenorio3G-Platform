@@ -8,37 +8,209 @@ Orden {{ orden.code }}
 
 <div class="container">
 
-    <div class="page-header">
+    <!-- =====================================================
+         WORK ORDER HEADER
+         ===================================================== -->
+
+    <div class="work-order-page-heading">
 
         <div>
+
             <p class="page-eyebrow">
                 Orden de trabajo
             </p>
 
-            <h1>
-                {{ orden.code }}
-            </h1>
+            <div class="work-order-page-heading__title-row">
 
-            <p>
+                <h1>
+                    {{ orden.code }}
+                </h1>
+
+                <span
+                    class="
+                        work-order-status-badge
+                        work-order-status-badge--{{ orden.status|lower }}
+                    "
+                >
+                    {{ orden.status }}
+                </span>
+
+            </div>
+
+            <p class="work-order-page-heading__subtitle">
                 {{ orden.title }}
             </p>
-        </div>
 
-        <div>
-            <span class="badge">
-                {{ orden.status }}
-            </span>
         </div>
 
     </div>
 
 
-    <div class="asset-workspace-grid">
+    <!-- =====================================================
+         WORK ORDER ACTIONS
+         ===================================================== -->
 
-        <article class="asset-workspace-card">
+    <div class="work-order-actions-bar">
+
+        {% if orden.status == "CREATED" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.assign_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Asignar
+                </button>
+            </form>
+
+
+        {% elif orden.status == "ASSIGNED" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.start_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Iniciar
+                </button>
+            </form>
+
+
+        {% elif orden.status == "IN_PROGRESS" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.hold_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-secondary"
+                >
+                    Pausar
+                </button>
+            </form>
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.complete_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Completar
+                </button>
+            </form>
+
+
+        {% elif orden.status == "ON_HOLD" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.resume_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Reanudar
+                </button>
+            </form>
+
+
+        {% elif orden.status == "COMPLETED" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.close_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Cerrar
+                </button>
+            </form>
+
+        {% endif %}
+
+
+        {% if orden.status in [
+            "CREATED",
+            "ASSIGNED",
+            "IN_PROGRESS",
+            "ON_HOLD"
+        ] %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.cancel_work_order_route',
+                    numero=orden.code
+                ) }}"
+                onsubmit="
+                    return confirm(
+                        '¿Deseas cancelar esta orden?'
+                    );
+                "
+            >
+                <button
+                    type="submit"
+                    class="button button-secondary"
+                >
+                    Cancelar
+                </button>
+            </form>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         WORK ORDER GRID
+         ===================================================== -->
+
+    <div class="work-order-detail-grid">
+
+
+        <!-- =================================================
+             GENERAL INFORMATION
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-summary-card
+        ">
 
             <div class="asset-workspace-card__header">
+
                 <div>
+
                     <p class="asset-workspace-card__eyebrow">
                         Información
                     </p>
@@ -46,161 +218,46 @@ Orden {{ orden.code }}
                     <h3>
                         Datos generales
                     </h3>
+
                 </div>
+
             </div>
 
             <div class="asset-workspace-card__body">
 
                 <p>
                     <strong>Tipo:</strong>
-                    {{ orden.work_type }}
+
+                    <span class="work-order-type-badge">
+                        {{ orden.work_type }}
+                    </span>
                 </p>
 
                 <p>
                     <strong>Prioridad:</strong>
-                    {{ orden.priority }}
+
+                    <span
+                        class="
+                            work-order-priority-badge
+                            work-order-priority-badge--{{ orden.priority|lower }}
+                        "
+                    >
+                        {{ orden.priority }}
+                    </span>
                 </p>
 
                 <p>
                     <strong>Estado:</strong>
-                    {{ orden.status }}
-                                    <div class="form-actions">
 
-                    {% if orden.status == "CREATED" %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.assign_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-primary"
-                            >
-                                Asignar
-                            </button>
-                        </form>
-
-                    {% elif orden.status == "ASSIGNED" %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.start_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-primary"
-                            >
-                                Iniciar
-                            </button>
-                        </form>
-
-                    {% endif %}
-                    {% if orden.status == "IN_PROGRESS" %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.hold_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-secondary"
-                            >
-                                Pausar
-                            </button>
-                        </form>
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.complete_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-primary"
-                            >
-                                Completar
-                            </button>
-                        </form>
-
-                    {% elif orden.status == "ON_HOLD" %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.resume_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-primary"
-                            >
-                                Reanudar
-                            </button>
-                        </form>
-
-                    {% elif orden.status == "COMPLETED" %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.close_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                        >
-                            <button
-                                type="submit"
-                                class="button button-primary"
-                            >
-                                Cerrar
-                            </button>
-                        </form>
-
-                    {% endif %} 
-                    
-                    {% if orden.status in [
-                        "CREATED",
-                        "ASSIGNED",
-                        "IN_PROGRESS",
-                        "ON_HOLD"
-                    ] %}
-
-                        <form
-                            method="post"
-                            action="{{ url_for(
-                                'work_orders.cancel_work_order_route',
-                                numero=orden.code
-                            ) }}"
-                            onsubmit="
-                                return confirm(
-                                    '¿Deseas cancelar esta orden?'
-                                );
-                            "
-                        >
-                            <button
-                                type="submit"
-                                class="button button-secondary"
-                            >
-                                Cancelar
-                            </button>
-                        </form>
-
-                    {% endif %}
-                </div>
+                    <span
+                        class="
+                            work-order-status-badge
+                            work-order-status-badge--{{ orden.status|lower }}
+                        "
+                    >
+                        {{ orden.status }}
+                    </span>
                 </p>
-
-
 
                 <p>
                     <strong>Creada:</strong>
@@ -217,10 +274,19 @@ Orden {{ orden.code }}
         </article>
 
 
-        <article class="asset-workspace-card">
+        <!-- =================================================
+             ASSET
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-compact-card
+        ">
 
             <div class="asset-workspace-card__header">
+
                 <div>
+
                     <p class="asset-workspace-card__eyebrow">
                         Activo
                     </p>
@@ -228,7 +294,9 @@ Orden {{ orden.code }}
                     <h3>
                         {{ orden.asset.name }}
                     </h3>
+
                 </div>
+
             </div>
 
             <div class="asset-workspace-card__body">
@@ -248,10 +316,19 @@ Orden {{ orden.code }}
         </article>
 
 
-        <article class="asset-workspace-card">
+        <!-- =================================================
+             REQUESTER
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-compact-card
+        ">
 
             <div class="asset-workspace-card__header">
+
                 <div>
+
                     <p class="asset-workspace-card__eyebrow">
                         Personal
                     </p>
@@ -259,7 +336,9 @@ Orden {{ orden.code }}
                     <h3>
                         Solicitante
                     </h3>
+
                 </div>
+
             </div>
 
             <div class="asset-workspace-card__body">
@@ -284,10 +363,19 @@ Orden {{ orden.code }}
         </article>
 
 
-        <article class="asset-workspace-card">
+        <!-- =================================================
+             SUPERVISOR
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-compact-card
+        ">
 
             <div class="asset-workspace-card__header">
+
                 <div>
+
                     <p class="asset-workspace-card__eyebrow">
                         Personal
                     </p>
@@ -295,7 +383,9 @@ Orden {{ orden.code }}
                     <h3>
                         Supervisor
                     </h3>
+
                 </div>
+
             </div>
 
             <div class="asset-workspace-card__body">
@@ -318,7 +408,16 @@ Orden {{ orden.code }}
             </div>
 
         </article>
-                <article class="asset-workspace-card">
+
+
+        <!-- =================================================
+             TECHNICIANS
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-technicians-card
+        ">
 
             <div class="asset-workspace-card__header">
 
@@ -350,68 +449,107 @@ Orden {{ orden.code }}
 
             </div>
 
+
             <div class="asset-workspace-card__body">
 
                 {% if technicians.has_items %}
 
-                    {% for technician in technicians.items %}
+                    <div class="work-order-technicians-grid">
 
-                        <div>
+                        {% for technician in technicians.items %}
 
-                            <p>
-                                <strong>Nombre:</strong>
-                                {{ technician.name }}
-                            </p>
+                            <article class="work-order-technician">
 
-                            <p>
-                                <strong>Número:</strong>
-                                {{ technician.person_code }}
-                            </p>
+                                <div class="work-order-technician__header">
 
-                            <p>
-                                <strong>Puesto:</strong>
-                                {{ technician.position }}
-                            </p>
+                                    <div class="work-order-technician__avatar">
+                                        {{ technician.name[:1]|upper }}
+                                    </div>
 
-                            <p>
-                                <strong>Asignado:</strong>
-                                {{ technician.assigned_at }}
-                            </p>
+                                    <div class="work-order-technician__identity">
 
-                            <form
-                                method="post"
-                                action="{{ url_for(
-                                    'work_orders.unassign_technician_route',
-                                    numero=orden.code,
-                                    person_code=technician.person_code
-                                ) }}"
-                                onsubmit="
-                                    return confirm(
-                                        '¿Deseas quitar este técnico de la orden?'
-                                    );
-                                "
-                            >
-                                <button
-                                    type="submit"
-                                    class="button button-secondary"
-                                >
-                                    Quitar
-                                </button>
-                            </form>
+                                        <h4>
+                                            {{ technician.name }}
+                                        </h4>
 
-                            {% if not loop.last %}
-                                <hr>
-                            {% endif %}
+                                        <span>
+                                            {{ technician.position }}
+                                        </span>
 
-                        </div>
+                                    </div>
 
-                    {% endfor %}
+                                </div>
+
+
+                                <div class="work-order-technician__details">
+
+                                    <div class="work-order-technician__detail">
+
+                                        <span>
+                                            Número
+                                        </span>
+
+                                        <strong>
+                                            {{ technician.person_code }}
+                                        </strong>
+
+                                    </div>
+
+                                    <div class="work-order-technician__detail">
+
+                                        <span>
+                                            Asignado
+                                        </span>
+
+                                        <strong>
+                                            {{ technician.assigned_at }}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="work-order-technician__footer">
+
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'work_orders.unassign_technician_route',
+                                            numero=orden.code,
+                                            person_code=technician.person_code
+                                        ) }}"
+                                        onsubmit="
+                                            return confirm(
+                                                '¿Deseas quitar este técnico de la orden?'
+                                            );
+                                        "
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="
+                                                button
+                                                button-secondary
+                                                work-order-technician__remove
+                                            "
+                                        >
+                                            Quitar
+                                        </button>
+                                    </form>
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
 
                 {% else %}
 
-                    <p>
+                    <div class="work-order-technicians-empty">
                         No hay técnicos asignados.
-                    </p>
+                    </div>
 
                 {% endif %}
 
@@ -420,7 +558,14 @@ Orden {{ orden.code }}
         </article>
 
 
-        <article class="asset-workspace-card">
+        <!-- =================================================
+             ACTIVITIES
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-activities-card
+        ">
 
             <div class="asset-workspace-card__header">
 
@@ -451,60 +596,230 @@ Orden {{ orden.code }}
                 </div>
 
             </div>
-            </div>
+
 
             <div class="asset-workspace-card__body">
 
-                <p>
-                    Avance:
-                    <strong>
-                        {{ activities.progress_percent }}%
-                    </strong>
-                </p>
 
-                <p>
-                    {{ activities.completed }}
-                    de
-                    {{ activities.total }}
-                    actividades finalizadas
-                </p>
+                <!-- ACTIVITY SUMMARY -->
 
-                <hr>
+                <div class="work-order-activities-summary">
+
+                    <div class="work-order-activities-progress">
+
+                        <div class="work-order-activities-progress__top">
+
+                            <span>
+                                Avance de la orden
+                            </span>
+
+                            <strong>
+                                {{ activities.progress_percent }}%
+                            </strong>
+
+                        </div>
+
+                        <div class="work-order-activities-progress__track">
+
+                            <div
+                                class="work-order-activities-progress__value"
+                                style="--progress-width: {{ activities.progress_percent }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="work-order-activities-stats">
+
+                        <div>
+
+                            <strong>
+                                {{ activities.total }}
+                            </strong>
+
+                            <span>
+                                Total
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                {{ activities.completed }}
+                            </strong>
+
+                            <span>
+                                Finalizadas
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                {{
+                                    activities.total
+                                    - activities.completed
+                                }}
+                            </strong>
+
+                            <span>
+                                Pendientes
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACTIVITY ITEMS -->
 
                 {% if activities.has_items %}
 
                     {% for activity in activities.items %}
 
-                        <div>
+                        <article class="work-order-activity-item">
 
-                            <h3>
-                                {{ activity.title }}
-                            </h3>
+                            <div class="work-order-activity-item__header">
 
-                            <p>
-                                <strong>Código:</strong>
-                                {{ activity.code }}
-                            </p>
+                                <div class="work-order-activity-item__identity">
 
-                            {% if activity.description %}
-                                <p>
-                                    {{ activity.description }}
-                                </p>
-                            {% endif %}
+                                    <span class="work-order-activity-item__code">
+                                        {{ activity.code }}
+                                    </span>
 
-                            <p>
-                                <strong>Responsable:</strong>
-                                {{ activity.responsible_person_name }}
-                            </p>
+                                    <h4>
+                                        {{ activity.title }}
+                                    </h4>
 
-                            <p>
-                                <strong>Estado:</strong>
-                                {{ activity.status_label }}
-                            </p>
+                                    {% if activity.description %}
 
-                            <div class="form-actions">
+                                        <p>
+                                            {{ activity.description }}
+                                        </p>
 
-                                {% if activity.status == "PENDING" %}
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="work-order-activity-item__status">
+
+                                    <span
+                                        class="
+                                            work-order-activity-status
+                                            work-order-activity-status--{{ activity.status|lower }}
+                                        "
+                                    >
+                                        {{ activity.status_label }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="work-order-activity-item__metrics">
+
+                                <div class="work-order-activity-metric">
+
+                                    <span class="work-order-activity-metric__label">
+                                        Responsable
+                                    </span>
+
+                                    <strong>
+                                        {{ activity.responsible_person_name }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="work-order-activity-metric">
+
+                                    <span class="work-order-activity-metric__label">
+                                        Tiempo estimado
+                                    </span>
+
+                                    <strong>
+
+                                        {% if activity.estimated_minutes %}
+                                            {{ activity.estimated_minutes }} min
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="work-order-activity-metric">
+
+                                    <span class="work-order-activity-metric__label">
+                                        Tiempo real
+                                    </span>
+
+                                    <strong>
+
+                                        {% if activity.actual_minutes is not none %}
+                                            {{ activity.actual_minutes }} min
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="work-order-activity-metric">
+
+                                    <span class="work-order-activity-metric__label">
+                                        Inicio
+                                    </span>
+
+                                    <strong>
+
+                                        {% if activity.started_at %}
+                                            {{ activity.started_at }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="work-order-activity-metric">
+
+                                    <span class="work-order-activity-metric__label">
+                                        Finalización
+                                    </span>
+
+                                    <strong>
+
+                                        {% if activity.completed_at %}
+                                            {{ activity.completed_at }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            {% if activity.status == "PENDING" %}
+
+                                <div class="work-order-activity-item__actions">
 
                                     <form
                                         method="post"
@@ -518,11 +833,16 @@ Orden {{ orden.code }}
                                             type="submit"
                                             class="button button-primary"
                                         >
-                                            Iniciar
+                                            Iniciar actividad
                                         </button>
                                     </form>
 
-                                {% elif activity.status == "IN_PROGRESS" %}
+                                </div>
+
+
+                            {% elif activity.status == "IN_PROGRESS" %}
+
+                                <div class="work-order-activity-item__actions">
 
                                     <form
                                         method="post"
@@ -536,80 +856,55 @@ Orden {{ orden.code }}
                                             type="submit"
                                             class="button button-primary"
                                         >
-                                            Finalizar
+                                            Finalizar actividad
                                         </button>
                                     </form>
 
-                                {% endif %}
+                                </div>
 
-                            </div>
-
-
-                            {% if activity.estimated_minutes %}
-                                <p>
-                                    <strong>Tiempo estimado:</strong>
-                                    {{ activity.estimated_minutes }}
-                                    min
-                                </p>
-                            {% endif %}
-                            
-                            {% if activity.actual_minutes is not none %}
-                                <p>
-                                    <strong>Tiempo real:</strong>
-                                    {{ activity.actual_minutes }}
-                                    min
-                                </p>
                             {% endif %}
 
-                            {% if activity.started_at %}
-                                <p>
-                                    <strong>Inicio:</strong>
-                                    {{ activity.started_at }}
-                                </p>
-                            {% endif %}
-
-                            {% if activity.completed_at %}
-                                <p>
-                                    <strong>Finalización:</strong>
-                                    {{ activity.completed_at }}
-                                </p>
-                            {% endif %}
-
-                            {% if not loop.last %}
-                                <hr>
-                            {% endif %}
-
-                        </div>
+                        </article>
 
                     {% endfor %}
 
                 {% else %}
 
-                    <p>
-                        Esta orden todavía no tiene actividades registradas.
-                    </p>
+                    <div class="work-order-activities-empty">
+                        No hay actividades registradas
+                        para esta orden.
+                    </div>
 
                 {% endif %}
 
             </div>
-            <div class="asset-workspace-card__actions">
 
-                <a
-                    class="button button-primary"
-                    href="{{ url_for(
-                        'work_orders.create_work_order_activity_route',
-                        numero=orden.code
-                    ) }}"
-                >
-                    + Nueva actividad
-                </a>
-
-            </div>
         </article>
 
-        <article class="asset-workspace-card">
+
+        <!-- =================================================
+             SPARE PARTS
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-spare-parts-card
+        ">
 
             <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Materiales
+                    </p>
+
+                    <h3>
+                        Refacciones utilizadas
+                    </h3>
+
+                </div>
+
                 <div class="asset-workspace-card__actions">
 
                     <a
@@ -623,106 +918,158 @@ Orden {{ orden.code }}
                     </a>
 
                 </div>
-                <div>
-
-                    <p class="asset-workspace-card__eyebrow">
-                        Materiales
-                    </p>
-
-                    <h3>
-                        Refacciones utilizadas
-                    </h3>
-
-                </div>
 
             </div>
+
 
             <div class="asset-workspace-card__body">
 
                 {% if spare_parts.has_items %}
 
-                    <p>
-                        <strong>
-                            {{ spare_parts.total_items }}
-                        </strong>
-                        registros de consumo
-                    </p>
+                    <div class="work-order-resource-summary">
 
-                    <p>
-                        Costo total:
-                        <strong>
-                            ${{ "%.2f"|format(spare_parts.total_cost) }}
-                        </strong>
-                    </p>
+                        <div class="work-order-resource-stat">
 
-                    <hr>
+                            <span>
+                                Registros
+                            </span>
+
+                            <strong>
+                                {{ spare_parts.total_items }}
+                            </strong>
+
+                        </div>
+
+                        <div class="work-order-resource-stat">
+
+                            <span>
+                                Costo total
+                            </span>
+
+                            <strong>
+                                ${{ "%.2f"|format(
+                                    spare_parts.total_cost
+                                ) }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
 
                     {% for item in spare_parts.items %}
 
-                        <div>
+                        <article class="work-order-resource-item">
 
-                            <h3>
-                                {{ item.name }}
-                            </h3>
+                            <div class="work-order-resource-item__header">
 
-                            <p>
-                                <strong>Código:</strong>
-                                {{ item.code }}
-                            </p>
+                                <div>
 
-                            <p>
-                                <strong>Fabricante:</strong>
-                                {{ item.manufacturer }}
-                            </p>
+                                    <span class="work-order-resource-item__code">
+                                        {{ item.code }}
+                                    </span>
 
-                            <p>
-                                <strong>Número de parte:</strong>
-                                {{ item.part_number }}
-                            </p>
+                                    <h4>
+                                        {{ item.name }}
+                                    </h4>
 
-                            <p>
-                                <strong>Cantidad:</strong>
-                                {{ item.quantity }}
-                                {{ item.unit }}
-                            </p>
+                                    <p>
+                                        {{ item.manufacturer }}
 
-                            <p>
-                                <strong>Costo unitario:</strong>
-                                ${{ "%.2f"|format(item.unit_cost) }}
-                            </p>
+                                        {% if item.part_number %}
+                                            · {{ item.part_number }}
+                                        {% endif %}
+                                    </p>
 
-                            <p>
-                                <strong>Total:</strong>
-                                ${{ "%.2f"|format(item.total_cost) }}
-                            </p>
+                                </div>
 
-                            <p>
-                                <strong>Utilizado:</strong>
-                                {{ item.used_at }}
-                            </p>
+                                <div class="work-order-resource-item__total">
+
+                                    <span>
+                                        Total
+                                    </span>
+
+                                    <strong>
+                                        ${{ "%.2f"|format(
+                                            item.total_cost
+                                        ) }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="work-order-resource-item__metrics">
+
+                                <div>
+
+                                    <span>
+                                        Cantidad
+                                    </span>
+
+                                    <strong>
+                                        {{ item.quantity }}
+                                        {{ item.unit }}
+                                    </strong>
+
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Costo unitario
+                                    </span>
+
+                                    <strong>
+                                        ${{ "%.2f"|format(
+                                            item.unit_cost
+                                        ) }}
+                                    </strong>
+
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Utilizado
+                                    </span>
+
+                                    <strong>
+                                        {{ item.used_at }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
 
                             {% if item.observations %}
 
-                                <p>
-                                    <strong>Observaciones:</strong>
-                                    {{ item.observations }}
-                                </p>
+                                <div class="work-order-resource-item__observations">
+
+                                    <span>
+                                        Observaciones
+                                    </span>
+
+                                    <p>
+                                        {{ item.observations }}
+                                    </p>
+
+                                </div>
 
                             {% endif %}
 
-                            {% if not loop.last %}
-                                <hr>
-                            {% endif %}
-
-                        </div>
+                        </article>
 
                     {% endfor %}
 
                 {% else %}
 
-                    <p>
-                        Esta orden todavía no tiene refacciones utilizadas.
-                    </p>
+                    <div class="work-order-resources-empty">
+                        No hay refacciones registradas
+                        para esta orden.
+                    </div>
 
                 {% endif %}
 
@@ -730,9 +1077,30 @@ Orden {{ orden.code }}
 
         </article>
 
-        <article class="asset-workspace-card">
+
+        <!-- =================================================
+             TOOLS
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-tools-card
+        ">
 
             <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Recursos
+                    </p>
+
+                    <h3>
+                        Herramientas utilizadas
+                    </h3>
+
+                </div>
+
                 <div class="asset-workspace-card__actions">
 
                     <a
@@ -747,70 +1115,151 @@ Orden {{ orden.code }}
 
                 </div>
 
-
-                <div>
-
-                    <p class="asset-workspace-card__eyebrow">
-                        Recursos
-                    </p>
-
-                    <h3>
-                        Herramientas utilizadas
-                    </h3>
-
-                </div>
-
             </div>
+
 
             <div class="asset-workspace-card__body">
 
                 {% if tools.has_items %}
 
-                    <p>
-                        <strong>
-                            {{ tools.total }}
-                        </strong>
-                        registros de herramientas
-                    </p>
+                    <div class="work-order-tool-summary">
 
-                    <p>
-                        Prestadas:
-                        <strong>
-                            {{ tools.issued }}
-                        </strong>
+                        <div class="work-order-tool-stat">
 
-                        &nbsp; | &nbsp;
+                            <span>
+                                Registros
+                            </span>
 
-                        Devueltas:
-                        <strong>
-                            {{ tools.returned }}
-                        </strong>
-                    </p>
+                            <strong>
+                                {{ tools.total }}
+                            </strong>
 
-                    <hr>
+                        </div>
+
+                        <div class="work-order-tool-stat">
+
+                            <span>
+                                Prestadas
+                            </span>
+
+                            <strong>
+                                {{ tools.issued }}
+                            </strong>
+
+                        </div>
+
+                        <div class="work-order-tool-stat">
+
+                            <span>
+                                Devueltas
+                            </span>
+
+                            <strong>
+                                {{ tools.returned }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
 
                     {% for item in tools.items %}
 
-                        <div>
+                        <article class="work-order-tool-item">
 
-                            <h3>
-                                {{ item.tool_name }}
-                            </h3>
+                            <div class="work-order-tool-item__header">
 
-                            <p>
-                                <strong>Código:</strong>
-                                {{ item.tool_code }}
-                            </p>
+                                <div>
 
-                            <p>
-                                <strong>Cantidad:</strong>
-                                {{ item.quantity }}
-                            </p>
+                                    <span class="work-order-tool-item__code">
+                                        {{ item.tool_code }}
+                                    </span>
 
-                            <p>
-                                <strong>Estado:</strong>
-                                {{ item.status_label }}
-                                {% if item.status == "ISSUED" %}
+                                    <h4>
+                                        {{ item.tool_name }}
+                                    </h4>
+
+                                </div>
+
+                                <span
+                                    class="
+                                        work-order-tool-status
+                                        work-order-tool-status--{{ item.status|lower }}
+                                    "
+                                >
+                                    {{ item.status_label }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="work-order-tool-item__metrics">
+
+                                <div>
+
+                                    <span>
+                                        Cantidad
+                                    </span>
+
+                                    <strong>
+                                        {{ item.quantity }}
+                                    </strong>
+
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Prestada
+                                    </span>
+
+                                    <strong>
+                                        {{ item.issued_at }}
+                                    </strong>
+
+                                </div>
+
+                                <div>
+
+                                    <span>
+                                        Devuelta
+                                    </span>
+
+                                    <strong>
+
+                                        {% if item.returned_at %}
+                                            {{ item.returned_at }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            {% if item.observations %}
+
+                                <div class="work-order-tool-item__observations">
+
+                                    <span>
+                                        Observaciones
+                                    </span>
+
+                                    <p>
+                                        {{ item.observations }}
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if item.status == "ISSUED" %}
+
+                                <div class="work-order-tool-item__actions">
 
                                     <form
                                         method="post"
@@ -833,52 +1282,36 @@ Orden {{ orden.code }}
                                         </button>
                                     </form>
 
-                                {% endif %}
-                            </p>
-
-                            <p>
-                                <strong>Prestada:</strong>
-                                {{ item.issued_at }}
-                            </p>
-
-                            {% if item.returned_at %}
-
-                                <p>
-                                    <strong>Devuelta:</strong>
-                                    {{ item.returned_at }}
-                                </p>
+                                </div>
 
                             {% endif %}
 
-                            {% if item.observations %}
-
-                                <p>
-                                    <strong>Observaciones:</strong>
-                                    {{ item.observations }}
-                                </p>
-
-                            {% endif %}
-
-                            {% if not loop.last %}
-                                <hr>
-                            {% endif %}
-
-                        </div>
+                        </article>
 
                     {% endfor %}
 
                 {% else %}
 
-                    <p>
-                        Esta orden todavía no tiene herramientas registradas.
-                    </p>
+                    <div class="work-order-tools-empty">
+                        No hay herramientas registradas
+                        para esta orden.
+                    </div>
 
                 {% endif %}
 
             </div>
 
         </article>
-        <article class="asset-workspace-card">
+
+
+        <!-- =================================================
+             EVIDENCE
+             ================================================= -->
+
+        <article class="
+            asset-workspace-card
+            work-order-evidence-card
+        ">
 
             <div class="asset-workspace-card__header">
 
@@ -890,149 +1323,209 @@ Orden {{ orden.code }}
 
                     <h3>
                         Evidencias de la orden
-                        <div class="asset-workspace-card__actions">
-
-                            <a
-                                class="button button-primary"
-                                href="{{ url_for(
-                                    'work_orders.create_work_order_evidence_route',
-                                    numero=orden.code
-                                ) }}"
-                            >
-                                + Registrar evidencia
-                            </a>
-
-                        </div>
-
                     </h3>
+
+                </div>
+
+                <div class="asset-workspace-card__actions">
+
+                    <a
+                        class="button button-primary"
+                        href="{{ url_for(
+                            'work_orders.create_work_order_evidence_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        + Registrar evidencia
+                    </a>
 
                 </div>
 
             </div>
 
+
             <div class="asset-workspace-card__body">
 
                 {% if evidence.has_items %}
 
-                    <p>
-                        <strong>{{ evidence.total }}</strong>
-                        evidencias registradas
-                    </p>
+                    <div class="work-order-evidence-summary">
 
-                    <hr>
+                        <span>
+                            Evidencias registradas
+                        </span>
 
-                    {% for item in evidence.items %}
+                        <strong>
+                            {{ evidence.total }}
+                        </strong>
 
-                        <div>
+                    </div>
 
-                            <h3>
-                                {{ item.title }}
-                            </h3>
 
-                            <p>
-                                <strong>Tipo:</strong>
-                                {{ item.evidence_type_label }}
-                            </p>
+                    <div class="work-order-evidence-grid">
 
-                            <div class="work-order-evidence-file">
+                        {% for item in evidence.items %}
 
-                                {% if item.is_image %}
+                            <article class="work-order-evidence-item">
 
-                                    <a
-                                        href="{{ url_for(
-                                            'work_orders.work_order_evidence_file_route',
-                                            numero=orden.code,
-                                            evidence_id=item.evidence_id
-                                        ) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                    >
-                                        <img
-                                            src="{{ url_for(
+                                <div class="work-order-evidence-item__preview">
+
+                                    {% if item.is_image %}
+
+                                        <a
+                                            href="{{ url_for(
                                                 'work_orders.work_order_evidence_file_route',
                                                 numero=orden.code,
                                                 evidence_id=item.evidence_id
                                             ) }}"
-                                            alt="{{ item.title }}"
-                                            class="work-order-evidence-thumbnail"
+                                            target="_blank"
+                                            rel="noopener"
                                         >
-                                    </a>
+                                            <img
+                                                src="{{ url_for(
+                                                    'work_orders.work_order_evidence_file_route',
+                                                    numero=orden.code,
+                                                    evidence_id=item.evidence_id
+                                                ) }}"
+                                                alt="{{ item.title }}"
+                                            >
+                                        </a>
 
-                                {% elif item.is_pdf %}
 
-                                    <a
-                                        class="button button-secondary"
-                                        href="{{ url_for(
-                                            'work_orders.work_order_evidence_file_route',
-                                            numero=orden.code,
-                                            evidence_id=item.evidence_id
-                                        ) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                    >
-                                        Abrir PDF
-                                    </a>
+                                    {% elif item.is_pdf %}
 
-                                {% else %}
+                                        <div class="work-order-evidence-document">
 
-                                    <a
-                                        class="button button-secondary"
-                                        href="{{ url_for(
-                                            'work_orders.work_order_evidence_file_route',
-                                            numero=orden.code,
-                                            evidence_id=item.evidence_id
-                                        ) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                    >
-                                        Ver archivo
-                                    </a>
+                                            <span class="work-order-evidence-document__icon">
+                                                PDF
+                                            </span>
 
-                                {% endif %}
+                                            <span>
+                                                Documento PDF
+                                            </span>
 
-                            </div>
+                                        </div>
 
-                            <p>
-                                <strong>Registrado por:</strong>
-                                {{ item.registered_by_person_code }}
-                            </p>
 
-                            <p>
-                                <strong>Fecha:</strong>
-                                {{ item.created_at }}
-                            </p>
+                                    {% else %}
 
-                            {% if item.activity_code %}
+                                        <div class="work-order-evidence-document">
 
-                                <p>
-                                    <strong>Actividad:</strong>
-                                    {{ item.activity_code }}
-                                </p>
+                                            <span class="work-order-evidence-document__icon">
+                                                FILE
+                                            </span>
 
-                            {% endif %}
+                                            <span>
+                                                Archivo adjunto
+                                            </span>
 
-                            {% if item.description %}
+                                        </div>
 
-                                <p>
-                                    <strong>Descripción:</strong>
-                                    {{ item.description }}
-                                </p>
+                                    {% endif %}
 
-                            {% endif %}
+                                </div>
 
-                            {% if not loop.last %}
-                                <hr>
-                            {% endif %}
 
-                        </div>
+                                <div class="work-order-evidence-item__content">
 
-                    {% endfor %}
+                                    <div class="work-order-evidence-item__top">
+
+                                        <span class="work-order-evidence-type">
+                                            {{ item.evidence_type_label }}
+                                        </span>
+
+                                        <span class="work-order-evidence-date">
+                                            {{ item.created_at }}
+                                        </span>
+
+                                    </div>
+
+                                    <h4>
+                                        {{ item.title }}
+                                    </h4>
+
+
+                                    <div class="work-order-evidence-meta">
+
+                                        {% if item.activity_code %}
+
+                                            <div>
+
+                                                <span>
+                                                    Actividad
+                                                </span>
+
+                                                <strong>
+                                                    {{ item.activity_code }}
+                                                </strong>
+
+                                            </div>
+
+                                        {% endif %}
+
+
+                                        <div>
+
+                                            <span>
+                                                Registrado por
+                                            </span>
+
+                                            <strong>
+                                                {{ item.registered_by_person_code }}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {% if item.description %}
+
+                                        <p class="work-order-evidence-description">
+                                            {{ item.description }}
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    <div class="work-order-evidence-item__actions">
+
+                                        <a
+                                            class="button button-secondary"
+                                            href="{{ url_for(
+                                                'work_orders.work_order_evidence_file_route',
+                                                numero=orden.code,
+                                                evidence_id=item.evidence_id
+                                            ) }}"
+                                            target="_blank"
+                                            rel="noopener"
+                                        >
+
+                                            {% if item.is_image %}
+                                                Ver fotografía
+                                            {% elif item.is_pdf %}
+                                                Abrir PDF
+                                            {% else %}
+                                                Ver archivo
+                                            {% endif %}
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
 
                 {% else %}
 
-                    <p>
-                        Esta orden todavía no tiene evidencias registradas.
-                    </p>
+                    <div class="work-order-evidence-empty">
+                        No hay evidencias registradas
+                        para esta orden.
+                    </div>
 
                 {% endif %}
 
