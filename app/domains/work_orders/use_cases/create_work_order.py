@@ -16,7 +16,10 @@ from app.domains.work_orders.entities import (
 from app.domains.work_orders.repositories import (
     WorkOrderRepository,
 )
-
+from app.foundation.timeline.engine.use_cases import (
+    RecordTimelineEvent,
+    RecordTimelineEventCommand,
+)
 
 @dataclass(frozen=True)
 class CreateWorkOrderCommand:
@@ -43,6 +46,7 @@ class CreateWorkOrder:
         work_order_repository: WorkOrderRepository,
         asset_repository: AssetRepository,
         person_repository: PersonRepository,
+        record_timeline_event: RecordTimelineEvent | None = None
     ):
         self._work_order_repository = (
             work_order_repository
@@ -54,6 +58,9 @@ class CreateWorkOrder:
 
         self._person_repository = (
             person_repository
+        )
+        self._record_timeline_event = (
+            record_timeline_event
         )
 
     def execute(
@@ -138,7 +145,34 @@ class CreateWorkOrder:
         self._work_order_repository.save(
             work_order
         )
+        if self._record_timeline_event is not None:
+
+            self._record_timeline_event.execute(
+                RecordTimelineEventCommand(
+                    entity_type="WORK_ORDER",
+                    entity_code=work_order.code,
+                    event_type="WORK_ORDER_CREATED",
+                    title="Orden de trabajo creada",
+                    actor_person_code=(
+                        requester.code
+                    ),
+                    occurred_at=(
+                        command.created_at
+                    ),
+                    description=(
+                        work_order.description
+                    ),
+                    reference_type=(
+                        "WORK_ORDER"
+                    ),
+                    reference_code=(
+                        work_order.code
+                    ),
+                )
+            )
 
         return CreateWorkOrderResult(
             work_order=work_order
         )
+
+        

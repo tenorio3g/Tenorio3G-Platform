@@ -23,8 +23,8 @@ from app.domains.work_orders.timeline import (
 )
 
 from app.domains.work_orders.use_cases import (
-    StartWorkOrder,
-    StartWorkOrderCommand,
+    HoldWorkOrder,
+    HoldWorkOrderCommand,
 )
 
 from app.domains.work_orders.value_objects import (
@@ -32,7 +32,7 @@ from app.domains.work_orders.value_objects import (
 )
 
 
-def create_assigned_work_order():
+def create_started_work_order():
 
     work_order = WorkOrder(
         code="WO-001",
@@ -53,48 +53,49 @@ def create_assigned_work_order():
     )
 
     work_order.assign()
+    work_order.start()
 
     return work_order
 
 
-def create_start_command(
+def create_hold_command(
     code="WO-001",
 ):
 
-    return StartWorkOrderCommand(
+    return HoldWorkOrderCommand(
         code=code,
         actor_person_code="55464",
         occurred_at=datetime(
             2026,
             8,
-            19,
-            18,
+            20,
+            9,
             0,
         ),
     )
 
 
-def test_should_start_work_order():
+def test_should_hold_work_order():
 
     repository = (
         InMemoryWorkOrderRepository()
     )
 
     repository.save(
-        create_assigned_work_order()
+        create_started_work_order()
     )
 
-    use_case = StartWorkOrder(
+    use_case = HoldWorkOrder(
         repository
     )
 
     result = use_case.execute(
-        create_start_command()
+        create_hold_command()
     )
 
     assert (
         result.work_order.status
-        == WorkOrderStatus.IN_PROGRESS
+        == WorkOrderStatus.ON_HOLD
     )
 
     persisted = repository.get_by_code(
@@ -103,7 +104,7 @@ def test_should_start_work_order():
 
     assert (
         persisted.status
-        == WorkOrderStatus.IN_PROGRESS
+        == WorkOrderStatus.ON_HOLD
     )
 
 
@@ -113,7 +114,7 @@ def test_should_reject_unknown_work_order():
         InMemoryWorkOrderRepository()
     )
 
-    use_case = StartWorkOrder(
+    use_case = HoldWorkOrder(
         repository
     )
 
@@ -122,7 +123,7 @@ def test_should_reject_unknown_work_order():
         match="work order not found",
     ):
         use_case.execute(
-            create_start_command(
+            create_hold_command(
                 code="WO-404"
             )
         )
@@ -135,16 +136,16 @@ def test_should_preserve_domain_transition_rules():
     )
 
     work_order = (
-        create_assigned_work_order()
+        create_started_work_order()
     )
 
-    work_order.start()
+    work_order.hold()
 
     repository.save(
         work_order
     )
 
-    use_case = StartWorkOrder(
+    use_case = HoldWorkOrder(
         repository
     )
 
@@ -152,11 +153,11 @@ def test_should_preserve_domain_transition_rules():
         ValueError,
     ):
         use_case.execute(
-            create_start_command()
+            create_hold_command()
         )
 
 
-def test_should_record_started_event():
+def test_should_record_held_event():
 
     repository = (
         InMemoryWorkOrderRepository()
@@ -179,10 +180,10 @@ def test_should_record_started_event():
     )
 
     repository.save(
-        create_assigned_work_order()
+        create_started_work_order()
     )
 
-    use_case = StartWorkOrder(
+    use_case = HoldWorkOrder(
         repository,
         timeline_recorder,
     )
@@ -190,13 +191,13 @@ def test_should_record_started_event():
     occurred_at = datetime(
         2026,
         8,
-        19,
-        18,
+        20,
+        9,
         30,
     )
 
     result = use_case.execute(
-        StartWorkOrderCommand(
+        HoldWorkOrderCommand(
             code="WO-001",
             actor_person_code="55464",
             occurred_at=occurred_at,
@@ -217,7 +218,7 @@ def test_should_record_started_event():
 
     assert (
         event.event_type
-        == "WORK_ORDER_STARTED"
+        == "WORK_ORDER_HELD"
     )
 
     assert (

@@ -497,6 +497,14 @@ def work_orders_test_db(
         work_order_repository,
     )
 
+    from app.foundation.timeline.engine.models import (
+        TimelineEventModel,
+    )
+
+    from app.foundation.timeline.engine.bootstrap import (
+        timeline_event_repository,
+    )
+
     database_path = (
         tmp_path
         / "work_orders_test.db"
@@ -524,6 +532,12 @@ def work_orders_test_db(
         TestSessionLocal,
     )
 
+    monkeypatch.setattr(
+        timeline_event_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
     yield work_order_repository
 
     Base.metadata.drop_all(
@@ -531,7 +545,6 @@ def work_orders_test_db(
     )
 
     test_engine.dispose()
-
 @pytest.fixture
 def work_order_activities_test_db(
     tmp_path,

@@ -49,6 +49,24 @@ def create_work_order():
     )
 
 
+def lifecycle_command(
+    command_class,
+    code="WO-001",
+):
+
+    return command_class(
+        code=code,
+        actor_person_code="55464",
+        occurred_at=datetime(
+            2026,
+            8,
+            20,
+            14,
+            0,
+        ),
+    )
+
+
 def test_should_hold_work_order():
 
     repository = (
@@ -69,8 +87,8 @@ def test_should_hold_work_order():
     )
 
     result = use_case.execute(
-        HoldWorkOrderCommand(
-            code="WO-001"
+        lifecycle_command(
+            HoldWorkOrderCommand
         )
     )
 
@@ -101,8 +119,8 @@ def test_should_resume_work_order():
     )
 
     result = use_case.execute(
-        ResumeWorkOrderCommand(
-            code="WO-001"
+        lifecycle_command(
+            ResumeWorkOrderCommand
         )
     )
 
@@ -132,8 +150,8 @@ def test_should_complete_work_order():
     )
 
     result = use_case.execute(
-        CompleteWorkOrderCommand(
-            code="WO-001"
+        lifecycle_command(
+            CompleteWorkOrderCommand
         )
     )
 
@@ -164,8 +182,8 @@ def test_should_close_work_order():
     )
 
     result = use_case.execute(
-        CloseWorkOrderCommand(
-            code="WO-001"
+        lifecycle_command(
+            CloseWorkOrderCommand
         )
     )
 
@@ -190,8 +208,8 @@ def test_should_cancel_work_order():
     )
 
     result = use_case.execute(
-        CancelWorkOrderCommand(
-            code="WO-001"
+        lifecycle_command(
+            CancelWorkOrderCommand
         )
     )
 
@@ -244,7 +262,8 @@ def test_should_reject_unknown_work_order(
         match="work order not found",
     ):
         use_case.execute(
-            command_class(
-                code="WO-404"
+            lifecycle_command(
+                command_class,
+                code="WO-404",
             )
         )

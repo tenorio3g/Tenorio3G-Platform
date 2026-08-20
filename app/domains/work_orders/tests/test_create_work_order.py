@@ -3,6 +3,8 @@ from unittest.mock import Mock
 
 import pytest
 
+
+
 from app.domains.assets.repositories import (
     AssetRepository,
 )
@@ -26,6 +28,14 @@ from app.domains.work_orders.use_cases import (
 
 from app.domains.work_orders.value_objects import (
     WorkOrderStatus,
+)
+
+from app.foundation.timeline.engine.repositories import (
+    InMemoryTimelineEventRepository,
+)
+
+from app.foundation.timeline.engine.use_cases import (
+    RecordTimelineEvent,
 )
 
 
@@ -318,3 +328,94 @@ def test_should_reject_inactive_supervisor():
         use_case.execute(
             create_command()
         )
+
+def test_should_record_work_order_created_event():
+
+    work_order_repository = (
+        InMemoryWorkOrderRepository()
+    )
+
+    asset_repository = Mock(
+        spec=AssetRepository
+    )
+
+    person_repository = Mock(
+        spec=PersonRepository
+    )
+
+    timeline_repository = (
+        InMemoryTimelineEventRepository()
+    )
+
+    record_timeline_event = (
+        RecordTimelineEvent(
+            timeline_repository
+        )
+    )
+
+    use_case = CreateWorkOrder(
+        work_order_repository,
+        asset_repository,
+        person_repository,
+        record_timeline_event,
+    )
+
+    configure_valid_dependencies(
+        asset_repository,
+        person_repository,
+    )
+
+    command = create_command()
+
+    result = use_case.execute(
+        command
+    )
+
+    events = timeline_repository.list_by_entity(
+        "WORK_ORDER",
+        result.work_order.code,
+    )
+
+    assert len(events) == 1
+
+    event = events[0]
+
+    assert (
+        event.entity_type
+        == "WORK_ORDER"
+    )
+
+    assert (
+        event.entity_code
+        == "WO-001"
+    )
+
+    assert (
+        event.event_type
+        == "WORK_ORDER_CREATED"
+    )
+
+    assert (
+        event.title
+        == "Orden de trabajo creada"
+    )
+
+    assert (
+        event.actor_person_code
+        == "REQ-001"
+    )
+
+    assert (
+        event.occurred_at
+        == command.created_at
+    )
+
+    assert (
+        event.reference_type
+        == "WORK_ORDER"
+    )
+
+    assert (
+        event.reference_code
+        == "WO-001"
+    )

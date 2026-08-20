@@ -480,9 +480,21 @@ def assign_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         assign_work_order.execute(
             AssignWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -508,9 +520,21 @@ def start_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         start_work_order.execute(
             StartWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -535,9 +559,21 @@ def hold_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         hold_work_order.execute(
             HoldWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -553,7 +589,6 @@ def hold_work_order_route(
             numero=numero,
         )
     )
-
 
 @work_orders.post(
     "/ordenes/<numero>/reanudar"
@@ -563,9 +598,21 @@ def resume_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         resume_work_order.execute(
             ResumeWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -581,8 +628,6 @@ def resume_work_order_route(
             numero=numero,
         )
     )
-
-
 @work_orders.post(
     "/ordenes/<numero>/completar"
 )
@@ -591,9 +636,21 @@ def complete_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         complete_work_order.execute(
             CompleteWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -609,7 +666,6 @@ def complete_work_order_route(
             numero=numero,
         )
     )
-
 
 @work_orders.post(
     "/ordenes/<numero>/cerrar"
@@ -619,9 +675,21 @@ def close_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         close_work_order.execute(
             CloseWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -647,9 +715,21 @@ def cancel_work_order_route(
 ):
 
     try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
         cancel_work_order.execute(
             CancelWorkOrderCommand(
                 code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
             )
         )
 
@@ -665,7 +745,6 @@ def cancel_work_order_route(
             numero=numero,
         )
     )
-
 @work_orders.post(
     "/ordenes/<numero>/tecnicos/<person_code>/quitar"
 )

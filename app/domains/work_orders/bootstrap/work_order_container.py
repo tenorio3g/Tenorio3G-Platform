@@ -28,8 +28,15 @@ from app.domains.work_orders.use_cases import (
     ResumeWorkOrder,
     StartWorkOrder,
 )
+from app.foundation.timeline.engine.bootstrap import (
+    record_timeline_event,
+    
+)
 
 
+from app.domains.work_orders.timeline import (
+    WorkOrderTimelineRecorder,
+)
 
 # ============================================================
 # REPOSITORY
@@ -50,6 +57,7 @@ create_work_order = CreateWorkOrder(
     work_order_repository,
     asset_repository,
     person_repository,
+    record_timeline_event,
 )
 
 # ============================================================
@@ -77,33 +85,44 @@ get_work_order_detail = GetWorkOrderDetail(
 # ============================================================
 # COMMANDS - WORK ORDER LIFECYCLE
 # ============================================================
+work_order_timeline_recorder = (
+    WorkOrderTimelineRecorder(
+        record_timeline_event
+    )
+)
 
 assign_work_order = AssignWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 start_work_order = StartWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 hold_work_order = HoldWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 resume_work_order = ResumeWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 complete_work_order = CompleteWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 close_work_order = CloseWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
 
 cancel_work_order = CancelWorkOrder(
-    work_order_repository
+    work_order_repository,
+    work_order_timeline_recorder,
 )
-
 
