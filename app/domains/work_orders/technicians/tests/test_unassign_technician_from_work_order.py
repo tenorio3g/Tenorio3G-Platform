@@ -67,6 +67,24 @@ def build_use_case():
     )
 
 
+def create_unassign_command(
+    work_order_code="WO-001",
+    person_code="55464",
+):
+
+    return UnassignTechnicianFromWorkOrderCommand(
+        work_order_code=work_order_code,
+        person_code=person_code,
+        unassigned_at=datetime(
+            2026,
+            8,
+            16,
+            15,
+            0,
+        ),
+    )
+
+
 def test_should_unassign_technician():
 
     (
@@ -94,16 +112,37 @@ def test_should_unassign_technician():
     )
 
     use_case.execute(
-        UnassignTechnicianFromWorkOrderCommand(
-            work_order_code="WO-001",
-            person_code="55464",
-        )
+        create_unassign_command()
     )
 
     assert assignment_repository.exists(
         "WO-001",
         "55464",
     ) is False
+
+    history = (
+        assignment_repository
+        .list_by_work_order(
+            "WO-001"
+        )
+    )
+
+    assert len(history) == 1
+
+    assignment = history[0]
+
+    assert assignment.is_active is False
+
+    assert (
+        assignment.unassigned_at
+        == datetime(
+            2026,
+            8,
+            16,
+            15,
+            0,
+        )
+    )
 
 
 def test_should_reject_unknown_work_order():
@@ -115,9 +154,8 @@ def test_should_reject_unknown_work_order():
         match="work order not found",
     ):
         use_case.execute(
-            UnassignTechnicianFromWorkOrderCommand(
-                work_order_code="WO-404",
-                person_code="55464",
+            create_unassign_command(
+                work_order_code="WO-404"
             )
         )
 
@@ -141,8 +179,5 @@ def test_should_reject_unassigned_technician():
         ),
     ):
         use_case.execute(
-            UnassignTechnicianFromWorkOrderCommand(
-                work_order_code="WO-001",
-                person_code="55464",
-            )
+            create_unassign_command()
         )

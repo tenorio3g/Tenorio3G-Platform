@@ -1581,6 +1581,121 @@
     }
 }
 
+
+/* =========================================================
+   WORK ORDER TIMELINE
+   ========================================================= */
+
+.work-order-timeline-card {
+    grid-column: 1 / -1;
+}
+
+.work-order-timeline-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.work-order-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.work-order-timeline-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    min-height: 110px;
+}
+
+.work-order-timeline-item__marker {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.work-order-timeline-item__marker::after {
+    content: "";
+    position: absolute;
+    top: 22px;
+    bottom: 0;
+    width: 2px;
+    background: #e2e8f0;
+}
+
+.work-order-timeline-item:last-child
+.work-order-timeline-item__marker::after {
+    display: none;
+}
+
+.work-order-timeline-item__dot {
+    position: relative;
+    z-index: 2;
+    width: 12px;
+    height: 12px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: #64748b;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px #cbd5e1;
+}
+
+.work-order-timeline-item__content {
+    padding: 0 0 24px 12px;
+}
+
+.work-order-timeline-item__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 6px;
+}
+
+.work-order-timeline-item__type {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.work-order-timeline-item__date {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.work-order-timeline-item__content h4 {
+    margin: 0 0 8px;
+}
+
+.work-order-timeline-item__meta {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.work-order-timeline-item__description {
+    margin: 8px 0;
+}
+
+.work-order-timeline-item__reference {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.work-order-timeline-empty {
+    padding: 16px 0;
+    color: #64748b;
+}
+
+
 /* =========================================================
    WORK ORDER TECHNICIANS
    ========================================================= */

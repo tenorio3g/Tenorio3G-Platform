@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 from flask import (
@@ -28,10 +28,11 @@ from app.work_orders.services.add_activity_service import AddActivityService
 from app.work_orders.services.add_material_service import AddMaterialService
 
 from app.domains.work_orders.bootstrap import (
-    assign_work_order,
+    list_work_order_summaries,    assign_work_order,
     cancel_work_order,
     close_work_order,
     complete_work_order,
+    create_work_order,
     get_work_order_detail,
     hold_work_order,
     resume_work_order,
@@ -39,7 +40,7 @@ from app.domains.work_orders.bootstrap import (
 )
 
 from app.domains.work_orders.presentation import (
-    WorkOrderDetailPresenter,
+    WorkOrderSummaryPresenter,    WorkOrderDetailPresenter,
 )
 
 from app.domains.work_orders.use_cases import (
@@ -47,6 +48,7 @@ from app.domains.work_orders.use_cases import (
     CancelWorkOrderCommand,
     CloseWorkOrderCommand,
     CompleteWorkOrderCommand,
+    CreateWorkOrderCommand,
     GetWorkOrderDetailQuery,
     HoldWorkOrderCommand,
     ResumeWorkOrderCommand,
@@ -143,6 +145,31 @@ from app.domains.work_orders.evidence.use_cases import (
 from app.domains.work_orders.evidence.value_objects import (
     EvidenceType,
 )
+
+
+from app.foundation.timeline.engine.bootstrap import (
+    list_timeline_events,
+)
+
+from app.foundation.timeline.engine.use_cases import (
+    ListTimelineEventsQuery,
+)
+
+from app.foundation.timeline.engine.presentation import (
+    TimelinePresenter,
+)
+
+from app.domains.assets.bootstrap.assets_container import (
+    find_all_assets,
+)
+
+from app.domains.assets.use_cases.find_all_assets.query import (
+    FindAllAssetsQuery,
+)
+from app.domains.identity.people.bootstrap import (
+    list_people,
+)
+
 # =====================================================
 # Repositorios
 # =====================================================
@@ -174,38 +201,205 @@ add_material_service = AddMaterialService(
 # Crear Orden
 # =====================================================
 
-@work_orders.route("/ordenes/nueva", methods=["GET", "POST"])
+@work_orders.route(
+    "/ordenes/nueva",
+    methods=["GET", "POST"],
+)
 def nueva_orden():
 
-    if request.method == "GET":
-        return render_template("pages/work_order_create.html")
-
-    create_request = CreateWorkOrderRequest(
-        numero=request.form.get("numero"),
-        titulo=request.form.get("titulo"),
-        descripcion=request.form.get("descripcion"),
-        tipo=request.form.get("tipo"),
-        prioridad=request.form.get("prioridad"),
-        codigo_activo=request.form.get("codigo_activo"),
-        numero_solicitante=request.form.get("numero_solicitante"),
-        numero_supervisor=request.form.get("numero_supervisor")
+    assets_result = find_all_assets.execute(
+        FindAllAssetsQuery()
     )
 
+    people_result = list_people.execute()
+
+    assets = assets_result.assets
+    people = people_result.people
+
+    if request.method == "GET":
+        return render_template(
+            "pages/work_order_create.html",
+            assets=assets,
+            people=people,
+        )
+
     try:
-        orden = create_work_order_service.ejecutar(create_request)
-        return redirect(url_for("work_orders.detalle", numero=orden.numero))
+        result = create_work_order.execute(
+            CreateWorkOrderCommand(
+                code=request.form.get(
+                    "numero",
+                    "",
+                ),
+                title=request.form.get(
+                    "titulo",
+                    "",
+                ),
+                description=request.form.get(
+                    "descripcion",
+                    "",
+                ),
+                work_type=request.form.get(
+                    "tipo",
+                    "",
+                ),
+                priority=request.form.get(
+                    "prioridad",
+                    "",
+                ),
+                asset_code=request.form.get(
+                    "codigo_activo",
+                    "",
+                ),
+                requester_person_code=request.form.get(
+                    "numero_solicitante",
+                    "",
+                ),
+                supervisor_person_code=request.form.get(
+                    "numero_supervisor",
+                    "",
+                ),
+                created_at=datetime.now(),
+            )
+        )
+
+        return redirect(
+            url_for(
+                "work_orders.detalle",
+                numero=result.work_order.code,
+            )
+        )
 
     except (ValueError, TypeError) as error:
         return render_template(
             "pages/work_order_create.html",
             error=str(error),
-            datos=request.form
+            datos=request.form,
+            assets=assets,
+            people=people,
         )
 
-
-# =====================================================
+    
 # Detalle Orden
 # =====================================================
+
+# =====================================================
+# Listado de Ordenes
+# =====================================================
+
+@work_orders.route("/ordenes")
+def index():
+
+    result = (
+        list_work_order_summaries.execute()
+    )
+
+    orders = (
+        WorkOrderSummaryPresenter.present(
+            result
+        )
+    )
+
+    selected_filter = (
+        request.args.get(
+            "filter",
+            "ALL",
+        )
+        .strip()
+        .upper()
+    )
+
+    search_text = (
+        request.args.get(
+            "q",
+            "",
+        )
+        .strip()
+    )
+
+    search_normalized = (
+        search_text.casefold()
+    )
+
+    filtered_items = []
+
+    for item in orders.items:
+
+        matches_filter = True
+
+        if selected_filter == "ACTIVE":
+            matches_filter = (
+                item.operational_state
+                == "ACTIVE"
+            )
+
+        elif selected_filter == "FINISHED":
+            matches_filter = (
+                item.operational_state
+                == "FINISHED"
+            )
+
+        elif selected_filter == "CANCELLED":
+            matches_filter = (
+                item.operational_state
+                == "CANCELLED"
+            )
+
+        elif selected_filter in {
+            "CREATED",
+            "ASSIGNED",
+            "IN_PROGRESS",
+            "ON_HOLD",
+            "COMPLETED",
+            "CLOSED",
+        }:
+            matches_filter = (
+                item.status
+                == selected_filter
+            )
+
+        if not matches_filter:
+            continue
+
+        if search_normalized:
+
+            searchable_values = [
+                item.code,
+                item.title,
+                item.status_label,
+                item.priority,
+                item.work_type,
+                item.asset_code,
+                item.asset_name,
+                item.requester_code,
+                item.requester_name,
+                item.supervisor_code,
+                item.supervisor_name,
+                *item.technician_names,
+            ]
+
+            searchable_text = " ".join(
+                str(value)
+                for value in searchable_values
+                if value
+            ).casefold()
+
+            if (
+                search_normalized
+                not in searchable_text
+            ):
+                continue
+
+        filtered_items.append(
+            item
+        )
+
+    return render_template(
+        "pages/work_orders_index.html",
+        orders=orders,
+        filtered_items=filtered_items,
+        selected_filter=selected_filter,
+        search_text=search_text,
+    )
 
 @work_orders.route("/ordenes/<numero>")
 def detalle(numero):
@@ -299,6 +493,19 @@ def detalle(numero):
             evidence_result
         )
     )
+
+    timeline_result = (
+        list_timeline_events.execute(
+            ListTimelineEventsQuery(
+                entity_type="WORK_ORDER",
+                entity_code=numero,
+            )
+        )
+    )
+
+    timeline = TimelinePresenter.present(
+        timeline_result
+    )
     
 
     return render_template(
@@ -309,10 +516,11 @@ def detalle(numero):
         spare_parts=spare_parts,
         tools=tools,
         evidence=evidence,
+        timeline=timeline,
     )
 
 # =====================================================
-# Asignar Técnico
+# Asignar TÃ©cnico
 # =====================================================
 
 @work_orders.route(
@@ -758,6 +966,7 @@ def unassign_technician_route(
             UnassignTechnicianFromWorkOrderCommand(
                 work_order_code=numero,
                 person_code=person_code,
+                unassigned_at=datetime.now(),
             )
         )
 
@@ -1258,7 +1467,7 @@ def create_work_order_evidence_route(
             evidence_types=list(
                 EvidenceType
             ),
-            error="Tipo de evidencia inválido.",
+            error="Tipo de evidencia invÃ¡lido.",
             data=request.form,
         )
 
@@ -1402,3 +1611,7 @@ def work_order_evidence_file_route(
         file_path,
         as_attachment=False,
     )
+
+
+
+

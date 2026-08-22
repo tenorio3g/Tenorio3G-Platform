@@ -34,3 +34,9 @@ class WorkOrderTechnicianAssignmentModel(Base):
         nullable=False,
         index=True,
     )
+
+    unassigned_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        index=True,
+    )

@@ -90,14 +90,51 @@ class AssignTechnicianToWorkOrder:
                 "technician already assigned to work order"
             )
 
-        assignment = WorkOrderTechnicianAssignment(
-            work_order_code=work_order.code,
-            person_code=person.code,
-            assigned_at=command.assigned_at,
+        historical_assignments = (
+            self._assignment_repository
+            .list_by_work_order(
+                work_order.code
+            )
         )
 
-        self._assignment_repository.save(
-            assignment
+        historical_assignment = next(
+            (
+                assignment
+                for assignment in historical_assignments
+                if (
+                    assignment.person_code
+                    == person.code
+                    and not assignment.is_active
+                )
+            ),
+            None,
+        )
+
+        if historical_assignment is not None:
+
+            assignment = (
+                self._assignment_repository
+                .reactivate(
+                    work_order.code,
+                    person.code,
+                    command.assigned_at,
+                )
+            )
+
+        else:
+
+            assignment = WorkOrderTechnicianAssignment(
+                work_order_code=work_order.code,
+                person_code=person.code,
+                assigned_at=command.assigned_at,
+            )
+
+            self._assignment_repository.save(
+                assignment
+            )
+
+        return AssignTechnicianToWorkOrderResult(
+            assignment=assignment
         )
 
         return AssignTechnicianToWorkOrderResult(

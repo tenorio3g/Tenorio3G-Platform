@@ -149,51 +149,109 @@ Nueva Orden de Trabajo
             <div class="form-field">
 
                 <label for="codigo_activo">
-                    Código del activo
+                    Activo
                 </label>
 
-                <input
+                <select
                     id="codigo_activo"
                     name="codigo_activo"
-                    type="text"
                     required
-                    value="{{ datos.get('codigo_activo', 'ES09') if datos else 'ES09' }}"
-                    placeholder="Ej. ES09"
                 >
 
-            </div>
+                    <option value="">
+                        Seleccione un activo
+                    </option>
 
+                    {% for asset in assets %}
+
+                        <option
+                            value="{{ asset.code }}"
+                            {% if datos
+                                and datos.get('codigo_activo') == asset.code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ asset.name }} — {{ asset.code }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
             <div class="form-field">
 
                 <label for="numero_solicitante">
-                    Número del solicitante
+                    Solicitante
                 </label>
 
-                <input
+                <select
                     id="numero_solicitante"
                     name="numero_solicitante"
-                    type="text"
                     required
-                    value="{{ datos.get('numero_solicitante', '0004') if datos else '0004' }}"
-                    placeholder="Ej. 0004"
                 >
+
+                    <option value="">
+                        Seleccione un solicitante
+                    </option>
+
+                    {% for person in people %}
+
+                        {% if person.is_active %}
+
+                            <option
+                                value="{{ person.code }}"
+                                {% if datos
+                                    and datos.get('numero_solicitante') == person.code %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ person.name }} — {{ person.code }}
+                            </option>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </select>
 
             </div>
 
             <div class="form-field">
 
                 <label for="numero_supervisor">
-                    Número del supervisor
+                    Supervisor
                 </label>
 
-                <input
+                <select
                     id="numero_supervisor"
                     name="numero_supervisor"
-                    type="text"
                     required
-                    value="{{ datos.get('numero_supervisor', '0001') if datos else '0001' }}"
-                    placeholder="Ej. 0001"
                 >
+
+                    <option value="">
+                        Seleccione un supervisor
+                    </option>
+
+                    {% for person in people %}
+
+                        {% if person.is_active %}
+
+                            <option
+                                value="{{ person.code }}"
+                                {% if datos
+                                    and datos.get('numero_supervisor') == person.code %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ person.name }} — {{ person.code }}
+                            </option>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </select>
 
             </div>
 

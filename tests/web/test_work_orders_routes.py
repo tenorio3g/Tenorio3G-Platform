@@ -325,7 +325,10 @@ def test_should_unassign_technician_from_web(
     work_orders_test_db.save(
         work_order
     )
-
+    technician_assignment_repository.delete(
+        "WO-WEB-UNASSIGN",
+        "55464",
+    )
     technician_assignment_repository.save(
         WorkOrderTechnicianAssignment(
             work_order_code="WO-WEB-UNASSIGN",

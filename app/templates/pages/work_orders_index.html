@@ -1,0 +1,358 @@
+﻿{% extends "layouts/base.html" %}
+
+{% block title %}
+Órdenes de trabajo | Tenorio3G
+{% endblock %}
+
+{% block content %}
+
+<div class="work-orders-index">
+
+    <div class="work-orders-index__header">
+
+        <div>
+            <p class="work-orders-index__eyebrow">
+                Mantenimiento
+            </p>
+
+            <h1>
+                Órdenes de trabajo
+            </h1>
+
+            <p>
+                Consulta, búsqueda y seguimiento
+                de las órdenes registradas.
+            </p>
+        </div>
+
+        <div class="work-orders-index__actions">
+
+            <a
+                class="btn"
+                href="{{ url_for('core.dashboard') }}"
+            >
+                Panel principal
+            </a>
+
+            <a
+                class="btn"
+                href="{{ url_for('work_orders.nueva_orden') }}"
+            >
+                + Nueva orden
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="work-orders-kpis">
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                filter='ALL',
+                q=search_text
+            ) }}"
+            class="work-orders-kpi"
+        >
+            <span>Todas</span>
+            <strong>{{ orders.total }}</strong>
+        </a>
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                filter='ACTIVE',
+                q=search_text
+            ) }}"
+            class="work-orders-kpi"
+        >
+            <span>Activas</span>
+            <strong>{{ orders.total_active }}</strong>
+        </a>
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                filter='FINISHED',
+                q=search_text
+            ) }}"
+            class="work-orders-kpi"
+        >
+            <span>Finalizadas</span>
+            <strong>{{ orders.total_finished }}</strong>
+        </a>
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                filter='CANCELLED',
+                q=search_text
+            ) }}"
+            class="work-orders-kpi"
+        >
+            <span>Canceladas</span>
+            <strong>{{ orders.total_cancelled }}</strong>
+        </a>
+
+    </div>
+
+
+    <div class="work-orders-status-filters">
+
+        {% set status_filters = [
+            ('CREATED', 'Creada'),
+            ('ASSIGNED', 'Asignada'),
+            ('IN_PROGRESS', 'En proceso'),
+            ('ON_HOLD', 'En pausa'),
+            ('COMPLETED', 'Completada'),
+            ('CLOSED', 'Cerrada')
+        ] %}
+
+        {% for code, label in status_filters %}
+
+            <a
+                href="{{ url_for(
+                    'work_orders.index',
+                    filter=code,
+                    q=search_text
+                ) }}"
+                class="work-orders-status-filter"
+            >
+                {{ label }}
+                <strong>
+                    {{ orders.total_by_status(code) }}
+                </strong>
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+
+    <form
+        method="get"
+        action="{{ url_for('work_orders.index') }}"
+        class="work-orders-search"
+    >
+
+        <input
+            type="hidden"
+            name="filter"
+            value="{{ selected_filter }}"
+        >
+
+        <input
+            type="search"
+            name="q"
+            value="{{ search_text }}"
+            placeholder="Buscar por orden, activo, solicitante, supervisor o técnico..."
+        >
+
+        <button
+            type="submit"
+            class="btn"
+        >
+            Buscar
+        </button>
+
+        {% if search_text %}
+
+            <a
+                class="btn"
+                href="{{ url_for(
+                    'work_orders.index',
+                    filter=selected_filter
+                ) }}"
+            >
+                Limpiar
+            </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <div class="work-orders-results-header">
+
+        <span>
+            Resultados
+        </span>
+
+        <strong>
+            {{ filtered_items|length }}
+        </strong>
+
+    </div>
+
+
+    {% if filtered_items %}
+
+        <div class="work-orders-list">
+
+            {% for order in filtered_items %}
+
+                <article class="work-order-list-card">
+
+                    <div class="work-order-list-card__header">
+
+                        <div>
+
+                            <span class="work-order-list-card__code">
+                                {{ order.code }}
+                            </span>
+
+                            <h3>
+                                {{ order.title }}
+                            </h3>
+
+                        </div>
+
+                        <div class="work-order-list-card__statuses">
+
+                            <span class="work-order-state-badge">
+                                {{ order.operational_state_label }}
+                            </span>
+
+                            <span
+                                class="
+                                    work-order-status
+                                    work-order-status--{{ order.status|lower }}
+                                "
+                            >
+                                {{ order.status_label }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="work-order-list-card__grid">
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                Activo
+                            </span>
+
+                            <strong>
+                                {{ order.asset_name }}
+                            </strong>
+
+                            <small>
+                                {{ order.asset_code }}
+                            </small>
+                        </div>
+
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                Solicitó
+                            </span>
+
+                            <strong>
+                                {{ order.requester_name }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                Supervisor
+                            </span>
+
+                            <strong>
+                                {{ order.supervisor_name }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                {{ order.technician_label }}
+                            </span>
+
+                            {% if order.technician_names %}
+
+                                <strong>
+                                    {{ order.technician_names|join(", ") }}
+                                </strong>
+
+                            {% else %}
+
+                                <span>
+                                    Sin técnicos registrados
+                                </span>
+
+                            {% endif %}
+                        </div>
+
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                Prioridad
+                            </span>
+
+                            <strong>
+                                {{ order.priority }}
+                            </strong>
+                        </div>
+
+
+                        <div>
+                            <span class="work-order-list-card__label">
+                                Creada
+                            </span>
+
+                            <strong>
+                                {{ order.created_at }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="work-order-list-card__footer">
+
+                        <span>
+                            {{ order.work_type }}
+                        </span>
+
+                        <a
+                            class="btn"
+                            href="{{ url_for(
+                                'work_orders.detalle',
+                                numero=order.code
+                            ) }}"
+                        >
+                            Ver orden
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="work-orders-empty">
+
+            <h3>
+                No se encontraron órdenes
+            </h3>
+
+            <p>
+                Cambie el filtro o el texto de búsqueda.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

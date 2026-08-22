@@ -140,3 +140,60 @@ def test_should_ignore_missing_person():
     )
 
     assert result.items == []
+
+
+def test_should_ignore_inactive_assignments():
+
+    assignment_repository = (
+        InMemoryWorkOrderTechnicianAssignmentRepository()
+    )
+
+    person_repository = (
+        InMemoryPersonRepository()
+    )
+
+    assignment = WorkOrderTechnicianAssignment(
+        work_order_code="WO-001",
+        person_code="55464",
+        assigned_at=datetime(
+            2026,
+            8,
+            21,
+            8,
+            0,
+        ),
+    )
+
+    assignment.unassign(
+        datetime(
+            2026,
+            8,
+            21,
+            12,
+            0,
+        )
+    )
+
+    assignment_repository.save(
+        assignment
+    )
+
+    person_repository.save(
+        Person(
+            code="55464",
+            name="Fortunato",
+        )
+    )
+
+    use_case = ListWorkOrderTechnicians(
+        assignment_repository,
+        person_repository,
+    )
+
+    result = use_case.execute(
+        ListWorkOrderTechniciansQuery(
+            work_order_code="WO-001"
+        )
+    )
+
+    assert result.items == []

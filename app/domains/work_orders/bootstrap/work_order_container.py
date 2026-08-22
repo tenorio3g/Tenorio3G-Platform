@@ -1,4 +1,4 @@
-from app.foundation.database import (
+﻿from app.foundation.database import (
     SessionLocal,
 )
 
@@ -12,6 +12,10 @@ from app.domains.identity.people.bootstrap import (
 
 from app.domains.work_orders.repositories import (
     SQLiteWorkOrderRepository,
+)
+
+from app.domains.work_orders.technicians.repositories import (
+    SQLiteWorkOrderTechnicianAssignmentRepository,
 )
 
 from app.domains.work_orders.use_cases import (
@@ -28,22 +32,32 @@ from app.domains.work_orders.use_cases import (
     ResumeWorkOrder,
     StartWorkOrder,
 )
-from app.foundation.timeline.engine.bootstrap import (
-    record_timeline_event,
-    
+
+from app.domains.work_orders.use_cases.list_work_order_summaries import (
+    ListWorkOrderSummaries,
 )
 
+from app.foundation.timeline.engine.bootstrap import (
+    record_timeline_event,
+)
 
 from app.domains.work_orders.timeline import (
     WorkOrderTimelineRecorder,
 )
 
+
 # ============================================================
-# REPOSITORY
+# REPOSITORIES
 # ============================================================
 
 work_order_repository = (
     SQLiteWorkOrderRepository(
+        SessionLocal
+    )
+)
+
+work_order_summary_technician_repository = (
+    SQLiteWorkOrderTechnicianAssignmentRepository(
         SessionLocal
     )
 )
@@ -59,6 +73,7 @@ create_work_order = CreateWorkOrder(
     person_repository,
     record_timeline_event,
 )
+
 
 # ============================================================
 # QUERIES
@@ -77,19 +92,37 @@ list_work_orders_by_asset = (
         work_order_repository
     )
 )
+
 get_work_order_detail = GetWorkOrderDetail(
     work_order_repository,
     asset_repository,
     person_repository,
 )
+
+list_work_order_summaries = (
+    ListWorkOrderSummaries(
+        work_order_repository,
+        asset_repository,
+        person_repository,
+        work_order_summary_technician_repository,
+    )
+)
+
+
 # ============================================================
-# COMMANDS - WORK ORDER LIFECYCLE
+# TIMELINE
 # ============================================================
+
 work_order_timeline_recorder = (
     WorkOrderTimelineRecorder(
         record_timeline_event
     )
 )
+
+
+# ============================================================
+# COMMANDS - WORK ORDER LIFECYCLE
+# ============================================================
 
 assign_work_order = AssignWorkOrder(
     work_order_repository,
@@ -125,4 +158,3 @@ cancel_work_order = CancelWorkOrder(
     work_order_repository,
     work_order_timeline_recorder,
 )
-

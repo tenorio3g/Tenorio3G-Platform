@@ -1,4 +1,4 @@
-from .work_order_container import (
+﻿from .work_order_container import (
     assign_work_order,
     cancel_work_order,
     close_work_order,
@@ -9,6 +9,7 @@ from .work_order_container import (
     hold_work_order,
     list_work_orders,
     list_work_orders_by_asset,
+    list_work_order_summaries,
     resume_work_order,
     start_work_order,
     work_order_repository,
@@ -21,6 +22,7 @@ __all__ = [
     "get_work_order",
     "list_work_orders",
     "list_work_orders_by_asset",
+    "list_work_order_summaries",
     "assign_work_order",
     "start_work_order",
     "hold_work_order",

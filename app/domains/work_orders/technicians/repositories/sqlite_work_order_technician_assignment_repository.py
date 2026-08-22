@@ -1,5 +1,5 @@
 from sqlalchemy import select
-
+from datetime import datetime
 from app.domains.work_orders.technicians.entities import (
     WorkOrderTechnicianAssignment,
 )
@@ -58,6 +58,9 @@ class SQLiteWorkOrderTechnicianAssignmentRepository(
                     assigned_at=(
                         assignment.assigned_at
                     ),
+                    unassigned_at=(
+                        assignment.unassigned_at
+                    ),
                 )
             )
 
@@ -93,8 +96,12 @@ class SQLiteWorkOrderTechnicianAssignmentRepository(
                 key,
             )
 
-            return model is not None
+            return (
+                model is not None
+                and model.unassigned_at is None
+            )
 
+        
     def list_by_work_order(
         self,
         work_order_code: str,
@@ -181,4 +188,114 @@ class SQLiteWorkOrderTechnicianAssignmentRepository(
             assigned_at=(
                 model.assigned_at
             ),
+            unassigned_at=(
+                model.unassigned_at
+            ),
         )
+    def unassign(
+        self,
+        work_order_code: str,
+        person_code: str,
+        unassigned_at: datetime,
+    ) -> None:
+
+        normalized_work_order_code = str(
+            work_order_code
+        ).strip().upper()
+
+        normalized_person_code = str(
+            person_code
+        ).strip()
+
+        if not isinstance(
+            unassigned_at,
+            datetime,
+        ):
+            raise ValueError(
+                "unassigned_at must be a datetime"
+            )
+
+        with self._session_factory() as session:
+
+            key = (
+                normalized_work_order_code,
+                normalized_person_code,
+            )
+
+            model = session.get(
+                WorkOrderTechnicianAssignmentModel,
+                key,
+            )
+
+            if model is None:
+                raise ValueError(
+                    "technician is not assigned to work order"
+                )
+
+            assignment = self._to_entity(
+                model
+            )
+
+            assignment.unassign(
+                unassigned_at
+            )
+
+            model.unassigned_at = (
+                assignment.unassigned_at
+            )
+
+            session.commit()
+
+    def reactivate(
+        self,
+        work_order_code: str,
+        person_code: str,
+        assigned_at: datetime,
+    ) -> WorkOrderTechnicianAssignment:
+
+        normalized_work_order_code = str(
+            work_order_code
+        ).strip().upper()
+
+        normalized_person_code = str(
+            person_code
+        ).strip()
+
+        if not isinstance(
+            assigned_at,
+            datetime,
+        ):
+            raise ValueError(
+                "assigned_at must be a datetime"
+            )
+
+        with self._session_factory() as session:
+
+            key = (
+                normalized_work_order_code,
+                normalized_person_code,
+            )
+
+            model = session.get(
+                WorkOrderTechnicianAssignmentModel,
+                key,
+            )
+
+            if model is None:
+                raise ValueError(
+                    "technician assignment history not found"
+                )
+
+            if model.unassigned_at is None:
+                raise ValueError(
+                    "technician already assigned to work order"
+                )
+
+            model.assigned_at = assigned_at
+            model.unassigned_at = None
+
+            session.commit()
+
+            return self._to_entity(
+                model
+            )

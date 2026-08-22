@@ -145,3 +145,127 @@ def test_should_delete_assignment():
         "WO-001",
         "55464",
     ) is False
+
+def test_should_unassign_without_deleting_history():
+
+    repository = (
+        InMemoryWorkOrderTechnicianAssignmentRepository()
+    )
+
+    assignment = create_assignment()
+
+    repository.save(
+        assignment
+    )
+
+    repository.unassign(
+        "WO-001",
+        "55464",
+        datetime(
+            2026,
+            8,
+            16,
+            12,
+            0,
+        ),
+    )
+
+    assert repository.exists(
+        "WO-001",
+        "55464",
+    ) is False
+
+    history = repository.list_by_work_order(
+        "WO-001"
+    )
+
+    assert len(history) == 1
+
+    assert history[0].is_active is False
+
+    assert (
+        history[0].unassigned_at
+        == datetime(
+            2026,
+            8,
+            16,
+            12,
+            0,
+        )
+    )
+
+
+def test_should_allow_reassignment_after_unassign():
+
+    repository = (
+        InMemoryWorkOrderTechnicianAssignmentRepository()
+    )
+
+    repository.save(
+        create_assignment()
+    )
+
+    repository.unassign(
+        "WO-001",
+        "55464",
+        datetime(
+            2026,
+            8,
+            16,
+            12,
+            0,
+        ),
+    )
+
+    repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-001",
+            person_code="55464",
+            assigned_at=datetime(
+                2026,
+                8,
+                16,
+                14,
+                0,
+            ),
+        )
+    )
+
+    assert repository.exists(
+        "WO-001",
+        "55464",
+    ) is True
+
+    history = repository.list_by_work_order(
+        "WO-001"
+    )
+
+    assert len(history) == 2
+
+    assert history[0].is_active is False
+    assert history[1].is_active is True
+
+
+def test_should_reject_unassign_when_no_active_assignment():
+
+    repository = (
+        InMemoryWorkOrderTechnicianAssignmentRepository()
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "technician is not assigned to work order"
+        ),
+    ):
+        repository.unassign(
+            "WO-001",
+            "55464",
+            datetime(
+                2026,
+                8,
+                16,
+                12,
+                0,
+            ),
+        )

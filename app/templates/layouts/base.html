@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -64,7 +64,7 @@
     >
 
     <!-- ==================================================
-         MÓDULOS
+         MÃ“DULOS
     =================================================== -->
 
     <link
@@ -75,6 +75,14 @@
         ) }}"
     >
 
+    <link
+        rel="stylesheet"
+        href="{{ url_for(
+            'static',
+            filename='css/modules/work_order.css'
+        ) }}"
+    >
+
     {% block extra_css %}
     {% endblock %}
 
@@ -82,72 +90,144 @@
 
 <body>
 
-    <header>
+    <header class="app-header">
 
-        <div class="logo">
-            <h1>
-                Tenorio3G Platform
-            </h1>
-        </div>
+        <div class="app-header__top">
 
-        {% if session.get("username") %}
+            <div class="logo">
+                <a
+                    href="{{ url_for('core.dashboard') }}"
+                    class="app-brand"
+                >
+                    Tenorio3G Platform
+                </a>
+            </div>
 
-            <div class="session-user">
+            {% if session.get("username") %}
 
-                <div class="session-user__info">
+                <div class="session-user">
 
-                    <div>
-                        <span>
-                            Usuario:
-                        </span>
+                    <div class="session-user__info">
 
-                        <strong>
-                            {{ session.get("username") }}
-                        </strong>
+                        <div>
+                            <span>
+                                Usuario:
+                            </span>
+
+                            <strong>
+                                {{ session.get("username") }}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>
+                                Rol:
+                            </span>
+
+                            <strong>
+                                {{ session.get("role_code") }}
+                            </strong>
+                        </div>
+
                     </div>
 
-                    <div>
-                        <span>
-                            Rol:
-                        </span>
-
-                        <strong>
-                            {{ session.get("role_code") }}
-                        </strong>
-                    </div>
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'identity.logout_route'
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="btn"
+                        >
+                            Cerrar sesiÃ³n
+                        </button>
+                    </form>
 
                 </div>
 
-                <form
-                    method="post"
-                    action="{{ url_for(
-                        'identity.logout_route'
-                    ) }}"
-                >
-                    <button
-                        type="submit"
+            {% else %}
+
+                <div class="session-user">
+
+                    <a
                         class="btn"
+                        href="{{ url_for(
+                            'identity.login_route'
+                        ) }}"
                     >
-                        Cerrar sesión
-                    </button>
-                </form>
+                        Iniciar sesiÃ³n
+                    </a>
 
-            </div>
+                </div>
 
-        {% else %}
+            {% endif %}
 
-            <div class="session-user">
+        </div>
+
+
+        {% if session.get("username") %}
+
+            <nav class="app-navigation">
 
                 <a
-                    class="btn"
-                    href="{{ url_for(
-                        'identity.login_route'
-                    ) }}"
+                    href="{{ url_for('core.dashboard') }}"
+                    class="app-navigation__link"
                 >
-                    Iniciar sesión
+                    Panel
                 </a>
 
-            </div>
+                <a
+                    href="{{ url_for('assets.index') }}"
+                    class="app-navigation__link"
+                >
+                    Activos
+                </a>
+
+                <a
+                    href="{{ url_for('operations.index') }}"
+                    class="app-navigation__link"
+                >
+                    Operaciones
+                </a>
+
+                <a
+                    href="{{ url_for('work_orders.nueva_orden') }}"
+                    class="app-navigation__link"
+                >
+                    Nueva orden
+                </a>
+
+                <a
+                    href="{{ url_for('identity.people_index') }}"
+                    class="app-navigation__link"
+                >
+                    Personas
+                </a>
+
+                <a
+                    href="{{ url_for('maps.index') }}"
+                    class="app-navigation__link"
+                >
+                    Mapas
+                </a>
+
+                <a
+                    href="{{ url_for('identity.users_index') }}"
+                    class="app-navigation__link"
+                >
+                    Usuarios
+                </a>
+
+                <a
+                    href="{{ url_for('identity.roles_index') }}"
+                    class="app-navigation__link"
+                >
+                    Roles
+                </a>
+
+            </nav>
 
         {% endif %}
 
@@ -170,3 +250,4 @@
 </body>
 
 </html>
+

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 from app.domains.work_orders.repositories import (
     WorkOrderRepository,
@@ -13,6 +14,7 @@ from app.domains.work_orders.technicians.repositories import (
 class UnassignTechnicianFromWorkOrderCommand:
     work_order_code: str
     person_code: str
+    unassigned_at: datetime
 
 
 class UnassignTechnicianFromWorkOrder:
@@ -56,7 +58,8 @@ class UnassignTechnicianFromWorkOrder:
                 "technician is not assigned to work order"
             )
 
-        self._assignment_repository.delete(
+        self._assignment_repository.unassign(
             work_order.code,
             command.person_code,
+            command.unassigned_at,
         )

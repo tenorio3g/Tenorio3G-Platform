@@ -66,6 +66,9 @@ class ListWorkOrderTechnicians:
 
         for assignment in assignments:
 
+            if not assignment.is_active:
+                continue
+
             person = (
                 self._person_repository
                 .get_by_code(

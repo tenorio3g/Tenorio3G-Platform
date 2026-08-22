@@ -19,6 +19,10 @@ Orden {{ orden.code }}
             <p class="page-eyebrow">
                 Orden de trabajo
             </p>
+            <div style="margin: 16px 0; padding: 12px; border: 1px solid #ccc;">
+                <strong>Timeline:</strong>
+                {{ timeline.total }} eventos
+            </div>
 
             <div class="work-order-page-heading__title-row">
 
@@ -1525,6 +1529,139 @@ Orden {{ orden.code }}
                     <div class="work-order-evidence-empty">
                         No hay evidencias registradas
                         para esta orden.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </article>
+        <article class="asset-workspace-card work-order-timeline-card">
+
+            <div class="asset-workspace-card__header">
+
+                <div>
+
+                    <p class="asset-workspace-card__eyebrow">
+                        Historial
+                    </p>
+
+                    <h3>
+                        Línea de tiempo de la orden
+                    </h3>
+
+                </div>
+
+                <div class="work-order-timeline-summary">
+
+                    <span>
+                        Eventos
+                    </span>
+
+                    <strong>
+                        {{ timeline.total }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="asset-workspace-card__body">
+
+                {% if timeline.has_items %}
+
+                    <div class="work-order-timeline">
+
+                        {% for item in timeline.items %}
+
+                            <article class="work-order-timeline-item">
+
+                                <div class="work-order-timeline-item__marker">
+
+                                    <span
+                                        class="
+                                            work-order-timeline-item__dot
+                                            work-order-timeline-item__dot--{{ item.event_type|lower }}
+                                        "
+                                    ></span>
+
+                                </div>
+
+
+                                <div class="work-order-timeline-item__content">
+
+                                    <div class="work-order-timeline-item__top">
+
+                                        <span class="work-order-timeline-item__type">
+                                            {{ item.event_type_label }}
+                                        </span>
+
+                                        <span class="work-order-timeline-item__date">
+                                            {{ item.occurred_at }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <h4>
+                                        {{ item.title }}
+                                    </h4>
+
+
+                                    <div class="work-order-timeline-item__meta">
+
+                                        <span>
+                                            Registrado por
+                                        </span>
+
+                                        <strong>
+                                            {{ item.actor_person_code }}
+                                        </strong>
+
+                                    </div>
+
+
+                                    {% if item.description %}
+
+                                        <p class="work-order-timeline-item__description">
+                                            {{ item.description }}
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    {% if item.reference_code %}
+
+                                        <div class="work-order-timeline-item__reference">
+
+                                            <span>
+                                                Referencia
+                                            </span>
+
+                                            <strong>
+                                                {{ item.reference_code }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="work-order-timeline-empty">
+
+                        No hay eventos registrados
+                        para esta orden.
+
                     </div>
 
                 {% endif %}

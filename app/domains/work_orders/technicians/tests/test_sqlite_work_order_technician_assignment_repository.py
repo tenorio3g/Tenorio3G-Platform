@@ -183,3 +183,67 @@ def test_should_delete_assignment(
     ) is False
 
     engine.dispose()
+
+def test_should_unassign_without_deleting_history(
+    tmp_path,
+):
+
+    repository, engine = (
+        build_repository(
+            tmp_path
+        )
+    )
+
+    assignment = WorkOrderTechnicianAssignment(
+        work_order_code="WO-001",
+        person_code="55464",
+        assigned_at=datetime(
+            2026,
+            8,
+            20,
+            8,
+            0,
+        ),
+    )
+
+    repository.save(
+        assignment
+    )
+
+    unassigned_at = datetime(
+        2026,
+        8,
+        20,
+        12,
+        30,
+    )
+
+    repository.unassign(
+        "WO-001",
+        "55464",
+        unassigned_at,
+    )
+
+    assert repository.exists(
+        "WO-001",
+        "55464",
+    ) is False
+
+    assignments = (
+        repository.list_by_work_order(
+            "WO-001"
+        )
+    )
+
+    assert len(assignments) == 1
+
+    persisted = assignments[0]
+
+    assert persisted.is_active is False
+
+    assert (
+        persisted.unassigned_at
+        == unassigned_at
+    )
+
+    engine.dispose()

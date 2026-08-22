@@ -56,6 +56,7 @@ def test_should_present_timeline_events():
     assert item.event_id == "EVT-001"
     assert item.event_type == "CREATED"
     assert item.title == "Orden creada"
+    assert item.event_type_label == "Created"
 
     assert (
         item.occurred_at
@@ -81,3 +82,45 @@ def test_should_present_empty_timeline():
     assert view_model.has_items is False
     assert view_model.total == 0
     assert view_model.items == []
+
+
+def test_should_present_friendly_work_order_event_label():
+
+    result = ListTimelineEventsResult(
+        items=[
+            TimelineEvent(
+                event_id="EVT-002",
+                entity_type="WORK_ORDER",
+                entity_code="WO-001",
+                event_type="WORK_ORDER_ASSIGNED",
+                title="Orden de trabajo asignada",
+                actor_person_code="55464",
+                occurred_at=datetime(
+                    2026,
+                    8,
+                    20,
+                    16,
+                    31,
+                ),
+                description="",
+                reference_type="WORK_ORDER",
+                reference_code="WO-001",
+            )
+        ]
+    )
+
+    view_model = TimelinePresenter.present(
+        result
+    )
+
+    item = view_model.items[0]
+
+    assert (
+        item.event_type
+        == "WORK_ORDER_ASSIGNED"
+    )
+
+    assert (
+        item.event_type_label
+        == "Asignación"
+    )

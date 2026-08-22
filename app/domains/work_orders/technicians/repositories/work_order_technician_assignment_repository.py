@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from app.domains.work_orders.technicians.entities import (
     WorkOrderTechnicianAssignment,
@@ -29,6 +30,24 @@ class WorkOrderTechnicianAssignmentRepository(
         self,
         work_order_code: str,
     ) -> list[WorkOrderTechnicianAssignment]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def unassign(
+        self,
+        work_order_code: str,
+        person_code: str,
+        unassigned_at: datetime,
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def reactivate(
+        self,
+        work_order_code: str,
+        person_code: str,
+        assigned_at: datetime,
+    ) -> WorkOrderTechnicianAssignment:
         raise NotImplementedError
 
     @abstractmethod

@@ -16,6 +16,15 @@ from .work_order_detail_view_model import (
     WorkOrderPersonViewModel,
 )
 
+from .work_order_summary_presenter import (
+    WorkOrderSummaryPresenter,
+)
+
+from .work_order_summary_view_model import (
+    WorkOrderSummaryItemViewModel,
+    WorkOrderSummaryViewModel,
+)
+
 
 __all__ = [
     "WorkOrderPresenter",
@@ -24,4 +33,7 @@ __all__ = [
     "WorkOrderAssetViewModel",
     "WorkOrderDetailViewModel",
     "WorkOrderPersonViewModel",
+    "WorkOrderSummaryPresenter",
+    "WorkOrderSummaryItemViewModel",
+    "WorkOrderSummaryViewModel",
 ]
