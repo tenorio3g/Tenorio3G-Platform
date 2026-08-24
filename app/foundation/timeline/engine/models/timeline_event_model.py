@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from sqlalchemy import (
     DateTime,
@@ -51,10 +51,15 @@ class TimelineEventModel(Base):
         default="",
     )
 
-    actor_person_code: Mapped[str] = mapped_column(
+    actor_person_code: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=False,
+        nullable=True,
         index=True,
+    )
+
+    actor_name: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
     )
 
     occurred_at: Mapped[datetime] = mapped_column(

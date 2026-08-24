@@ -83,9 +83,6 @@ def test_should_create_work_order():
         "title",
         "work_type",
         "priority",
-        "asset_code",
-        "requester_person_code",
-        "supervisor_person_code",
     ],
 )
 def test_should_require_mandatory_fields(

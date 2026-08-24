@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from app.domains.work_orders.value_objects import (
     WorkOrderStatus,
@@ -19,6 +19,10 @@ class WorkOrder:
         supervisor_person_code,
         created_at,
         status=WorkOrderStatus.CREATED,
+        requester_name=None,
+        requester_phone=None,
+        requester_area=None,
+        location_description=None,
     ):
         self.code = self._required(
             code,
@@ -44,24 +48,47 @@ class WorkOrder:
             "priority",
         ).upper()
 
-        self.asset_code = self._required(
-            asset_code,
-            "asset_code",
-        ).upper()
+        self.asset_code = self._optional_code(
+            asset_code
+        )
 
         self.requester_person_code = (
-            self._required(
-                requester_person_code,
-                "requester_person_code",
-            ).upper()
+            self._optional_code(
+                requester_person_code
+            )
         )
 
         self.supervisor_person_code = (
-            self._required(
-                supervisor_person_code,
-                "supervisor_person_code",
-            ).upper()
+            self._optional_code(
+                supervisor_person_code
+            )
         )
+
+        self.requester_name = (
+            self._optional_text(
+                requester_name
+            )
+        )
+
+        self.requester_phone = (
+            self._optional_text(
+                requester_phone
+            )
+        )
+
+        self.requester_area = (
+            self._optional_text(
+                requester_area
+            )
+        )
+
+        self.location_description = (
+            self._optional_text(
+                location_description
+            )
+        )
+
+        self._validate_requester()
 
         if not isinstance(
             created_at,
@@ -83,6 +110,23 @@ class WorkOrder:
 
         self.status = status
 
+    def _validate_requester(
+        self,
+    ) -> None:
+
+        if self.requester_person_code:
+            return
+
+        if not self.requester_name:
+            raise ValueError(
+                "requester name is required"
+            )
+
+        if not self.requester_phone:
+            raise ValueError(
+                "requester phone is required"
+            )
+
     @staticmethod
     def _required(
         value,
@@ -100,6 +144,40 @@ class WorkOrder:
 
         return normalized
 
+    @staticmethod
+    def _optional_code(
+        value,
+    ) -> str | None:
+
+        if value is None:
+            return None
+
+        normalized = str(
+            value
+        ).strip()
+
+        if not normalized:
+            return None
+
+        return normalized.upper()
+
+    @staticmethod
+    def _optional_text(
+        value,
+    ) -> str | None:
+
+        if value is None:
+            return None
+
+        normalized = str(
+            value
+        ).strip()
+
+        if not normalized:
+            return None
+
+        return normalized
+
     def assign(
         self,
     ) -> None:
@@ -110,7 +188,6 @@ class WorkOrder:
             )
 
         self.status = WorkOrderStatus.ASSIGNED
-
 
     def start(
         self,
@@ -123,7 +200,6 @@ class WorkOrder:
 
         self.status = WorkOrderStatus.IN_PROGRESS
 
-
     def hold(
         self,
     ) -> None:
@@ -134,7 +210,6 @@ class WorkOrder:
             )
 
         self.status = WorkOrderStatus.ON_HOLD
-
 
     def resume(
         self,
@@ -147,7 +222,6 @@ class WorkOrder:
 
         self.status = WorkOrderStatus.IN_PROGRESS
 
-
     def complete(
         self,
     ) -> None:
@@ -159,7 +233,6 @@ class WorkOrder:
 
         self.status = WorkOrderStatus.COMPLETED
 
-
     def close(
         self,
     ) -> None:
@@ -170,7 +243,6 @@ class WorkOrder:
             )
 
         self.status = WorkOrderStatus.CLOSED
-
 
     def cancel(
         self,

@@ -217,6 +217,7 @@ def nueva_orden():
     people = people_result.people
 
     if request.method == "GET":
+
         return render_template(
             "pages/work_order_create.html",
             assets=assets,
@@ -224,6 +225,7 @@ def nueva_orden():
         )
 
     try:
+
         result = create_work_order.execute(
             CreateWorkOrderCommand(
                 code=request.form.get(
@@ -250,13 +252,35 @@ def nueva_orden():
                     "codigo_activo",
                     "",
                 ),
-                requester_person_code=request.form.get(
-                    "numero_solicitante",
+                requester_person_code=(
+                    request.form.get(
+                        "numero_solicitante",
+                        "",
+                    )
+                ),
+                requester_name=request.form.get(
+                    "nombre_solicitante",
                     "",
                 ),
-                supervisor_person_code=request.form.get(
-                    "numero_supervisor",
+                requester_phone=request.form.get(
+                    "telefono_solicitante",
                     "",
+                ),
+                requester_area=request.form.get(
+                    "area_solicitante",
+                    "",
+                ),
+                supervisor_person_code=(
+                    request.form.get(
+                        "numero_supervisor",
+                        "",
+                    )
+                ),
+                location_description=(
+                    request.form.get(
+                        "ubicacion",
+                        "",
+                    )
                 ),
                 created_at=datetime.now(),
             )
@@ -270,6 +294,7 @@ def nueva_orden():
         )
 
     except (ValueError, TypeError) as error:
+
         return render_template(
             "pages/work_order_create.html",
             error=str(error),
@@ -277,6 +302,8 @@ def nueva_orden():
             assets=assets,
             people=people,
         )
+
+
 
     
 # Detalle Orden
@@ -1611,6 +1638,7 @@ def work_order_evidence_file_route(
         file_path,
         as_attachment=False,
     )
+
 
 
 

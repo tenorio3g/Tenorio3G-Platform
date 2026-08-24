@@ -1,26 +1,35 @@
-{% extends "layouts/base.html" %}
+﻿{% extends "layouts/base.html" %}
 
 {% block title %}
-Nueva Orden de Trabajo
+Nueva solicitud de trabajo
 {% endblock %}
 
 {% block content %}
 
-<div class="asset-card">
+<div class="container">
 
-    <p class="asset-label">
-        WORK ORDERS
-    </p>
+    <div class="work-order-page-heading">
 
-    <h1>
-        📋 Nueva Orden de Trabajo
-    </h1>
+        <div>
 
-    <p>
-        Registre la información inicial de la orden.
-    </p>
+            <p class="page-eyebrow">
+                Work Orders
+            </p>
 
-    <hr>
+            <h1>
+                Nueva solicitud de trabajo
+            </h1>
+
+            <p class="work-order-page-heading__subtitle">
+                Registre la necesidad de mantenimiento.
+                El activo, supervisor y técnicos pueden
+                definirse posteriormente.
+            </p>
+
+        </div>
+
+    </div>
+
 
     {% if error %}
 
@@ -30,232 +39,500 @@ Nueva Orden de Trabajo
 
     {% endif %}
 
+
     <form
         method="POST"
         class="work-order-form"
     >
 
-        <div class="form-grid">
+        <!-- =================================================
+             INFORMACION DEL TRABAJO
+        ================================================== -->
 
-            <div class="form-field">
+        <div class="asset-card">
 
-                <label for="numero">
-                    Número de orden
-                </label>
+            <p class="asset-label">
+                SOLICITUD
+            </p>
 
-                <input
-                    id="numero"
-                    name="numero"
-                    type="text"
-                    required
-                    value="{{ datos.get('numero', '') if datos else '' }}"
-                    placeholder="Ej. 70150"
-                >
+            <h2>
+                Información del trabajo
+            </h2>
 
-            </div>
+            <div class="form-grid">
 
-            <div class="form-field">
+                <div class="form-field">
 
-                <label for="titulo">
-                    Título
-                </label>
+                    <label for="numero">
+                        Número de orden *
+                    </label>
 
-                <input
-                    id="titulo"
-                    name="titulo"
-                    type="text"
-                    required
-                    value="{{ datos.get('titulo', '') if datos else '' }}"
-                    placeholder="Descripción breve del trabajo"
-                >
+                    <input
+                        id="numero"
+                        name="numero"
+                        type="text"
+                        required
+                        value="{{ datos.get('numero', '') if datos else '' }}"
+                        placeholder="Ej. WO-00125"
+                    >
 
-            </div>
+                </div>
 
-            <div class="form-field form-field-full">
 
-                <label for="descripcion">
-                    Descripción
-                </label>
+                <div class="form-field">
 
-                <textarea
-                    id="descripcion"
-                    name="descripcion"
-                    rows="5"
-                    placeholder="Explique el trabajo solicitado"
-                >{{ datos.get('descripcion', '') if datos else '' }}</textarea>
+                    <label for="titulo">
+                        Título *
+                    </label>
 
-            </div>
+                    <input
+                        id="titulo"
+                        name="titulo"
+                        type="text"
+                        required
+                        value="{{ datos.get('titulo', '') if datos else '' }}"
+                        placeholder="Ej. Instalar contacto 110 V"
+                    >
 
-            <div class="form-field">
+                </div>
 
-                <label for="tipo">
-                    Tipo
-                </label>
 
-                <select
-                    id="tipo"
-                    name="tipo"
-                    required
-                >
-                    <option value="Correctivo">
-                        Correctivo
-                    </option>
+                <div class="form-field form-field-full">
 
-                    <option value="Preventivo">
-                        Preventivo
-                    </option>
+                    <label for="descripcion">
+                        Descripción
+                    </label>
 
-                    <option value="Proyecto">
-                        Proyecto
-                    </option>
+                    <textarea
+                        id="descripcion"
+                        name="descripcion"
+                        rows="5"
+                        placeholder="Explique qué trabajo se necesita realizar"
+                    >{{ datos.get('descripcion', '') if datos else '' }}</textarea>
 
-                    <option value="Inspección">
-                        Inspección
-                    </option>
-                </select>
+                </div>
 
-            </div>
 
-            <div class="form-field">
+                <div class="form-field">
 
-                <label for="prioridad">
-                    Prioridad
-                </label>
+                    <label for="tipo">
+                        Tipo de trabajo *
+                    </label>
 
-                <select
-                    id="prioridad"
-                    name="prioridad"
-                    required
-                >
-                    <option value="Baja">
-                        Baja
-                    </option>
+                    {% set tipo_actual =
+                        datos.get('tipo', '')
+                        if datos
+                        else ''
+                    %}
 
-                    <option value="Media">
-                        Media
-                    </option>
-
-                    <option value="Alta">
-                        Alta
-                    </option>
-
-                    <option value="Crítica">
-                        Crítica
-                    </option>
-                </select>
-
-            </div>
-
-            <div class="form-field">
-
-                <label for="codigo_activo">
-                    Activo
-                </label>
-
-                <select
-                    id="codigo_activo"
-                    name="codigo_activo"
-                    required
-                >
-
-                    <option value="">
-                        Seleccione un activo
-                    </option>
-
-                    {% for asset in assets %}
+                    <select
+                        id="tipo"
+                        name="tipo"
+                        required
+                    >
 
                         <option
-                            value="{{ asset.code }}"
-                            {% if datos
-                                and datos.get('codigo_activo') == asset.code %}
+                            value="Correctivo"
+                            {% if tipo_actual == "Correctivo" %}
                                 selected
                             {% endif %}
                         >
-                            {{ asset.name }} — {{ asset.code }}
+                            Correctivo
                         </option>
 
-                    {% endfor %}
+                        <option
+                            value="Preventivo"
+                            {% if tipo_actual == "Preventivo" %}
+                                selected
+                            {% endif %}
+                        >
+                            Preventivo
+                        </option>
 
-                </select>
+                        <option
+                            value="Proyecto"
+                            {% if tipo_actual == "Proyecto" %}
+                                selected
+                            {% endif %}
+                        >
+                            Proyecto / Instalación
+                        </option>
 
-            </div>
-            <div class="form-field">
+                        <option
+                            value="Inspeccion"
+                            {% if tipo_actual == "Inspeccion" %}
+                                selected
+                            {% endif %}
+                        >
+                            Inspección
+                        </option>
 
-                <label for="numero_solicitante">
-                    Solicitante
-                </label>
+                        <option
+                            value="General"
+                            {% if tipo_actual == "General" %}
+                                selected
+                            {% endif %}
+                        >
+                            Mantenimiento general
+                        </option>
 
-                <select
-                    id="numero_solicitante"
-                    name="numero_solicitante"
-                    required
-                >
+                    </select>
 
-                    <option value="">
-                        Seleccione un solicitante
-                    </option>
+                </div>
 
-                    {% for person in people %}
 
-                        {% if person.is_active %}
+                <div class="form-field">
 
-                            <option
-                                value="{{ person.code }}"
-                                {% if datos
-                                    and datos.get('numero_solicitante') == person.code %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ person.name }} — {{ person.code }}
-                            </option>
+                    <label for="prioridad">
+                        Prioridad solicitada *
+                    </label>
 
-                        {% endif %}
+                    {% set prioridad_actual =
+                        datos.get('prioridad', 'Media')
+                        if datos
+                        else 'Media'
+                    %}
 
-                    {% endfor %}
+                    <select
+                        id="prioridad"
+                        name="prioridad"
+                        required
+                    >
 
-                </select>
+                        <option
+                            value="Baja"
+                            {% if prioridad_actual == "Baja" %}
+                                selected
+                            {% endif %}
+                        >
+                            Baja
+                        </option>
 
-            </div>
+                        <option
+                            value="Media"
+                            {% if prioridad_actual == "Media" %}
+                                selected
+                            {% endif %}
+                        >
+                            Media
+                        </option>
 
-            <div class="form-field">
+                        <option
+                            value="Alta"
+                            {% if prioridad_actual == "Alta" %}
+                                selected
+                            {% endif %}
+                        >
+                            Alta
+                        </option>
 
-                <label for="numero_supervisor">
-                    Supervisor
-                </label>
+                        <option
+                            value="Critica"
+                            {% if prioridad_actual == "Critica" %}
+                                selected
+                            {% endif %}
+                        >
+                            Crítica
+                        </option>
 
-                <select
-                    id="numero_supervisor"
-                    name="numero_supervisor"
-                    required
-                >
+                    </select>
 
-                    <option value="">
-                        Seleccione un supervisor
-                    </option>
+                </div>
 
-                    {% for person in people %}
 
-                        {% if person.is_active %}
+                <div class="form-field form-field-full">
 
-                            <option
-                                value="{{ person.code }}"
-                                {% if datos
-                                    and datos.get('numero_supervisor') == person.code %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ person.name }} — {{ person.code }}
-                            </option>
+                    <label for="ubicacion">
+                        Ubicación del trabajo
+                    </label>
 
-                        {% endif %}
+                    <input
+                        id="ubicacion"
+                        name="ubicacion"
+                        type="text"
+                        value="{{ datos.get('ubicacion', '') if datos else '' }}"
+                        placeholder="Ej. MD2, Línea 4, estación 12"
+                    >
 
-                    {% endfor %}
+                    <small>
+                        Puede indicar área, línea, oficina,
+                        estacionamiento o cualquier ubicación
+                        aunque no exista un activo registrado.
+                    </small>
 
-                </select>
+                </div>
 
             </div>
 
         </div>
+
+
+        <!-- =================================================
+             ACTIVO
+        ================================================== -->
+
+        <div class="asset-card">
+
+            <p class="asset-label">
+                ACTIVO RELACIONADO
+            </p>
+
+            <h2>
+                Equipo o activo
+            </h2>
+
+            <p>
+                Este campo es opcional.
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-field form-field-full">
+
+                    <label for="codigo_activo">
+                        Activo
+                    </label>
+
+                    <select
+                        id="codigo_activo"
+                        name="codigo_activo"
+                    >
+
+                        <option value="">
+                            No aplica / No se conoce
+                        </option>
+
+                        {% for asset in assets %}
+
+                            <option
+                                value="{{ asset.code }}"
+                                {% if datos
+                                    and datos.get(
+                                        'codigo_activo'
+                                    ) == asset.code %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ asset.name }}
+                                — {{ asset.code }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SOLICITANTE
+        ================================================== -->
+
+        <div class="asset-card">
+
+            <p class="asset-label">
+                SOLICITANTE
+            </p>
+
+            <h2>
+                ¿Quién solicita el trabajo?
+            </h2>
+
+            <p>
+                Puede seleccionar una persona registrada
+                o capturar manualmente sus datos.
+            </p>
+
+
+            <div class="form-grid">
+
+                <div class="form-field form-field-full">
+
+                    <label for="numero_solicitante">
+                        Persona registrada
+                    </label>
+
+                    <select
+                        id="numero_solicitante"
+                        name="numero_solicitante"
+                    >
+
+                        <option value="">
+                            No está registrada / Capturar manualmente
+                        </option>
+
+                        {% for person in people %}
+
+                            {% if person.is_active %}
+
+                                <option
+                                    value="{{ person.code }}"
+                                    {% if datos
+                                        and datos.get(
+                                            'numero_solicitante'
+                                        ) == person.code %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ person.name }}
+                                    — {{ person.code }}
+                                </option>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="nombre_solicitante">
+                        Nombre manual
+                    </label>
+
+                    <input
+                        id="nombre_solicitante"
+                        name="nombre_solicitante"
+                        type="text"
+                        value="{{ datos.get('nombre_solicitante', '') if datos else '' }}"
+                        placeholder="Ej. Juan Pérez"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="telefono_solicitante">
+                        Teléfono / extensión
+                    </label>
+
+                    <input
+                        id="telefono_solicitante"
+                        name="telefono_solicitante"
+                        type="text"
+                        value="{{ datos.get('telefono_solicitante', '') if datos else '' }}"
+                        placeholder="Ej. 1234 o 8991234567"
+                    >
+
+                </div>
+
+
+                <div class="form-field form-field-full">
+
+                    <label for="area_solicitante">
+                        Área / departamento
+                    </label>
+
+                    <input
+                        id="area_solicitante"
+                        name="area_solicitante"
+                        type="text"
+                        value="{{ datos.get('area_solicitante', '') if datos else '' }}"
+                        placeholder="Ej. Producción MD2"
+                    >
+
+                </div>
+
+            </div>
+
+            <p>
+                Si no selecciona una persona registrada,
+                nombre y teléfono serán obligatorios
+                al enviar la solicitud.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             SUPERVISION
+        ================================================== -->
+
+        <div class="asset-card">
+
+            <p class="asset-label">
+                MANTENIMIENTO
+            </p>
+
+            <h2>
+                Revisión y ejecución
+            </h2>
+
+            <div class="form-grid">
+
+                <div class="form-field form-field-full">
+
+                    <label for="numero_supervisor">
+                        Supervisor
+                    </label>
+
+                    <select
+                        id="numero_supervisor"
+                        name="numero_supervisor"
+                    >
+
+                        <option value="">
+                            Pendiente de revisión
+                        </option>
+
+                        {% for person in people %}
+
+                            {% if person.is_active %}
+
+                                <option
+                                    value="{{ person.code }}"
+                                    {% if datos
+                                        and datos.get(
+                                            'numero_supervisor'
+                                        ) == person.code %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ person.name }}
+                                    — {{ person.code }}
+                                </option>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="work-order-request-note">
+
+                <strong>
+                    Técnicos
+                </strong>
+
+                <p>
+                    No es necesario asignar técnicos
+                    para enviar esta solicitud.
+                    Mantenimiento podrá definirlos
+                    posteriormente o registrar quiénes
+                    realizaron realmente el trabajo.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ACTIONS
+        ================================================== -->
 
         <div class="form-actions">
 
@@ -263,11 +540,11 @@ Nueva Orden de Trabajo
                 type="submit"
                 class="button button-primary"
             >
-                Crear Orden
+                Enviar solicitud
             </button>
 
             <a
-                href="{{ url_for('operations.index') }}"
+                href="{{ url_for('work_orders.index') }}"
                 class="button button-secondary"
             >
                 Cancelar

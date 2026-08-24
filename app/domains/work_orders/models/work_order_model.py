@@ -45,22 +45,42 @@ class WorkOrderModel(Base):
         index=True,
     )
 
-    asset_code: Mapped[str] = mapped_column(
+    asset_code: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=False,
+        nullable=True,
         index=True,
     )
 
-    requester_person_code: Mapped[str] = mapped_column(
+    requester_person_code: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=False,
+        nullable=True,
         index=True,
     )
 
-    supervisor_person_code: Mapped[str] = mapped_column(
+    requester_name: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    requester_phone: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=False,
+        nullable=True,
+    )
+
+    requester_area: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    supervisor_person_code: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
         index=True,
+    )
+
+    location_description: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
     )
 
     status: Mapped[str] = mapped_column(

@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 
 class TimelineEvent:
@@ -15,6 +15,7 @@ class TimelineEvent:
         description="",
         reference_type=None,
         reference_code=None,
+        actor_name=None,
     ):
         self.event_id = self._required(
             event_id,
@@ -41,10 +42,23 @@ class TimelineEvent:
             "title",
         )
 
-        self.actor_person_code = self._required(
-            actor_person_code,
-            "actor_person_code",
+        self.actor_person_code = (
+            self._optional_upper(
+                actor_person_code
+            )
         )
+
+        self.actor_name = self._optional(
+            actor_name
+        )
+
+        if (
+            self.actor_person_code is None
+            and self.actor_name is None
+        ):
+            raise ValueError(
+                "actor_person_code or actor_name is required"
+            )
 
         if not isinstance(
             occurred_at,
@@ -60,12 +74,16 @@ class TimelineEvent:
             description or ""
         ).strip()
 
-        self.reference_type = self._optional_upper(
-            reference_type
+        self.reference_type = (
+            self._optional_upper(
+                reference_type
+            )
         )
 
-        self.reference_code = self._optional_upper(
-            reference_code
+        self.reference_code = (
+            self._optional_upper(
+                reference_code
+            )
         )
 
     @staticmethod
@@ -86,7 +104,7 @@ class TimelineEvent:
         return normalized
 
     @staticmethod
-    def _optional_upper(
+    def _optional(
         value,
     ) -> str | None:
 
@@ -98,6 +116,20 @@ class TimelineEvent:
         ).strip()
 
         if not normalized:
+            return None
+
+        return normalized
+
+    @staticmethod
+    def _optional_upper(
+        value,
+    ) -> str | None:
+
+        normalized = TimelineEvent._optional(
+            value
+        )
+
+        if normalized is None:
             return None
 
         return normalized.upper()

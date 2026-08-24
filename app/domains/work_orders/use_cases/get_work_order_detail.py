@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 
 from app.domains.assets.entities import (
     Asset,
@@ -33,9 +33,9 @@ class GetWorkOrderDetailQuery:
 @dataclass(frozen=True)
 class GetWorkOrderDetailResult:
     work_order: WorkOrder
-    asset: Asset
-    requester: Person
-    supervisor: Person
+    asset: Asset | None
+    requester: Person | None
+    supervisor: Person | None
 
 
 class GetWorkOrderDetail:
@@ -49,9 +49,11 @@ class GetWorkOrderDetail:
         self._work_order_repository = (
             work_order_repository
         )
+
         self._asset_repository = (
             asset_repository
         )
+
         self._person_repository = (
             person_repository
         )
@@ -62,7 +64,8 @@ class GetWorkOrderDetail:
     ) -> GetWorkOrderDetailResult:
 
         work_order = (
-            self._work_order_repository.get_by_code(
+            self._work_order_repository
+            .get_by_code(
                 query.code
             )
         )
@@ -72,36 +75,65 @@ class GetWorkOrderDetail:
                 "work order not found"
             )
 
-        asset = self._asset_repository.find_by_code(
-            work_order.asset_code
-        )
+        # ====================================================
+        # ASSET
+        # ====================================================
 
-        if asset is None:
-            raise ValueError(
-                "work order asset not found"
+        asset = None
+
+        if work_order.asset_code:
+
+            asset = (
+                self._asset_repository
+                .find_by_code(
+                    work_order.asset_code
+                )
             )
 
-        requester = (
-            self._person_repository.get_by_code(
-                work_order.requester_person_code
-            )
-        )
+            if asset is None:
+                raise ValueError(
+                    "work order asset not found"
+                )
 
-        if requester is None:
-            raise ValueError(
-                "work order requester not found"
+        # ====================================================
+        # REQUESTER
+        # ====================================================
+
+        requester = None
+
+        if work_order.requester_person_code:
+
+            requester = (
+                self._person_repository
+                .get_by_code(
+                    work_order.requester_person_code
+                )
             )
 
-        supervisor = (
-            self._person_repository.get_by_code(
-                work_order.supervisor_person_code
-            )
-        )
+            if requester is None:
+                raise ValueError(
+                    "work order requester not found"
+                )
 
-        if supervisor is None:
-            raise ValueError(
-                "work order supervisor not found"
+        # ====================================================
+        # SUPERVISOR
+        # ====================================================
+
+        supervisor = None
+
+        if work_order.supervisor_person_code:
+
+            supervisor = (
+                self._person_repository
+                .get_by_code(
+                    work_order.supervisor_person_code
+                )
             )
+
+            if supervisor is None:
+                raise ValueError(
+                    "work order supervisor not found"
+                )
 
         return GetWorkOrderDetailResult(
             work_order=work_order,

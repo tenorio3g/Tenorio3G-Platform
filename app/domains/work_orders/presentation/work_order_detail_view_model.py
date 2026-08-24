@@ -1,18 +1,20 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class WorkOrderAssetViewModel:
-    code: str
+    code: str | None
     name: str
-    location_code: str
+    location_code: str | None
 
 
 @dataclass(frozen=True)
 class WorkOrderPersonViewModel:
-    code: str
+    code: str | None
     name: str
     position: str
+    phone: str | None = None
+    area: str | None = None
 
 
 @dataclass(frozen=True)
@@ -24,6 +26,9 @@ class WorkOrderDetailViewModel:
     priority: str
     status: str
     created_at: str
+
     asset: WorkOrderAssetViewModel
     requester: WorkOrderPersonViewModel
     supervisor: WorkOrderPersonViewModel
+
+    location_description: str | None = None

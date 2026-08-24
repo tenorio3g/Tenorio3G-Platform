@@ -1,4 +1,4 @@
-from sqlalchemy import (
+﻿from sqlalchemy import (
     select,
 )
 
@@ -51,6 +51,9 @@ class SQLiteTimelineEventRepository(
                     actor_person_code=(
                         event.actor_person_code
                     ),
+                    actor_name=(
+                        event.actor_name
+                    ),
                     occurred_at=event.occurred_at,
                     reference_type=(
                         event.reference_type
@@ -88,6 +91,10 @@ class SQLiteTimelineEventRepository(
 
                 model.actor_person_code = (
                     event.actor_person_code
+                )
+
+                model.actor_name = (
+                    event.actor_name
                 )
 
                 model.occurred_at = (
@@ -187,6 +194,9 @@ class SQLiteTimelineEventRepository(
             description=model.description,
             actor_person_code=(
                 model.actor_person_code
+            ),
+            actor_name=(
+                model.actor_name
             ),
             occurred_at=model.occurred_at,
             reference_type=(

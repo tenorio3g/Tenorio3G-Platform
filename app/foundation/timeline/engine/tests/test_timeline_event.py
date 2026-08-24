@@ -56,7 +56,6 @@ def test_should_create_timeline_event():
         "entity_code",
         "event_type",
         "title",
-        "actor_person_code",
     ],
 )
 def test_should_require_fields(

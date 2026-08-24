@@ -1,4 +1,4 @@
-from sqlalchemy import select
+﻿from sqlalchemy import select
 
 from app.domains.work_orders.entities import (
     WorkOrder,
@@ -49,15 +49,33 @@ class SQLiteWorkOrderRepository(
                     description=work_order.description,
                     work_type=work_order.work_type,
                     priority=work_order.priority,
-                    asset_code=work_order.asset_code,
+                    asset_code=(
+                        work_order.asset_code
+                    ),
                     requester_person_code=(
                         work_order.requester_person_code
+                    ),
+                    requester_name=(
+                        work_order.requester_name
+                    ),
+                    requester_phone=(
+                        work_order.requester_phone
+                    ),
+                    requester_area=(
+                        work_order.requester_area
                     ),
                     supervisor_person_code=(
                         work_order.supervisor_person_code
                     ),
-                    status=work_order.status.value,
-                    created_at=work_order.created_at,
+                    location_description=(
+                        work_order.location_description
+                    ),
+                    status=(
+                        work_order.status.value
+                    ),
+                    created_at=(
+                        work_order.created_at
+                    ),
                 )
 
                 session.add(
@@ -90,8 +108,24 @@ class SQLiteWorkOrderRepository(
                     work_order.requester_person_code
                 )
 
+                model.requester_name = (
+                    work_order.requester_name
+                )
+
+                model.requester_phone = (
+                    work_order.requester_phone
+                )
+
+                model.requester_area = (
+                    work_order.requester_area
+                )
+
                 model.supervisor_person_code = (
                     work_order.supervisor_person_code
+                )
+
+                model.location_description = (
+                    work_order.location_description
                 )
 
                 model.status = (
@@ -223,8 +257,20 @@ class SQLiteWorkOrderRepository(
             requester_person_code=(
                 model.requester_person_code
             ),
+            requester_name=(
+                model.requester_name
+            ),
+            requester_phone=(
+                model.requester_phone
+            ),
+            requester_area=(
+                model.requester_area
+            ),
             supervisor_person_code=(
                 model.supervisor_person_code
+            ),
+            location_description=(
+                model.location_description
             ),
             created_at=model.created_at,
             status=WorkOrderStatus(

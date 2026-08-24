@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 from datetime import datetime
 from uuid import uuid4
 
@@ -17,12 +17,13 @@ class RecordTimelineEventCommand:
     entity_code: str
     event_type: str
     title: str
-    actor_person_code: str
+    actor_person_code: str | None
     occurred_at: datetime
     description: str = ""
     reference_type: str | None = None
     reference_code: str | None = None
     event_id: str | None = None
+    actor_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -44,7 +45,9 @@ class RecordTimelineEvent:
     ) -> RecordTimelineEventResult:
 
         event_id = (
-            str(command.event_id).strip().upper()
+            str(command.event_id)
+            .strip()
+            .upper()
             if command.event_id
             else f"EVT-{uuid4().hex.upper()}"
         )
@@ -69,6 +72,9 @@ class RecordTimelineEvent:
             title=command.title,
             actor_person_code=(
                 command.actor_person_code
+            ),
+            actor_name=(
+                command.actor_name
             ),
             occurred_at=command.occurred_at,
             description=command.description,
