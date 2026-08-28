@@ -28,6 +28,7 @@ from app.work_orders.services.add_activity_service import AddActivityService
 from app.work_orders.services.add_material_service import AddMaterialService
 
 from app.domains.work_orders.bootstrap import (
+    approve_work_order,
     list_work_order_summaries,    assign_work_order,
     cancel_work_order,
     close_work_order,
@@ -44,6 +45,7 @@ from app.domains.work_orders.presentation import (
 )
 
 from app.domains.work_orders.use_cases import (
+    ApproveWorkOrderCommand,
     AssignWorkOrderCommand,
     CancelWorkOrderCommand,
     CloseWorkOrderCommand,
@@ -547,7 +549,7 @@ def detalle(numero):
     )
 
 # =====================================================
-# Asignar TÃ©cnico
+# Asignar Técnico
 # =====================================================
 
 @work_orders.route(
@@ -706,6 +708,45 @@ def agregar_material(numero):
             error=str(error),
             datos=request.form
         )
+
+@work_orders.post(
+    "/ordenes/<numero>/aprobar"
+)
+def approve_work_order_route(
+    numero: str,
+):
+
+    try:
+        actor_person_code = session.get(
+            "person_code"
+        )
+
+        if not actor_person_code:
+            return (
+                "Usuario no autenticado.",
+                401,
+            )
+
+        approve_work_order.execute(
+            ApproveWorkOrderCommand(
+                code=numero,
+                actor_person_code=actor_person_code,
+                occurred_at=datetime.now(),
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
 
 @work_orders.post(
     "/ordenes/<numero>/asignar"
@@ -1494,7 +1535,7 @@ def create_work_order_evidence_route(
             evidence_types=list(
                 EvidenceType
             ),
-            error="Tipo de evidencia invÃ¡lido.",
+            error="Tipo de evidencia inválido.",
             data=request.form,
         )
 
@@ -1638,8 +1679,3 @@ def work_order_evidence_file_route(
         file_path,
         as_attachment=False,
     )
-
-
-
-
-

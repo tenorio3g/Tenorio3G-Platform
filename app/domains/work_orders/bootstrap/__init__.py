@@ -1,4 +1,5 @@
 ﻿from .work_order_container import (
+    approve_work_order,
     assign_work_order,
     cancel_work_order,
     close_work_order,
@@ -23,6 +24,7 @@ __all__ = [
     "list_work_orders",
     "list_work_orders_by_asset",
     "list_work_order_summaries",
+    "approve_work_order",
     "assign_work_order",
     "start_work_order",
     "hold_work_order",

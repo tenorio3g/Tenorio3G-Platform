@@ -18,6 +18,14 @@ from app.domains.work_orders.activities.entities import (
 from app.domains.work_orders.activities.value_objects import (
     ActivityStatus,
 )
+
+from app.domains.work_orders.technicians.entities import (
+    WorkOrderTechnicianAssignment,
+)
+
+from app.domains.work_orders.bootstrap.work_order_container import (
+    work_order_summary_technician_repository,
+)
 def create_web_work_order(
     code,
 ):
@@ -45,9 +53,27 @@ def test_should_assign_work_order_from_web(
     work_orders_test_db,
 ):
 
+    work_order = create_web_work_order(
+        code="WO-WEB-001"
+    )
+
+    work_order.approve()
+
     work_orders_test_db.save(
-        create_web_work_order(
-            code="WO-WEB-001"
+        work_order
+    )
+
+    work_order_summary_technician_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-WEB-001",
+            person_code="TECH-001",
+            assigned_at=datetime(
+                2026,
+                8,
+                25,
+                18,
+                0,
+            ),
         )
     )
 
@@ -62,11 +88,12 @@ def test_should_assign_work_order_from_web(
         "WO-WEB-001"
     )
 
+    assert persisted is not None
+
     assert (
         persisted.status
         == WorkOrderStatus.ASSIGNED
     )
-
 def test_should_start_assigned_work_order_from_web(
     authenticated_client,
     work_orders_test_db,
@@ -75,7 +102,7 @@ def test_should_start_assigned_work_order_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-002"
     )
-
+    work_order.approve()
     work_order.assign()
 
     work_orders_test_db.save(
@@ -106,7 +133,7 @@ def test_should_resume_work_order_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-RESUME"
     )
-
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.hold()
@@ -140,7 +167,7 @@ def test_should_complete_work_order_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-COMPLETE"
     )
-
+    work_order.approve()
     work_order.assign()
     work_order.start()
 
@@ -173,7 +200,7 @@ def test_should_close_work_order_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-CLOSE"
     )
-
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.complete()
@@ -234,7 +261,7 @@ def test_should_hold_work_order_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-HOLD"
     )
-
+    work_order.approve()
     work_order.assign()
     work_order.start()
 
@@ -488,6 +515,7 @@ def test_should_add_spare_part_from_web(
     work_order = create_web_work_order(
         code="WO-WEB-SPARE"
     )
+    work_order.approve()
 
     work_orders_test_db.save(
         work_order

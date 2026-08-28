@@ -19,6 +19,7 @@ from app.domains.work_orders.technicians.repositories import (
 )
 
 from app.domains.work_orders.use_cases import (
+    ApproveWorkOrder,
     AssignWorkOrder,
     CancelWorkOrder,
     CloseWorkOrder,
@@ -123,6 +124,10 @@ work_order_timeline_recorder = (
 # ============================================================
 # COMMANDS - WORK ORDER LIFECYCLE
 # ============================================================
+approve_work_order = ApproveWorkOrder(
+    work_order_repository,
+    work_order_timeline_recorder,
+)
 
 assign_work_order = AssignWorkOrder(
     work_order_repository,

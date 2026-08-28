@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+﻿{% extends "layouts/base.html" %}
 
 {% block title %}
 Orden {{ orden.code }}
@@ -57,6 +57,24 @@ Orden {{ orden.code }}
     <div class="work-order-actions-bar">
 
         {% if orden.status == "CREATED" %}
+
+            <form
+                method="post"
+                action="{{ url_for(
+                    'work_orders.approve_work_order_route',
+                    numero=orden.code
+                ) }}"
+            >
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Autorizar
+                </button>
+            </form>
+
+
+        {% elif orden.status == "APPROVED" %}
 
             <form
                 method="post"
@@ -165,6 +183,7 @@ Orden {{ orden.code }}
 
         {% if orden.status in [
             "CREATED",
+            "APPROVED",
             "ASSIGNED",
             "IN_PROGRESS",
             "ON_HOLD"

@@ -1,14 +1,6 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 import pytest
-
-from app.foundation.timeline.engine.repositories import (
-    InMemoryTimelineEventRepository,
-)
-
-from app.foundation.timeline.engine.use_cases import (
-    RecordTimelineEvent,
-)
 
 from app.domains.work_orders.entities import (
     WorkOrder,
@@ -22,88 +14,96 @@ from app.domains.work_orders.timeline import (
     WorkOrderTimelineRecorder,
 )
 
-from app.domains.work_orders.use_cases import (
-    StartWorkOrder,
-    StartWorkOrderCommand,
+from app.domains.work_orders.use_cases.approve_work_order import (
+    ApproveWorkOrder,
+    ApproveWorkOrderCommand,
 )
 
 from app.domains.work_orders.value_objects import (
     WorkOrderStatus,
 )
 
+from app.foundation.timeline.engine.repositories import (
+    InMemoryTimelineEventRepository,
+)
 
-def create_assigned_work_order():
+from app.foundation.timeline.engine.use_cases import (
+    RecordTimelineEvent,
+)
 
-    work_order = WorkOrder(
-        code="WO-001",
-        title="Inspección general",
-        description="Prueba.",
-        work_type="PREVENTIVE",
-        priority="HIGH",
-        asset_code="ASSET-001",
-        requester_person_code="REQ-001",
-        supervisor_person_code="SUP-001",
+
+def create_work_order():
+
+    return WorkOrder(
+        code="WO-APPROVE-001",
+        title="Instalar contacto 110 V",
+        description="Solicitud de prueba.",
+        work_type="PROJECT",
+        priority="MEDIUM",
+        asset_code=None,
+        requester_person_code=None,
+        requester_name="Juan Perez",
+        requester_phone="8991234567",
+        requester_area="Produccion",
+        supervisor_person_code=None,
+        location_description="Linea 4",
         created_at=datetime(
             2026,
             8,
-            15,
+            24,
             8,
             0,
         ),
     )
-    work_order.approve()
-    work_order.assign()
-
-    return work_order
 
 
-def create_start_command(
-    code="WO-001",
+def create_command(
+    code="WO-APPROVE-001",
 ):
 
-    return StartWorkOrderCommand(
+    return ApproveWorkOrderCommand(
         code=code,
         actor_person_code="55464",
         occurred_at=datetime(
             2026,
             8,
-            19,
-            18,
+            24,
+            9,
             0,
         ),
     )
 
 
-def test_should_start_work_order():
+def test_should_approve_work_order():
 
     repository = (
         InMemoryWorkOrderRepository()
     )
 
     repository.save(
-        create_assigned_work_order()
+        create_work_order()
     )
 
-    use_case = StartWorkOrder(
+    use_case = ApproveWorkOrder(
         repository
     )
 
     result = use_case.execute(
-        create_start_command()
+        create_command()
     )
 
     assert (
         result.work_order.status
-        == WorkOrderStatus.IN_PROGRESS
+        == WorkOrderStatus.APPROVED
     )
 
     persisted = repository.get_by_code(
-        "WO-001"
+        "WO-APPROVE-001"
     )
 
     assert (
         persisted.status
-        == WorkOrderStatus.IN_PROGRESS
+        == WorkOrderStatus.APPROVED
     )
 
 
@@ -113,7 +113,7 @@ def test_should_reject_unknown_work_order():
         InMemoryWorkOrderRepository()
     )
 
-    use_case = StartWorkOrder(
+    use_case = ApproveWorkOrder(
         repository
     )
 
@@ -122,7 +122,7 @@ def test_should_reject_unknown_work_order():
         match="work order not found",
     ):
         use_case.execute(
-            create_start_command(
+            create_command(
                 code="WO-404"
             )
         )
@@ -134,29 +134,31 @@ def test_should_preserve_domain_transition_rules():
         InMemoryWorkOrderRepository()
     )
 
-    work_order = (
-        create_assigned_work_order()
-    )
+    work_order = create_work_order()
 
-    work_order.start()
+    work_order.approve()
 
     repository.save(
         work_order
     )
 
-    use_case = StartWorkOrder(
+    use_case = ApproveWorkOrder(
         repository
     )
 
     with pytest.raises(
         ValueError,
+        match=(
+            "work order cannot be approved "
+            "from current status"
+        ),
     ):
         use_case.execute(
-            create_start_command()
+            create_command()
         )
 
 
-def test_should_record_started_event():
+def test_should_record_approved_event():
 
     repository = (
         InMemoryWorkOrderRepository()
@@ -179,10 +181,10 @@ def test_should_record_started_event():
     )
 
     repository.save(
-        create_assigned_work_order()
+        create_work_order()
     )
 
-    use_case = StartWorkOrder(
+    use_case = ApproveWorkOrder(
         repository,
         timeline_recorder,
     )
@@ -190,14 +192,14 @@ def test_should_record_started_event():
     occurred_at = datetime(
         2026,
         8,
-        19,
-        18,
+        24,
+        9,
         30,
     )
 
     result = use_case.execute(
-        StartWorkOrderCommand(
-            code="WO-001",
+        ApproveWorkOrderCommand(
+            code="WO-APPROVE-001",
             actor_person_code="55464",
             occurred_at=occurred_at,
         )
@@ -217,17 +219,7 @@ def test_should_record_started_event():
 
     assert (
         event.event_type
-        == "WORK_ORDER_STARTED"
-    )
-
-    assert (
-        event.entity_type
-        == "WORK_ORDER"
-    )
-
-    assert (
-        event.entity_code
-        == "WO-001"
+        == "WORK_ORDER_APPROVED"
     )
 
     assert (
@@ -238,14 +230,4 @@ def test_should_record_started_event():
     assert (
         event.occurred_at
         == occurred_at
-    )
-
-    assert (
-        event.reference_type
-        == "WORK_ORDER"
-    )
-
-    assert (
-        event.reference_code
-        == "WO-001"
     )

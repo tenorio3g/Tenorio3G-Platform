@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -116,6 +116,7 @@ def test_should_persist_status_changes(
         work_order
     )
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
 

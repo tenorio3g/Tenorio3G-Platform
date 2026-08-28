@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from enum import Enum
 
@@ -6,6 +6,8 @@ from enum import Enum
 class WorkOrderStatus(str, Enum):
 
     CREATED = "CREATED"
+
+    APPROVED = "APPROVED"
 
     ASSIGNED = "ASSIGNED"
 

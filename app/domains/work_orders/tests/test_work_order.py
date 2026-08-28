@@ -161,7 +161,7 @@ def test_should_require_valid_status():
 def test_should_follow_main_work_order_lifecycle():
 
     work_order = create_work_order()
-
+    work_order.approve()
     work_order.assign()
     assert work_order.status == WorkOrderStatus.ASSIGNED
 
@@ -197,7 +197,7 @@ def test_should_not_start_created_work_order():
 def test_should_not_complete_assigned_work_order():
 
     work_order = create_work_order()
-
+    work_order.approve()
     work_order.assign()
 
     with pytest.raises(
@@ -224,7 +224,7 @@ def test_should_cancel_created_work_order():
 def test_should_not_cancel_completed_work_order():
 
     work_order = create_work_order()
-
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.complete()

@@ -9,6 +9,9 @@ from app.foundation.timeline.engine.use_cases import (
 class WorkOrderTimelineRecorder:
 
     EVENT_TITLES = {
+        "WORK_ORDER_APPROVED": (
+            "Orden de trabajo aprobada"
+        ),
         "WORK_ORDER_ASSIGNED": (
             "Orden de trabajo asignada"
         ),

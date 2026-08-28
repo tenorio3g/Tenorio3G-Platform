@@ -1,4 +1,4 @@
-from .create_work_order import (
+﻿from .create_work_order import (
     CreateWorkOrder,
     CreateWorkOrderCommand,
     CreateWorkOrderResult,
@@ -20,16 +20,25 @@ from .list_work_orders_by_asset import (
     ListWorkOrdersByAssetQuery,
     ListWorkOrdersByAssetResult,
 )
+
+from .approve_work_order import (
+    ApproveWorkOrder,
+    ApproveWorkOrderCommand,
+    ApproveWorkOrderResult,
+)
+
 from .assign_work_order import (
     AssignWorkOrder,
     AssignWorkOrderCommand,
     AssignWorkOrderResult,
 )
+
 from .start_work_order import (
     StartWorkOrder,
     StartWorkOrderCommand,
     StartWorkOrderResult,
 )
+
 from .hold_work_order import (
     HoldWorkOrder,
     HoldWorkOrderCommand,
@@ -59,30 +68,42 @@ from .cancel_work_order import (
     CancelWorkOrderCommand,
     CancelWorkOrderResult,
 )
+
 from .get_work_order_detail import (
     GetWorkOrderDetail,
     GetWorkOrderDetailQuery,
     GetWorkOrderDetailResult,
 )
 
+
 __all__ = [
     "CreateWorkOrder",
     "CreateWorkOrderCommand",
     "CreateWorkOrderResult",
+
     "GetWorkOrder",
     "GetWorkOrderQuery",
     "GetWorkOrderResult",
+
     "ListWorkOrders",
     "ListWorkOrdersResult",
+
     "ListWorkOrdersByAsset",
     "ListWorkOrdersByAssetQuery",
     "ListWorkOrdersByAssetResult",
+
+    "ApproveWorkOrder",
+    "ApproveWorkOrderCommand",
+    "ApproveWorkOrderResult",
+
     "AssignWorkOrder",
     "AssignWorkOrderCommand",
     "AssignWorkOrderResult",
+
     "StartWorkOrder",
     "StartWorkOrderCommand",
     "StartWorkOrderResult",
+
     "HoldWorkOrder",
     "HoldWorkOrderCommand",
     "HoldWorkOrderResult",
@@ -102,6 +123,7 @@ __all__ = [
     "CancelWorkOrder",
     "CancelWorkOrderCommand",
     "CancelWorkOrderResult",
+
     "GetWorkOrderDetail",
     "GetWorkOrderDetailQuery",
     "GetWorkOrderDetailResult",

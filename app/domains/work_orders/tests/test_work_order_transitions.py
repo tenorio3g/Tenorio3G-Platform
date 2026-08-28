@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 import pytest
 
@@ -75,6 +75,7 @@ def test_should_hold_work_order():
 
     work_order = create_work_order()
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
 
@@ -106,6 +107,7 @@ def test_should_resume_work_order():
 
     work_order = create_work_order()
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.hold()
@@ -138,6 +140,7 @@ def test_should_complete_work_order():
 
     work_order = create_work_order()
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
 
@@ -169,6 +172,7 @@ def test_should_close_work_order():
 
     work_order = create_work_order()
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.complete()

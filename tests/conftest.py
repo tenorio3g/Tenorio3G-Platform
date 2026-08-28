@@ -497,8 +497,8 @@ def work_orders_test_db(
         work_order_repository,
     )
 
-    from app.foundation.timeline.engine.models import (
-        TimelineEventModel,
+    from app.domains.work_orders.bootstrap.work_order_container import (
+        work_order_summary_technician_repository,
     )
 
     from app.foundation.timeline.engine.bootstrap import (
@@ -528,6 +528,12 @@ def work_orders_test_db(
 
     monkeypatch.setattr(
         work_order_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    monkeypatch.setattr(
+        work_order_summary_technician_repository,
         "_session_factory",
         TestSessionLocal,
     )

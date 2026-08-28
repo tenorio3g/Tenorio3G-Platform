@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 import pytest
 
@@ -52,6 +52,7 @@ def create_completed_work_order():
         ),
     )
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
     work_order.complete()

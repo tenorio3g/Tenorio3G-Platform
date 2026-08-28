@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 import pytest
 
@@ -29,10 +29,11 @@ from app.foundation.timeline.engine.use_cases import (
 from app.domains.work_orders.timeline import (
     WorkOrderTimelineRecorder,
 )
+def create_work_order(
+    approved=False,
+):
 
-def create_work_order():
-
-    return WorkOrder(
+    work_order = WorkOrder(
         code="WO-001",
         title="Inspección general",
         description="Prueba.",
@@ -50,6 +51,11 @@ def create_work_order():
         ),
     )
 
+    if approved:
+        work_order.approve()
+
+    return work_order
+
 
 def test_should_assign_work_order():
 
@@ -58,7 +64,9 @@ def test_should_assign_work_order():
     )
 
     repository.save(
-        create_work_order()
+        create_work_order(
+            approved=True
+        )
     )
 
     use_case = AssignWorkOrder(
@@ -129,7 +137,9 @@ def test_should_preserve_domain_transition_rules():
         InMemoryWorkOrderRepository()
     )
 
-    work_order = create_work_order()
+    work_order = create_work_order(
+        approved=True
+    )
 
     work_order.assign()
 
@@ -181,7 +191,9 @@ def test_should_record_assigned_event():
     )
 
     repository.save(
-        create_work_order()
+        create_work_order(
+            approved=True
+        )
     )
 
     use_case = AssignWorkOrder(
@@ -231,3 +243,39 @@ def test_should_record_assigned_event():
         event.occurred_at
         == occurred_at
     )
+
+
+def test_should_reject_assignment_before_approval():
+
+    repository = (
+        InMemoryWorkOrderRepository()
+    )
+
+    repository.save(
+        create_work_order()
+    )
+
+    use_case = AssignWorkOrder(
+        repository
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "work order cannot be assigned "
+            "from current status"
+        ),
+    ):
+        use_case.execute(
+            AssignWorkOrderCommand(
+                code="WO-001",
+                actor_person_code="55464",
+                occurred_at=datetime(
+                    2026,
+                    8,
+                    19,
+                    18,
+                    0,
+                ),
+            )
+        )

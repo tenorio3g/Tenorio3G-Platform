@@ -178,11 +178,23 @@ class WorkOrder:
 
         return normalized
 
-    def assign(
+    def approve(
         self,
     ) -> None:
 
         if self.status != WorkOrderStatus.CREATED:
+            raise ValueError(
+                "work order cannot be approved from current status"
+            )
+
+        self.status = WorkOrderStatus.APPROVED
+
+
+    def assign(
+        self,
+    ) -> None:
+
+        if self.status != WorkOrderStatus.APPROVED:
             raise ValueError(
                 "work order cannot be assigned from current status"
             )

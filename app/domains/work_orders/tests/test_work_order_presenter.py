@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from app.domains.work_orders.entities import (
     WorkOrder,
@@ -83,6 +83,7 @@ def test_should_present_current_status():
 
     work_order = create_work_order()
 
+    work_order.approve()
     work_order.assign()
     work_order.start()
 
