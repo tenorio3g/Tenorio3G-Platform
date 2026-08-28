@@ -1,4 +1,4 @@
-﻿from app.domains.identity.people.bootstrap import (
+from app.domains.identity.people.bootstrap import (
     person_repository,
 )
 

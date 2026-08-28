@@ -1,4 +1,4 @@
-﻿from app.domains.assets.entities import (
+from app.domains.assets.entities import (
     Asset,
 )
 

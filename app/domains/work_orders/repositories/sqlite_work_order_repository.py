@@ -1,4 +1,4 @@
-﻿from sqlalchemy import select
+from sqlalchemy import select
 
 from app.domains.work_orders.entities import (
     WorkOrder,

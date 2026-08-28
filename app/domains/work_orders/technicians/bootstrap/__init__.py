@@ -1,4 +1,4 @@
-﻿from .technician_repository_container import (
+from .technician_repository_container import (
     technician_assignment_repository,
 )
 

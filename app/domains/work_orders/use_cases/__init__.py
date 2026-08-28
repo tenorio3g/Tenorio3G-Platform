@@ -1,4 +1,4 @@
-﻿from .create_work_order import (
+from .create_work_order import (
     CreateWorkOrder,
     CreateWorkOrderCommand,
     CreateWorkOrderResult,

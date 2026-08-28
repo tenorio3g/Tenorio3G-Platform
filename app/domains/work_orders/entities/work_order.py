@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 
 from app.domains.work_orders.value_objects import (
     WorkOrderStatus,

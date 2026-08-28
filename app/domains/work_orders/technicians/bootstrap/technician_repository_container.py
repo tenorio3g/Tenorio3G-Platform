@@ -1,4 +1,4 @@
-﻿from app.foundation.database import (
+from app.foundation.database import (
     SessionLocal,
 )
 

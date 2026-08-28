@@ -1,4 +1,4 @@
-﻿from .work_order_container import (
+from .work_order_container import (
     approve_work_order,
     assign_work_order,
     cancel_work_order,

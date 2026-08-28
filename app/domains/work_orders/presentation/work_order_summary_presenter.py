@@ -1,4 +1,4 @@
-﻿from app.domains.work_orders.use_cases.list_work_order_summaries import (
+from app.domains.work_orders.use_cases.list_work_order_summaries import (
     ListWorkOrderSummariesResult,
 )
 

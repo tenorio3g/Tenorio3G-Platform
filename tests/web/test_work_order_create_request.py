@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 
 def test_new_work_order_form_should_allow_optional_asset(
