@@ -116,6 +116,10 @@ class DashboardService:
                 WorkOrderStatus.CREATED
             ),
 
+            approved_work_orders=count_status(
+                WorkOrderStatus.APPROVED
+            ),
+
             assigned_work_orders=count_status(
                 WorkOrderStatus.ASSIGNED
             ),

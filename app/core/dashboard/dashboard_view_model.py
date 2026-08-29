@@ -19,6 +19,7 @@ class DashboardViewModel:
     pending_activities: int
 
     created_work_orders: int
+    approved_work_orders: int
     assigned_work_orders: int
     in_progress_work_orders: int
     on_hold_work_orders: int

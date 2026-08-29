@@ -247,3 +247,40 @@ def test_should_calculate_summary_counters():
         )
         == 1
     )
+
+
+def test_should_classify_approved_as_active():
+
+    result = ListWorkOrderSummariesResult(
+        items=[
+            create_summary(
+                WorkOrderStatus.APPROVED
+            )
+        ]
+    )
+
+    view_model = (
+        WorkOrderSummaryPresenter.present(
+            result
+        )
+    )
+
+    item = view_model.items[0]
+
+    assert item.status == "APPROVED"
+    assert item.status_label == "Autorizada"
+
+    assert (
+        item.operational_state
+        == "ACTIVE"
+    )
+
+    assert (
+        item.operational_state_label
+        == "Activa"
+    )
+
+    assert (
+        item.technician_label
+        == "Realizando"
+    )

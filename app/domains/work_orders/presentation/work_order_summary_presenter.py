@@ -12,6 +12,7 @@ class WorkOrderSummaryPresenter:
 
     STATUS_LABELS = {
         "CREATED": "Creada",
+        "APPROVED": "Autorizada",
         "ASSIGNED": "Asignada",
         "IN_PROGRESS": "En proceso",
         "ON_HOLD": "En pausa",
@@ -28,6 +29,7 @@ class WorkOrderSummaryPresenter:
 
     ACTIVE_STATUSES = {
         "CREATED",
+        "APPROVED",
         "ASSIGNED",
         "IN_PROGRESS",
         "ON_HOLD",
