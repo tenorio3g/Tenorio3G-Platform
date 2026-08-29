@@ -1,370 +1,321 @@
-# Tenorio3G Platform — Roadmap
+# Tenorio3G Platform ? Roadmap
 
 ## Vision
 
-Tenorio3G Platform aims to become a modular industrial maintenance platform capable of organizing, preserving, analyzing, and using the technical knowledge generated throughout the lifecycle of industrial assets.
+Tenorio3G Platform is evolving into a modular industrial maintenance and technical-knowledge platform.
 
-The platform evolves incrementally through independent engines built on a common architectural foundation.
-
-The objective is to transform maintenance information into structured technical knowledge that can later support operational analysis and intelligent assistance.
+The objective is to transform maintenance information into structured technical knowledge, operational history, measurable intelligence, and eventually contextual technical assistance.
 
 ---
 
 # Current Baseline
 
-## v0.7.0
+## v0.9.0 Candidate
 
-Current stable development baseline.
+Current development baseline:
 
-Completed engines:
+`455572b feat(work-sessions): complete work sessions engine`
 
-- Foundation Engine
-- Maps Engine
-- Assets Engine
-- Technical Data Engine
-- Spare Parts Engine
-- Documents Engine
-- Photos Engine
-- Maintenance History Engine
+Current full automated regression:
 
-Automated test suite:
+**1925 PASSED**<br>
+**0 FAILED**<br>
+**0 ERRORS**
 
-**184 PASSED**  
-**0 FAILED**  
-**0 ERRORS**  
-**0 SKIPPED**
+Work Sessions suite:
 
-The Maintenance History Engine extends the asset technical record with persistent maintenance events, chronological operational history, technician information, maintenance timestamps, technical observations, and open / completed maintenance status.
+**132 PASSED**
+
+The global pytest count includes the repository-wide source-encoding guard.
 
 ---
 
-# Development Roadmap
-
-## Phase 1 — Technical Asset Foundation
+# Phase 1 ? Technical Asset Foundation
 
 **Status: COMPLETE**
 
-This phase established the architectural and technical foundation required to represent industrial equipment and its structured information.
-
-### Foundation Engine
+## Foundation Engine
 
 **Status: COMPLETE**
 
-Provides shared infrastructure and architectural foundations.
+Shared infrastructure, persistence configuration, session management, metadata, and common application foundations.
 
-Main capabilities include:
-
-- Database infrastructure
-- SQLAlchemy configuration
-- Session management
-- Shared metadata
-- Common application infrastructure
-
-### Maps Engine
+## Maps Engine
 
 **Status: COMPLETE**
 
-Provides physical asset location and map integration.
+Physical asset location and map integration.
 
-### Assets Engine
-
-**Status: COMPLETE**
-
-Provides the central industrial asset model and the foundation for the equipment technical record.
-
-### Technical Data Engine
+## Assets Engine
 
 **Status: COMPLETE**
 
-Provides structured technical specifications associated with industrial assets.
+Central industrial asset identity and lifecycle foundation.
 
-### Spare Parts Engine
+## Technical Data Engine
 
 **Status: COMPLETE**
 
-Provides spare-parts information and asset relationships.
+Structured technical specifications associated with assets.
 
-Capabilities include:
+## Spare Parts Engine
 
-- Spare-part registration
-- Asset relationships
-- Manufacturer information
-- Part numbers
-- Installed quantities
-- Component positions
-- Critical spare-part identification
-- Observations
-- CRUD operations
-- SQLite persistence
-- Web integration
-- Automated testing
+**Status: COMPLETE**
+
+Replacement-part information and asset relationships.
+
+Milestone:
+
+**v0.4.0**
 
 ---
 
-# Phase 2 — Technical Knowledge
+# Phase 2 ? Technical Knowledge
 
 **Status: COMPLETE**
 
-The objective of this phase is to transform each asset into a digital technical record containing structured information, technical documentation, and visual evidence.
+The objective of this phase was to convert each asset into a richer digital technical record.
 
 ## Documents Engine
 
 **Status: COMPLETE**
 
-Purpose:
+Capabilities include:
 
-Associate real technical documentation with industrial assets.
-
-Implemented capabilities:
-
-- Document domain model
-- Asset-document relationships
-- Document type classification
-- Document metadata
-- Repository abstraction
+- Technical-document metadata
+- Asset relationships
+- CRUD
 - SQLite persistence
-- Create / Read / Update / Delete
-- Bootstrap composition
-- Presenter
-- ViewModel
-- Asset-detail integration
-- Document registration UI
-- Document editing
-- Document deletion
 - PDF upload
-- DocumentStorage abstraction
-- LocalDocumentStorage implementation
-- Physical PDF storage
-- PDF visualization in browser
-- Physical file deletion
-- PDF file-type validation
-- Safe file naming
+- Physical storage
+- PDF visualization
+- File validation
 - HTTP integration tests
-- Temporary test storage
 
-Supported document categories include:
+Milestone:
 
-- Manuals
-- Datasheets
-- Electrical diagrams
-- Mechanical drawings
-- Procedures
-- Certifications
-- Manufacturer documentation
-
-Uploaded documents are maintained outside Git version control.
-
-The repository preserves the storage directory through:
-
-`storage/documents/.gitkeep`
-
----
+**v0.5.0**
 
 ## Photos Engine
 
 **Status: COMPLETE**
 
-Purpose:
+Capabilities include:
 
-Create visual technical evidence and photographic history associated with industrial assets.
-
-Implemented capabilities:
-
-- Photo domain model
-- Asset-photo relationships
-- Repository abstraction
-- SQLite persistence
-- Create / Read / Update / Delete
-- Bootstrap composition
-- Presenter
-- ViewModel
-- Asset-detail integration
-- Photo registration UI
-- Photo editing
-- Photo deletion
-- PhotoStorage abstraction
-- LocalPhotoStorage implementation
-- Physical JPG / JPEG / PNG storage
-- Image visualization
-- Photo gallery
-- Main asset photograph
-- Photo-type classification
-- Equipment photographs
+- Asset photographs
 - Nameplate photographs
 - Component photographs
-- Installation evidence
 - Maintenance evidence
-- Before / after photographs
 - Failure evidence
-- Inspection evidence
-- Photo metadata
-- Date tracking
-- Physical image deletion
-- Image file-type validation
-- Safe file naming
-- HTTP integration tests
-- Temporary test storage
-- Storage tests
-- Automated primary-photo selection
+- Installation evidence
+- Photo gallery
+- Main asset photograph
+- Physical image storage
+- Image validation
 
-Uploaded photographs are maintained outside Git version control.
+Milestone:
 
-The repository preserves the storage directory through:
-
-`storage/photos/.gitkeep`
-
-User-uploaded image files are excluded through `.gitignore`.
-
-### Primary Photo Rule
-
-Photographs classified with:
-
-`photo_type = "general"`
-
-are candidates to become the main asset photograph.
-
-When multiple general photographs exist, the most recently registered general photograph becomes the primary photograph.
-
-Previous general photographs remain available as historical visual evidence.
-
-The asset technical record now integrates:
-
-Asset  
-↓  
-Technical Data  
-↓  
-Spare Parts  
-↓  
-Documents  
-↓  
-Photos
+**v0.6.0**
 
 ---
 
-# Phase 3 — Maintenance Intelligence
+# Phase 3 ? Maintenance Intelligence
 
-**Status: IN PROGRESS**
-
-This phase begins using the technical foundation to build a structured operational history for industrial equipment.
+**Status: COMPLETE**
 
 ## Maintenance History Engine
 
 **Status: COMPLETE**
 
-Purpose:
+Provides persistent chronological maintenance events.
 
-Create a complete technical and maintenance history for every asset.
-
-Implemented capabilities:
+Capabilities include:
 
 - Maintenance event domain model
-- Asset-maintenance-event relationships
-- Repository abstraction
-- In-memory repository
 - SQLite persistence
-- Create / Read / Update / Delete
-- Bootstrap composition
-- Presenter
-- ViewModel
-- Asset-detail integration
-- Maintenance registration UI
-- Maintenance editing UI
-- Maintenance deletion
-- Maintenance type classification
-- Technician / responsible-person information
-- Maintenance start timestamps
-- Maintenance completion timestamps
-- Open / completed event status
-- Technical descriptions
-- Maintenance observations
+- CRUD
+- Technician information
+- Maintenance timestamps
+- Open / completed status
+- Descriptions
+- Observations
 - Historical timeline
-- Most-recent-first chronological presentation
-- Flask route integration
-- HTTP integration tests
-- Temporary SQLite database testing
-- Automated domain tests
-- Repository tests
-- Use-case tests
-- Presenter tests
+- HTTP integration
 
-The Maintenance History Engine transforms the asset record from a static technical record into a chronological operational record.
+Milestone:
 
-The platform can now answer questions such as:
+**v0.7.0**
 
-- What maintenance has been performed on this asset?
-- When did an intervention begin?
-- When was it completed?
-- Who performed the work?
-- Is the maintenance event still open?
-- What technical description was recorded?
-- What observations were documented?
+Historical implementation commit:
 
-Future engines can extend maintenance events with direct relationships to spare parts, materials, documents, photographs, work orders, and additional operational evidence.
-
----
+`3b37780`
 
 ## Preventive Maintenance Engine
 
-**Status: NEXT**
+**Status: COMPLETE**
 
-Purpose:
+Provides structured maintenance planning and execution.
 
-Manage scheduled and recurring maintenance activities.
-
-Planned capabilities:
+Capabilities include:
 
 - Preventive maintenance plans
-- Maintenance frequencies
-- Scheduled tasks
-- Due dates
-- Asset assignments
-- Technician assignments
-- Completion records
-- Alerts
-- Overdue maintenance
-- Maintenance compliance
-- Procedures
-- Required spare parts
-- Technical documentation references
-- Photographic evidence
-- Integration with Maintenance History
+- Preventive maintenance executions
+- Plan CRUD
+- Plan completion
+- Execution history
+- SQLite persistence
+- In-memory repositories
+- Metrics
+- Presenters
+- ViewModels
+- Web integration
+- Automated tests
+
+Milestone:
+
+**v0.8.0**
+
+Historical implementation commit:
+
+`7b75037`
 
 ---
 
-# Phase 4 — Operational Intelligence
+# Phase 4 ? Operational Maintenance
 
-**Status: PLANNED**
+**Status: COMPLETE**
 
-## Dashboard & Analytics Engine
+This phase transformed Tenorio3G from an asset and maintenance-record system into an operational maintenance platform.
 
-**Status: PLANNED**
+## Work Orders Engine
+
+**Status: COMPLETE**
 
 Purpose:
 
-Transform operational and maintenance data into measurable indicators.
+Manage the complete operational lifecycle of maintenance work.
 
-Potential KPIs:
+Capabilities include:
+
+- Flexible maintenance requests
+- Work-order creation
+- Approval workflow
+- Assignment workflow
+- Supervisor information
+- Technician assignments
+- Work-order activities
+- Activity lifecycle
+- Work-order lifecycle
+- Spare-part consumption
+- Tool issue and return
+- Evidence
+- Persistent lifecycle timeline
+- Technician history
+- Work-order dashboard
+- Operational dashboard integration
+- SQLite persistence
+- Automated tests
+
+Current lifecycle foundation:
+
+Created<br>
+?<br>
+Approved<br>
+?<br>
+Assigned<br>
+?<br>
+In Progress
+
+## Work Sessions Engine
+
+**Status: COMPLETE**
+
+Purpose:
+
+Record actual technician execution time against work-order activities.
+
+Capabilities include:
+
+- Automatic sessions
+- Manual sessions
+- Start
+- End
+- Administrative correction
+- Active-session protection
+- Overlap control
+- Duration calculation
+- Person validation
+- Actor ownership validation
+- SQLite persistence
+- Audit trail
+- Integration tests
+
+Milestone candidate:
+
+**v0.9.0**
+
+Current implementation commit:
+
+`455572b`
+
+---
+
+# Phase 5 ? Operational Intelligence
+
+**Status: NEXT**
+
+The next objective is to convert operational maintenance records into measurable information.
+
+Existing dashboard capabilities should be consolidated into an analytical layer.
+
+Potential KPIs include:
 
 - Open work orders
 - Completed work orders
-- Equipment availability
-- Failure frequency
-- Preventive maintenance compliance
-- Corrective vs preventive maintenance
-- Spare-parts usage
-- Asset health
-- Maintenance workload
-- Recurring failures
+- Work-order cycle time
+- Approval lead time
+- Assignment lead time
+- Technician workload
+- Work-session utilization
 - Equipment downtime
+- Preventive maintenance compliance
+- Overdue preventive maintenance
+- Corrective vs preventive maintenance
+- Failure frequency
+- Recurring failures
+- Spare-part consumption
+- Tool usage
+- Maintenance backlog
+- Asset availability
+- Asset reliability
 - Maintenance trends
 
-The objective is to move from recording maintenance activity to understanding operational performance.
+This phase should prioritize data correctness and meaningful operational definitions before visual complexity.
 
 ---
 
-# Phase 5 — Technical Intelligence
+# Phase 6 ? Reliability and Failure Intelligence
 
 **Status: FUTURE**
+
+Potential capabilities include:
+
+- Failure classification
+- Failure history
+- Repeat-failure detection
+- Mean time between failures
+- Mean time to repair
+- Downtime analysis
+- Root-cause information
+- Cause / action relationships
+- Asset reliability indicators
+- Failure trend analysis
+
+This phase may be developed independently or as part of Operational Intelligence depending on architectural findings.
+
+---
+
+# Phase 7 ? Technical Intelligence
 
 ## Tenorio AI
 
@@ -372,90 +323,83 @@ The objective is to move from recording maintenance activity to understanding op
 
 Purpose:
 
-Create an intelligent technical assistant capable of using the structured information accumulated by Tenorio3G Platform.
+Create an intelligent technical assistant grounded in the structured technical and operational information accumulated by the platform.
 
-Potential capabilities:
+Potential capabilities include:
 
 - Search technical information
 - Analyze maintenance history
-- Locate technical documentation
-- Locate equipment photographs
-- Identify recurring failures
-- Suggest troubleshooting steps
+- Locate documentation
+- Locate photographs
 - Retrieve spare-part information
-- Analyze equipment history
-- Compare previous failures
+- Analyze preventive maintenance
+- Analyze work orders
+- Analyze work sessions
+- Identify recurring failures
+- Compare previous interventions
+- Suggest troubleshooting context
 - Assist technicians during diagnostics
 - Preserve institutional knowledge
-- Provide contextual technical responses
 
-Example:
+Potential context:
 
-Technician:
+Asset<br>
++<br>
+Technical Data<br>
++<br>
+Spare Parts<br>
++<br>
+Documents<br>
++<br>
+Photos<br>
++<br>
+Maintenance History<br>
++<br>
+Preventive Maintenance<br>
++<br>
+Work Orders<br>
++<br>
+Work Sessions<br>
++<br>
+Operational Analytics
 
-> "Why does AHU-03 keep stopping?"
-
-Tenorio AI could analyze:
-
-Asset  
-+  
-Technical Data  
-+  
-Maintenance History  
-+  
-Spare Parts  
-+  
-Documents  
-+  
-Photos  
-+  
-Work Orders
-
-and provide a contextual technical response based on the accumulated technical history of that equipment.
+The objective is contextual technical assistance based on accumulated evidence, not generic responses detached from plant history.
 
 ---
 
 # Architectural Rule
 
-Every new Tenorio3G engine should follow the established development cycle:
+Every new Tenorio3G capability should follow an intentional development cycle.
 
-Idea  
-↓  
-Domain  
-↓  
-Repository  
-↓  
-SQLite  
-↓  
-Use Cases  
-↓  
-Bootstrap  
-↓  
-Presenter  
-↓  
-ViewModel  
-↓  
-UI  
-↓  
-Tests  
-↓  
-Git  
-↓  
+Idea<br>
+?<br>
+Domain<br>
+?<br>
+Repository<br>
+?<br>
+Persistence<br>
+?<br>
+Use Cases<br>
+?<br>
+Bootstrap<br>
+?<br>
+Presentation<br>
+?<br>
+UI<br>
+?<br>
+Automated Tests<br>
+?<br>
+Integration<br>
+?<br>
+Documentation<br>
+?<br>
+Git<br>
+?<br>
 Release
 
-Storage-oriented engines may additionally include:
+Not every capability requires every layer.
 
-Storage Contract  
-↓  
-Storage Implementation  
-↓  
-Physical Storage  
-↓  
-Storage Tests  
-↓  
-HTTP Integration Tests
-
-before the engine is considered complete.
+Architecture should be driven by responsibility rather than by folder creation.
 
 ---
 
@@ -471,17 +415,35 @@ Tenorio3G development should remain:
 - Reusable
 - Scalable
 
-Each engine should have a clear responsibility.
-
-Business logic should remain independent from the user interface whenever possible.
+Business logic should remain independent from the UI whenever practical.
 
 Persistence should remain behind repository abstractions.
 
-Physical file storage should remain behind storage abstractions.
+Physical storage should remain behind storage abstractions.
 
-New functionality should include automated tests before being considered complete.
+New functionality should include automated tests.
 
-A completed engine should not reduce the stability of previously completed engines.
+Completed functionality must not reduce the stability of previous engines.
+
+---
+
+# Source Quality Standard
+
+Active source files use:
+
+**UTF-8 without BOM**
+
+Repository text policies are enforced through:
+
+- `.editorconfig`
+- `.gitattributes`
+- automated source-encoding tests
+
+The quality guard protects against:
+
+- UTF-8 BOM
+- Invalid UTF-8
+- Common mojibake sequences
 
 ---
 
@@ -489,154 +451,92 @@ A completed engine should not reduce the stability of previously completed engin
 
 ## v0.4.0
 
-Major milestone:
-
 **Spare Parts Engine completed**
 
-Established the first consolidated architectural baseline.
-
-Completed engines:
-
-1. Foundation
-2. Maps
-3. Assets
-4. Technical Data
-5. Spare Parts
-
-Automated test suite:
+Test baseline:
 
 **62 PASSED**
 
----
-
 ## v0.5.0
-
-Major milestone:
 
 **Documents Engine completed**
 
-Added persistent technical-document management and physical PDF storage.
-
-Completed engines:
-
-1. Foundation
-2. Maps
-3. Assets
-4. Technical Data
-5. Spare Parts
-6. Documents
-
-Automated test suite:
+Test baseline:
 
 **105 PASSED**
 
----
-
 ## v0.6.0
-
-Major milestone:
 
 **Photos Engine completed**
 
-Added persistent photographic evidence management, physical image storage, image visualization, photo galleries, and primary asset photographs.
-
-Completed engines:
-
-1. Foundation
-2. Maps
-3. Assets
-4. Technical Data
-5. Spare Parts
-6. Documents
-7. Photos
-
-Automated test suite:
+Test baseline:
 
 **147 PASSED**
 
-Next development target:
-
-**Maintenance History Engine**
-
----
-
 ## v0.7.0
-
-Major milestone:
 
 **Maintenance History Engine completed**
 
-Added persistent maintenance-event management, chronological asset history, maintenance status tracking, technician information, timestamps, technical descriptions, observations, complete CRUD functionality, asset-detail integration, historical timeline visualization, and HTTP integration testing.
+Historical commit:
 
-Completed engines:
+`3b37780`
 
-1. Foundation
-2. Maps
-3. Assets
-4. Technical Data
-5. Spare Parts
-6. Documents
-7. Photos
-8. Maintenance History
-
-Automated test suite:
+Test baseline:
 
 **184 PASSED**
 
-Next development target:
+## v0.8.0
 
-**Preventive Maintenance Engine**
+**Preventive Maintenance Engine completed**
 
----
+Historical commit:
 
-# Long-Term Objective
+`7b75037`
 
-The long-term objective is not simply to create maintenance software.
+## v0.9.0
 
-The objective is to create a technical knowledge platform where the operational history of an industrial facility becomes a reusable organizational asset.
+**Operational Maintenance**
 
-The expected evolution is:
+Major milestone:
 
-Maintenance Data  
-↓  
-Structured Technical Information  
-↓  
-Technical Evidence  
-↓  
-Technical Knowledge  
-↓  
-Maintenance Intelligence  
-↓  
-Operational Analytics  
-↓  
-Technical Intelligence
+**Work Orders + Work Sessions**
+
+Current candidate commit:
+
+`455572b`
+
+Current regression:
+
+**1925 PASSED**
+
+Work Sessions validation:
+
+**132 PASSED**
 
 ---
 
 # Strategic Direction
 
-Tenorio3G Platform is being built so that every new engine increases the value of the information already stored by previous engines.
+Tenorio3G now contains enough structured operational information to begin building measurable maintenance intelligence.
 
-An asset should eventually provide access to:
+The progression is:
 
-- Identity
-- Location
-- Technical specifications
-- Spare parts
-- Documents
-- Photographs
-- Maintenance history
-- Preventive maintenance
-- Work orders
-- Failure history
-- Operational indicators
+Industrial Assets<br>
+?<br>
+Structured Technical Data<br>
+?<br>
+Technical Evidence<br>
+?<br>
+Maintenance History<br>
+?<br>
+Preventive Planning<br>
+?<br>
+Operational Execution<br>
+?<br>
+Operational Intelligence<br>
+?<br>
+Reliability Intelligence<br>
+?<br>
+Technical Intelligence
 
-This accumulated information will form the knowledge base required for future intelligent assistance through Tenorio AI.
-
----
-
-Tenorio3G Platform
-
-**From maintenance data  
-to technical knowledge  
-to operational intelligence.**
+Each new stage should increase the value of information already generated by previous stages.

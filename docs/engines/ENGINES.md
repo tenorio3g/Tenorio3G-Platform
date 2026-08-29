@@ -1,38 +1,40 @@
-# Tenorio3G Platform — Engines
+# Tenorio3G Platform ? Engines
 
 ## Purpose
 
-This document provides a high-level view of the modular engines that compose Tenorio3G Platform.
+This document provides a high-level view of the modular engines currently implemented in Tenorio3G Platform.
 
-Each engine has a clearly defined responsibility and contributes specific capabilities to the platform.
+An engine exists because it owns a meaningful responsibility.
+
+It should not exist merely to create another folder or abstraction.
 
 ---
 
-# Engine Overview
+# Current Architecture
 
-Tenorio3G Platform currently follows an asset-centered architecture.
+Tenorio3G is no longer exclusively asset-centered.
+
+The platform currently has two major functional branches built on a shared foundation:
 
 Foundation
-    ↓
-Assets
-    ↓
-┌─────────────────────────────────┐
-│ Maps                            │
-│ Technical Data                  │
-│ Spare Parts                     │
-│ Documents                       │
-│ Photos                          │
-│ Maintenance History             │
-│ Preventive Maintenance          │
-└─────────────────────────────────┘
-    ↓
-Dashboard / Analytics
-    ↓
-Tenorio AI
+|
++-- Asset Knowledge
+|   +-- Maps
+|   +-- Assets
+|   +-- Technical Data
+|   +-- Spare Parts
+|   +-- Documents
+|   +-- Photos
+|   +-- Maintenance History
+|   +-- Preventive Maintenance
+|
++-- Operational Maintenance
+    +-- Work Orders
+    +-- Work Sessions
 
-Not every engine depends directly on every engine shown above.
+Cross-cutting capabilities include identity, authorization, persistence, testing, source-quality controls, and web integration.
 
-The diagram represents the functional evolution of the platform rather than a strict dependency graph.
+Future analytical capabilities will consume information from both branches.
 
 ---
 
@@ -40,21 +42,22 @@ The diagram represents the functional evolution of the platform rather than a st
 
 ## Status
 
-COMPLETE
+**COMPLETE**
 
 ## Responsibility
 
-Provide shared architectural and infrastructure capabilities required by the rest of Tenorio3G Platform.
+Provide shared architectural and infrastructure capabilities required by the rest of the platform.
 
-Foundation exists to support the platform without containing engine-specific business behavior.
+Foundation should not contain engine-specific business behavior.
 
-## Role
+Primary responsibilities include:
 
-Foundation
-    ↓
-Platform Engines
-
-It provides the common base upon which modular functionality can be developed consistently.
+- Database configuration
+- SQLAlchemy infrastructure
+- Session management
+- Shared metadata
+- Application composition
+- Shared services
 
 ---
 
@@ -62,33 +65,17 @@ It provides the common base upon which modular functionality can be developed co
 
 ## Status
 
-COMPLETE
+**COMPLETE**
 
 ## Responsibility
 
-Provide location and visualization capabilities for industrial assets.
+Provide physical-location context for industrial assets.
 
-Maps allows equipment to be associated with its physical location inside the industrial environment.
+Maps helps answer:
 
-## Concept
-
-Plant
-    ↓
-Area
-    ↓
-Location
-    ↓
-Asset
-
-## Value
-
-The Maps Engine answers questions such as:
-
-- Where is this equipment?
+- Where is the equipment?
 - In which area is it located?
 - How can a technician find it?
-
-Maps converts equipment identification into physical context.
 
 ---
 
@@ -96,43 +83,13 @@ Maps converts equipment identification into physical context.
 
 ## Status
 
-COMPLETE
+**COMPLETE**
 
 ## Responsibility
 
-Represent industrial assets as central entities within Tenorio3G Platform.
+Represent industrial assets as persistent central entities.
 
-An asset can represent equipment such as:
-
-- Electrical panels
-- Air handling units
-- Chillers
-- Compressors
-- Transformers
-- Substations
-- Pumps
-- Motors
-- Production equipment
-
-## Role
-
-Assets Engine acts as one of the central domain foundations of the platform.
-
-Other engines can progressively enrich an asset.
-
-Asset
-│
-├── Location
-├── Technical Data
-├── Spare Parts
-├── Documents
-├── Photos
-├── Maintenance History
-└── Preventive Maintenance
-
-## Value
-
-The asset becomes the digital identity of the physical equipment.
+Assets provide the digital identity of physical equipment and serve as an integration point for technical information.
 
 ---
 
@@ -140,13 +97,13 @@ The asset becomes the digital identity of the physical equipment.
 
 ## Status
 
-COMPLETE
+**COMPLETE**
 
 ## Responsibility
 
-Store and manage structured technical information associated with industrial assets.
+Store structured equipment specifications and technical information.
 
-Examples may include:
+Examples include:
 
 - Manufacturer
 - Model
@@ -156,20 +113,7 @@ Examples may include:
 - Power
 - Capacity
 - Frequency
-- Technical ratings
-- Equipment-specific specifications
-
-The exact technical fields may vary depending on the asset type.
-
-## Relationship
-
-Asset
-    ↓
-Technical Data
-
-## Value
-
-Technical information becomes structured and searchable instead of remaining scattered across labels, manuals, spreadsheets, or technician knowledge.
+- Equipment-specific ratings
 
 ---
 
@@ -177,176 +121,427 @@ Technical information becomes structured and searchable instead of remaining sca
 
 ## Status
 
-COMPLETE
+**COMPLETE**
 
 ## Responsibility
 
 Manage replacement-part information associated with industrial assets.
 
-Examples may include:
+Capabilities include:
 
-- Part name
-- Part number
+- Part registration
 - Manufacturer
-- Model
+- Part number
 - Quantity
 - Unit
-- Technical description
-- Asset relationship
+- Position
+- Critical-part identification
+- Observations
+- Asset relationships
+- SQLite persistence
+- CRUD
+- Web integration
 
-## Relationship
+Milestone:
 
-Asset
-    ↓
-Spare Parts
+**v0.4.0**
 
-## Value
+---
 
-The engine helps answer questions such as:
+# 6. Documents Engine
 
-- Which part does this equipment use?
-- What is its part number?
-- Which replacement should be requested?
-- Which asset uses this component?
+## Status
 
-This creates the foundation for future inventory and purchasing integration.
+**COMPLETE**
+
+## Responsibility
+
+Manage technical documentation associated with industrial assets.
+
+Capabilities include:
+
+- Document metadata
+- Asset relationships
+- SQLite persistence
+- CRUD
+- PDF upload
+- Local document storage
+- PDF visualization
+- Physical deletion
+- File validation
+- Safe file naming
+- HTTP integration
+
+Milestone:
+
+**v0.5.0**
+
+---
+
+# 7. Photos Engine
+
+## Status
+
+**COMPLETE**
+
+## Responsibility
+
+Manage photographic technical evidence.
+
+Capabilities include:
+
+- Photo metadata
+- Asset relationships
+- SQLite persistence
+- CRUD
+- JPG / JPEG / PNG storage
+- Photo visualization
+- Photo gallery
+- Primary asset photograph
+- Photo classification
+- Maintenance evidence
+- Failure evidence
+- Installation evidence
+- Inspection evidence
+- Physical deletion
+- Image validation
+
+Milestone:
+
+**v0.6.0**
+
+---
+
+# 8. Maintenance History Engine
+
+## Status
+
+**COMPLETE**
+
+## Responsibility
+
+Preserve chronological maintenance history for industrial assets.
+
+Capabilities include:
+
+- Maintenance event domain model
+- Asset relationships
+- SQLite persistence
+- CRUD
+- Maintenance classifications
+- Technician information
+- Start and completion timestamps
+- Open / completed status
+- Technical descriptions
+- Observations
+- Historical timeline
+- Web integration
+
+Milestone:
+
+**v0.7.0**
+
+Historical implementation commit:
+
+`3b37780`
+
+---
+
+# 9. Preventive Maintenance Engine
+
+## Status
+
+**COMPLETE**
+
+## Responsibility
+
+Manage preventive-maintenance planning and execution.
+
+Capabilities include:
+
+- Preventive maintenance plans
+- Preventive maintenance executions
+- Plan creation
+- Plan retrieval
+- Plan update
+- Plan deletion
+- Plan completion
+- Execution history
+- In-memory repositories
+- SQLite repositories
+- Presenters
+- ViewModels
+- Metrics
+- Bootstrap composition
+- Web integration
+- Automated testing
+
+Milestone:
+
+**v0.8.0**
+
+Historical implementation commit:
+
+`7b75037`
+
+---
+
+# 10. Work Orders Engine
+
+## Status
+
+**COMPLETE**
+
+## Responsibility
+
+Manage operational maintenance work from request through execution.
+
+Capabilities include:
+
+- Flexible requests
+- Requester information
+- Work-order lifecycle
+- Approval workflow
+- Assignment workflow
+- Supervisor information
+- Technician assignments
+- Activities
+- Activity lifecycle
+- Spare-part consumption
+- Tool issue and return
+- Evidence
+- Persistent lifecycle timeline
+- Technician history
+- Operational dashboards
+- SQLite persistence
+- Flask integration
+- Automated testing
+
+Important lifecycle rule:
+
+A work order must be approved before it can be assigned.
+
+Conceptual lifecycle:
+
+Created<br>
+?<br>
+Approved<br>
+?<br>
+Assigned<br>
+?<br>
+In Progress
+
+Additional completion and cancellation behavior remains governed by domain rules.
+
+---
+
+# 11. Work Sessions Engine
+
+## Status
+
+**COMPLETE**
+
+## Responsibility
+
+Record actual work periods performed by technicians against work-order activities.
+
+Capabilities include:
+
+- Automatic sessions
+- Manual sessions
+- Start
+- End
+- Manual creation
+- Manual correction
+- Person validation
+- Actor validation
+- Ownership validation
+- Active-session protection
+- Overlap detection
+- Duration calculation
+- In-memory repository
+- SQLite repository
+- Audit repository
+- Manual-created audit events
+- Correction audit events
+- Bootstrap composition
+- SQLite integration testing
+
+Overlap behavior uses half-open time intervals.
+
+For example:
+
+08:00?10:00<br>
+10:00?11:00
+
+does not represent an overlap.
+
+Normal session termination requires the actor to own that work session.
+
+Administrative correction is a separate workflow.
+
+---
+
+# Operational Maintenance Relationship
+
+Work Order
+|
++-- Request
++-- Approval
++-- Assignment
++-- Supervisor
++-- Technicians
++-- Activities
++-- Spare Parts
++-- Tools
++-- Evidence
++-- Timeline
++-- Work Sessions
+    +-- Automatic
+    +-- Manual
+    +-- Corrections
+    +-- Overlap Control
+    +-- Audit
+
+Work Sessions belong to the operational execution layer rather than the asset technical-record layer.
 
 ---
 
 # Current Platform Baseline
 
-Version:
+Candidate version:
 
-v0.4.0
+**v0.9.0**
 
-Completed engines:
+Current implementation commit:
 
-Foundation Engine
-Maps Engine
-Assets Engine
-Technical Data Engine
-Spare Parts Engine
+`455572b`
 
-Automated validation baseline:
+Current automated regression:
 
-62 PASSED
-0 FAILED
-0 ERRORS
-0 SKIPPED
+**1925 PASSED**
 
----
+Work Sessions suite:
 
-# Next Engine
+**132 PASSED**
 
-## Documents Engine
-
-Status:
-
-NEXT
-
-Documents Engine will extend the technical record of an asset with documentation such as:
-
-- Manuals
-- Datasheets
-- Electrical diagrams
-- Mechanical drawings
-- Procedures
-- Certifications
-- Manufacturer documentation
-
-Conceptually:
-
-Asset
-│
-├── Technical Data
-├── Spare Parts
-└── Documents
-
-Documents Engine should follow the architectural pattern defined in:
-
-docs/architecture/ENGINE_ARCHITECTURE.md
+The total regression count includes repository-wide source-encoding validation.
 
 ---
 
-# Future Engines
+# Quality Controls
 
-Planned evolution:
+Active project source uses:
 
-Documents Engine
-    ↓
-Photos Engine
-    ↓
-Maintenance History Engine
-    ↓
-Preventive Maintenance Engine
-    ↓
-Dashboard / Analytics
-    ↓
-Tenorio AI
+**UTF-8 without BOM**
+
+Repository controls include:
+
+- `.editorconfig`
+- `.gitattributes`
+- Source encoding tests
+- BOM detection
+- Invalid UTF-8 detection
+- Mojibake detection
+
+---
+
+# Release Progression
+
+v0.4.0<br>
+Spare Parts<br>
+?<br>
+v0.5.0<br>
+Documents<br>
+?<br>
+v0.6.0<br>
+Photos<br>
+?<br>
+v0.7.0<br>
+Maintenance History<br>
+?<br>
+v0.8.0<br>
+Preventive Maintenance<br>
+?<br>
+v0.9.0<br>
+Operational Maintenance<br>
+Work Orders + Work Sessions
+
+---
+
+# Next Architectural Stage
+
+## Operational Intelligence
+
+**Status: NEXT**
+
+Purpose:
+
+Convert operational maintenance information into reliable performance indicators.
+
+Potential areas include:
+
+- Work-order KPIs
+- Preventive maintenance compliance
+- Technician workload
+- Work-session analysis
+- Downtime
+- Failure frequency
+- Maintenance backlog
+- Spare-part consumption
+- Asset reliability
+- Operational trends
+
+Existing dashboard work should be consolidated into this analytical layer.
+
+---
+
+# Future Stage
+
+## Tenorio AI
+
+**Status: FUTURE**
+
+Tenorio AI should operate on structured platform information rather than isolated prompts.
+
+Potential context includes:
+
+- Assets
+- Technical Data
+- Spare Parts
+- Documents
+- Photos
+- Maintenance History
+- Preventive Maintenance
+- Work Orders
+- Work Sessions
+- Operational Analytics
 
 ---
 
 # Engine Design Principle
 
-An engine should exist because it owns a meaningful responsibility.
-
-It should not exist merely to create another folder or abstraction.
-
-Each engine should answer:
+Every engine should answer:
 
 1. What information does it own?
 2. What behavior does it provide?
 3. Which other concepts does it reference?
 4. What should remain outside its responsibility?
 
-This helps prevent the platform from becoming a collection of tightly coupled modules.
+Business logic should remain independent from the user interface whenever practical.
+
+Persistence should remain behind repository abstractions.
+
+Physical storage should remain behind storage abstractions.
+
+New functionality should include automated tests before being considered complete.
+
+A completed engine should not reduce the stability of previously completed engines.
 
 ---
 
-# Platform Evolution
+Tenorio3G Platform
 
-Tenorio3G is progressively transforming the concept of an industrial asset.
-
-Initial concept:
-
-Asset
-    ↓
-Identification
-
-Current concept:
-
-Asset
-    ↓
-Identification
-+
-Location
-+
-Technical Data
-+
-Spare Parts
-
-Next:
-
-Asset
-    ↓
-Complete Technical Record
-+
-Documents
-+
-Photos
-+
-Maintenance History
-+
-Preventive Maintenance
-
-Future:
-
-Technical Record
-+
-Operational History
-+
-Analytics
-+
-Artificial Intelligence
-
-The objective is to transform isolated maintenance information into structured technical knowledge.
+**From maintenance data<br>
+to technical knowledge<br>
+to operational intelligence.**
