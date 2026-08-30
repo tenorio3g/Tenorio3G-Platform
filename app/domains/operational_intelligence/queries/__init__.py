@@ -3,6 +3,11 @@ from .get_approval_lead_time import (
     GetApprovalLeadTime,
 )
 
+from .get_approval_lead_time_summary import (
+    ApprovalLeadTimeSummary,
+    GetApprovalLeadTimeSummary,
+)
+
 from .get_backlog_summary import (
     BacklogSummary,
     GetBacklogSummary,
@@ -21,8 +26,10 @@ from .get_work_order_status_summary import (
 
 __all__ = [
     "ApprovalLeadTimeItem",
+    "ApprovalLeadTimeSummary",
     "BacklogSummary",
     "GetApprovalLeadTime",
+    "GetApprovalLeadTimeSummary",
     "GetBacklogSummary",
     "GetWorkOrderAging",
     "GetWorkOrderStatusSummary",
