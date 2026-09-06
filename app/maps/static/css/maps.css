@@ -371,3 +371,62 @@
     -webkit-user-select: none;
     -webkit-user-drag: none;
 }
+
+
+/* Map search results */
+.map-search-results {
+    position: relative;
+    z-index: 40;
+    margin-top: 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid #d6dbe1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.map-search-results[hidden] {
+    display: none;
+}
+
+.map-search-results__header {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid #e3e6ea;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.map-search-result {
+    display: grid;
+    width: 100%;
+    gap: 0.15rem;
+    padding: 0.7rem 0.8rem;
+    border: 0;
+    border-bottom: 1px solid #edf0f2;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+.map-search-result:last-child {
+    border-bottom: 0;
+}
+
+.map-search-result:hover,
+.map-search-result:focus-visible {
+    background: #f4f6f8;
+}
+
+.map-search-result__identifier {
+    font-size: 0.95rem;
+}
+
+.map-search-result__name {
+    font-size: 0.85rem;
+}
+
+.map-search-result__code {
+    font-size: 0.75rem;
+    opacity: 0.72;
+}

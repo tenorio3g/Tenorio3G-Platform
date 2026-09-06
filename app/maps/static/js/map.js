@@ -223,6 +223,12 @@ function renderPuntos(locations) {
         punto.title =
             data.name;
 
+        punto.dataset.codigo =
+            data.asset_code || "";
+
+        punto.dataset.nombre =
+            data.name || "";
+
         punto.addEventListener(
             "click",
             event => {
@@ -453,52 +459,316 @@ function finalizarPanMapa(event) {
 }
 
 
-function buscarEquipo() {
-    const texto = document
-        .getElementById("busqueda")
-        .value
-        .toLowerCase()
-        .trim();
+function enfocarActivoMapa(punto) {
+    if (
+        !mapViewport
+        || !mapa
+        || !punto
+    ) {
+        return;
+    }
 
-    let encontrado = false;
+    const viewportRect =
+        mapViewport.getBoundingClientRect();
+
+    const mapWidth =
+        mapa.offsetWidth;
+
+    const mapHeight =
+        mapa.offsetHeight;
+
+    if (
+        mapWidth <= 0
+        || mapHeight <= 0
+    ) {
+        return;
+    }
+
+    const leftPercent =
+        Number.parseFloat(
+            punto.style.left
+        );
+
+    const topPercent =
+        Number.parseFloat(
+            punto.style.top
+        );
+
+    if (
+        !Number.isFinite(leftPercent)
+        || !Number.isFinite(topPercent)
+    ) {
+        return;
+    }
+
+    const assetX =
+        mapWidth
+        * leftPercent
+        / 100;
+
+    const assetY =
+        mapHeight
+        * topPercent
+        / 100;
+
+    const viewportCenterX =
+        viewportRect.width / 2;
+
+    const viewportCenterY =
+        viewportRect.height / 2;
+
+    camera.x =
+        viewportCenterX
+        - assetX * camera.scale;
+
+    camera.y =
+        viewportCenterY
+        - assetY * camera.scale;
+
+    aplicarCamara();
+}
+
+
+function obtenerIdentificadorCorto(codigo) {
+    if (!codigo) {
+        return "";
+    }
+
+    return codigo
+        .split("-")
+        .pop()
+        .trim()
+        .toUpperCase();
+}
+
+
+function limpiarResultadosBusqueda() {
+    const contenedor =
+        document.getElementById(
+            "resultadosBusquedaMapa"
+        );
+
+    if (!contenedor) {
+        return;
+    }
+
+    contenedor.replaceChildren();
+    contenedor.hidden = true;
+}
+
+
+function seleccionarResultadoBusqueda(punto) {
+    mapa.querySelectorAll(
+        ".punto"
+    ).forEach(
+        item => item.classList.remove(
+            "parpadeo"
+        )
+    );
+
+    punto.classList.add(
+        "parpadeo"
+    );
+
+    enfocarActivoMapa(
+        punto
+    );
+
+    limpiarResultadosBusqueda();
+}
+
+
+function mostrarResultadosBusqueda(coincidencias) {
+    const contenedor =
+        document.getElementById(
+            "resultadosBusquedaMapa"
+        );
+
+    if (!contenedor) {
+        return;
+    }
+
+    contenedor.replaceChildren();
+
+    const encabezado =
+        document.createElement("div");
+
+    encabezado.className =
+        "map-search-results__header";
+
+    encabezado.textContent =
+        `${coincidencias.length} coincidencias encontradas`;
+
+    contenedor.appendChild(
+        encabezado
+    );
+
+    coincidencias.forEach(
+        punto => {
+            const boton =
+                document.createElement("button");
+
+            boton.type = "button";
+            boton.className =
+                "map-search-result";
+
+            const identificador =
+                document.createElement("strong");
+
+            identificador.className =
+                "map-search-result__identifier";
+
+            identificador.textContent =
+                obtenerIdentificadorCorto(
+                    punto.dataset.codigo
+                );
+
+            const nombre =
+                document.createElement("span");
+
+            nombre.className =
+                "map-search-result__name";
+
+            nombre.textContent =
+                punto.dataset.nombre
+                || "Activo sin nombre";
+
+            const codigo =
+                document.createElement("small");
+
+            codigo.className =
+                "map-search-result__code";
+
+            codigo.textContent =
+                punto.dataset.codigo
+                || "";
+
+            boton.appendChild(
+                identificador
+            );
+
+            boton.appendChild(
+                nombre
+            );
+
+            boton.appendChild(
+                codigo
+            );
+
+            boton.addEventListener(
+                "click",
+                () => {
+                    seleccionarResultadoBusqueda(
+                        punto
+                    );
+                }
+            );
+
+            contenedor.appendChild(
+                boton
+            );
+        }
+    );
+
+    contenedor.hidden = false;
+}
+
+
+function buscarEquipo() {
+    const campo =
+        document.getElementById(
+            "busqueda"
+        );
+
+    if (!campo) {
+        return;
+    }
+
+    const texto =
+        campo.value
+            .toLowerCase()
+            .trim();
+
+    limpiarResultadosBusqueda();
 
     mapa.querySelectorAll(
         ".punto"
     ).forEach(
-        punto =>
-            punto.classList.remove(
-                "parpadeo"
-            )
+        punto => punto.classList.remove(
+            "parpadeo"
+        )
     );
+
+    if (texto === "") {
+        return;
+    }
+
+    const coincidencias = [];
 
     mapa.querySelectorAll(
         ".punto"
     ).forEach(
         punto => {
-            if (
+            const codigo = (
+                punto.dataset.codigo
+                || ""
+            ).toLowerCase();
+
+            const nombre = (
+                punto.dataset.nombre
+                || ""
+            ).toLowerCase();
+
+            const titulo = (
                 punto.title
-                    .toLowerCase()
-                    .includes(texto)
-                && texto !== ""
-            ) {
-                punto.classList.add(
-                    "parpadeo"
+                || ""
+            ).toLowerCase();
+
+            const identificadorCorto =
+                obtenerIdentificadorCorto(
+                    punto.dataset.codigo
+                ).toLowerCase();
+
+            const coincide = (
+                codigo.includes(texto)
+                || identificadorCorto.includes(texto)
+                || nombre.includes(texto)
+                || titulo.includes(texto)
+            );
+
+            if (coincide) {
+                coincidencias.push(
+                    punto
                 );
-
-                encontrado = true;
-
-                // El centrado automatico del activo
-                // se implementara en MAP-UX-002.
             }
         }
     );
 
-    if (
-        !encontrado
-        && texto !== ""
-    ) {
+    if (coincidencias.length === 0) {
         alert(
             "Equipo no encontrado"
+        );
+        return;
+    }
+
+    if (coincidencias.length === 1) {
+        const punto =
+            coincidencias[0];
+
+        punto.classList.add(
+            "parpadeo"
+        );
+
+        enfocarActivoMapa(
+            punto
+        );
+
+        return;
+    }
+
+    if (coincidencias.length > 1) {
+        mostrarResultadosBusqueda(
+            coincidencias
         );
     }
 }
@@ -770,6 +1040,22 @@ if (coordBox) {
 
             coordBox.textContent =
                 `X: ${coordinates.x}%, Y: ${coordinates.y}%`;
+        }
+    );
+}
+
+
+const campoBusqueda =
+    document.getElementById("busqueda");
+
+if (campoBusqueda) {
+    campoBusqueda.addEventListener(
+        "keydown",
+        (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                buscarEquipo();
+            }
         }
     );
 }
