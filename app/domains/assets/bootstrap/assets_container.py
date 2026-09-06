@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 # ==========================================================
-# Repositorios
+# Database
 # ==========================================================
 
-from app.domains.assets.repositories.in_memory_asset_repository import (
-    InMemoryAssetRepository,
-)
+from app.foundation.database import SessionLocal
 
-from app.domains.assets.repositories.in_memory_asset_model_repository import (
-    InMemoryAssetModelRepository,
+# ==========================================================
+# Repositories
+# ==========================================================
+
+from app.domains.assets.repositories import (
+    SQLiteAssetModelRepository,
+    SQLiteAssetRepository,
 )
 
 # ==========================================================
@@ -19,7 +22,7 @@ from app.domains.assets.repositories.in_memory_asset_model_repository import (
 from .demo_asset_seeder import DemoAssetSeeder
 
 # ==========================================================
-# Casos de uso de Assets
+# Asset use cases
 # ==========================================================
 
 from app.domains.assets.use_cases.find_all_assets.find_all_assets import (
@@ -32,6 +35,10 @@ from app.domains.assets.use_cases.find_asset_by_code.find_asset_by_code import (
 
 from app.domains.assets.use_cases.register_asset.register_asset import (
     RegisterAsset,
+)
+
+from app.domains.locations.bootstrap.locations_container import (
+    repository as physical_location_repository,
 )
 
 from app.domains.assets.use_cases.update_asset.update_asset import (
@@ -47,15 +54,23 @@ from app.domains.assets.use_cases.deactivate_asset.deactivate_asset import (
 )
 
 # ==========================================================
-# Casos de uso de AssetModel
+# AssetModel use cases
 # ==========================================================
+
+from app.domains.assets.use_cases.find_all_asset_models.find_all_asset_models import (
+    FindAllAssetModels,
+)
 
 from app.domains.assets.use_cases.find_asset_model_by_code.find_asset_model_by_code import (
     FindAssetModelByCode,
 )
 
+from app.domains.assets.use_cases.register_asset_model.register_asset_model import (
+    RegisterAssetModel,
+)
+
 # ==========================================================
-# Caso de uso compuesto
+# Composite use cases
 # ==========================================================
 
 from app.domains.assets.use_cases.get_asset_life_sheet.get_asset_life_sheet import (
@@ -63,24 +78,31 @@ from app.domains.assets.use_cases.get_asset_life_sheet.get_asset_life_sheet impo
 )
 
 # ==========================================================
-# Repositorios únicos del dominio
+# Domain repositories
 # ==========================================================
 
-repository = InMemoryAssetRepository()
+repository = SQLiteAssetRepository(
+    SessionLocal
+)
 
-asset_model_repository = InMemoryAssetModelRepository()
-
-# ==========================================================
-# Datos Demo
-# ==========================================================
-
-DemoAssetSeeder.load(
-    asset_repository=repository,
-    asset_model_repository=asset_model_repository,
+asset_model_repository = SQLiteAssetModelRepository(
+    SessionLocal
 )
 
 # ==========================================================
-# Casos de uso disponibles
+# Initial demo data
+# ==========================================================
+
+
+def load_demo_assets() -> None:
+    DemoAssetSeeder.load(
+        asset_repository=repository,
+        asset_model_repository=asset_model_repository,
+    )
+
+
+# ==========================================================
+# Available Asset use cases
 # ==========================================================
 
 find_all_assets = FindAllAssets(
@@ -91,22 +113,16 @@ find_asset_by_code = FindAssetByCode(
     repository,
 )
 
-find_asset_model_by_code = FindAssetModelByCode(
-    asset_model_repository,
-)
-
-get_asset_life_sheet = GetAssetLifeSheet(
-    find_asset_by_code=find_asset_by_code,
-    find_asset_model_by_code=find_asset_model_by_code,
-)
-
 register_asset = RegisterAsset(
     repository,
     asset_model_repository,
+    physical_location_repository,
 )
 
 update_asset = UpdateAsset(
     repository,
+    asset_model_repository,
+    physical_location_repository,
 )
 
 activate_asset = ActivateAsset(
@@ -115,4 +131,29 @@ activate_asset = ActivateAsset(
 
 deactivate_asset = DeactivateAsset(
     repository,
+)
+
+# ==========================================================
+# Available AssetModel use cases
+# ==========================================================
+
+find_all_asset_models = FindAllAssetModels(
+    asset_model_repository,
+)
+
+find_asset_model_by_code = FindAssetModelByCode(
+    asset_model_repository,
+)
+
+register_asset_model = RegisterAssetModel(
+    asset_model_repository,
+)
+
+# ==========================================================
+# Composite use cases
+# ==========================================================
+
+get_asset_life_sheet = GetAssetLifeSheet(
+    find_asset_by_code=find_asset_by_code,
+    find_asset_model_by_code=find_asset_model_by_code,
 )

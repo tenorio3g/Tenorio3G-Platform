@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from app.domains.assets.entities.asset import Asset
+from app.domains.locations.entities.physical_location import (
+    PhysicalLocation,
+)
 
 from .asset_view_model import AssetViewModel
 
@@ -25,13 +28,22 @@ class AssetPresenter:
     def present(
         cls,
         asset: Asset,
+        physical_location: PhysicalLocation | None = None,
     ) -> AssetViewModel:
+
+        location_name = asset.location_code
+        area = None
+
+        if physical_location is not None:
+            location_name = physical_location.name
+            area = physical_location.area
+
         return AssetViewModel(
             codigo=asset.code,
             nombre=asset.name,
             estado=cls._present_status(asset),
-            ubicacion=asset.location_code,
-            area=None,
+            ubicacion=location_name,
+            area=area,
             ultimo_mantenimiento=None,
             proximo_mantenimiento=None,
             salud=None,

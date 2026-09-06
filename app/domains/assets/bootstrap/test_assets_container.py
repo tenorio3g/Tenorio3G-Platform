@@ -12,9 +12,12 @@ def test_bootstrap_loaded():
 
     assets = repository.find_all()
 
-    assert len(assets) == 1
-    assert assets[0].code == "S2-480-ES09-T269"
+    asset_codes = {
+        asset.code
+        for asset in assets
+    }
 
+    assert "S2-480-ES09-T269" in asset_codes
 
 def test_container_should_get_asset_life_sheet():
 

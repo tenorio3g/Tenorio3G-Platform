@@ -1,13 +1,20 @@
+from datetime import date
+
 from flask import (
     jsonify,
     redirect,
     render_template,
     request,
     send_file,
+    session,
     url_for,
 )
 from app.domains.identity.authentication import (
     login_required,
+)
+
+from app.domains.identity.permissions.permission_policy import (
+    PermissionPolicy,
 )
 
 from . import assets
@@ -17,11 +24,54 @@ from app.assets.services.asset_service import (
 )
 
 from app.domains.assets.bootstrap import (
+    activate_asset,
+    deactivate_asset,
+    find_all_asset_models,
+    find_asset_by_code,
     get_asset_life_sheet,
+    register_asset,
+    register_asset_model,
+    update_asset,
+
 )
+from app.domains.assets.use_cases.activate_asset.command import (
+    ActivateAssetCommand,
+)
+from app.domains.assets.use_cases.deactivate_asset.command import (
+    DeactivateAssetCommand,
+)
+
+from app.domains.assets.use_cases.find_all_asset_models.command import (
+    FindAllAssetModelsCommand,
+)
+
+from app.domains.locations.bootstrap.locations_container import (
+    find_all_physical_locations,
+    register_physical_location,
+    repository as physical_location_repository,
+)
+from app.domains.locations.use_cases.find_all_physical_locations.query import (
+    FindAllPhysicalLocationsQuery,
+)
+from app.domains.locations.use_cases.register_physical_location.command import (
+    RegisterPhysicalLocationCommand,
+)
+
+from app.domains.assets.use_cases.register_asset.command import (
+    RegisterAssetCommand,
+)
+
+from app.domains.assets.use_cases.register_asset_model.command import (
+    RegisterAssetModelCommand,
+)
+
 
 from app.domains.assets.use_cases.get_asset_life_sheet.query import (
     GetAssetLifeSheetQuery,
+)
+
+from app.domains.assets.value_objects.asset_status import (
+    AssetStatus,
 )
 
 from app.assets.presenters.asset_life_sheet_presenter import (
@@ -31,7 +81,9 @@ from app.assets.presenters.asset_life_sheet_presenter import (
 from app.assets.presenters.asset_api_presenter import (
     AssetApiPresenter,
 )
-
+from app.domains.assets.use_cases.update_asset.command import (
+    UpdateAssetCommand,
+)
 
 # ============================================================
 # TECHNICAL DATA
@@ -233,6 +285,11 @@ from app.domains.assets.preventive_maintenance.use_cases import (
 
 
 
+from app.domains.assets.use_cases.find_asset_by_code.query import (
+    FindAssetByCodeQuery,
+)
+
+
 
 # ============================================================
 # ASSETS INDEX
@@ -247,11 +304,50 @@ def index():
 
     activos = AssetService.get_assets()
 
+    can_manage_assets = (
+        PermissionPolicy.has_permission(
+            session.get("role_code", ""),
+            "assets.manage",
+        )
+    )
+
     return render_template(
         "pages/assets_index.html",
         activos=activos,
         termino_busqueda="",
+        can_manage_assets=can_manage_assets,
     )
+
+
+
+# ============================================================
+# ASSET MODELS INDEX
+# ============================================================
+
+@assets.get("/activos/modelos")
+@permission_required("assets.view")
+def asset_models_index():
+    """
+    Cat?logo de modelos de activo.
+    """
+
+    result = find_all_asset_models.execute(
+        FindAllAssetModelsCommand()
+    )
+
+    can_manage_assets = (
+        PermissionPolicy.has_permission(
+            session.get("role_code", ""),
+            "assets.manage",
+        )
+    )
+
+    return render_template(
+        "pages/asset_models_index.html",
+        asset_models=result.asset_models,
+        can_manage_assets=can_manage_assets,
+    )
+
 
 
 # ============================================================
@@ -283,9 +379,16 @@ def asset_detail(codigo: str):
             404,
         )
 
+    physical_location = (
+        physical_location_repository.find_by_code(
+            result.asset.location_code
+        )
+    )
+
     activo = AssetLifeSheetPresenter.present(
         asset=result.asset,
         asset_model=result.asset_model,
+        physical_location=physical_location,
     )
 
     # --------------------------------------------------------
@@ -436,7 +539,7 @@ def asset_detail(codigo: str):
         preventive_maintenance=preventive_maintenance,
         preventive_executions=preventive_executions,
         preventive_metrics=preventive_metrics,
-    )   
+    )
 
 
 
@@ -949,9 +1052,16 @@ def asset_api(codigo: str):
             404,
         )
 
+    physical_location = (
+        physical_location_repository.find_by_code(
+            result.asset.location_code
+        )
+    )
+
     view_model = AssetLifeSheetPresenter.present(
         asset=result.asset,
         asset_model=result.asset_model,
+        physical_location=physical_location,
     )
 
     payload = AssetApiPresenter.present(
@@ -2085,3 +2195,732 @@ def delete_maintenance_event_route(
             codigo=codigo,
         )
     )
+
+
+
+def _render_asset_edit_form(
+        asset,
+        form_data,
+        error_message=None,
+        status_code=200,
+    ):
+        """
+        Renderiza el formulario de edicion de un activo.
+        """
+
+        asset_models_result = (
+            find_all_asset_models.execute(
+                FindAllAssetModelsCommand()
+            )
+        )
+
+        locations_result = (
+            find_all_physical_locations.execute(
+                FindAllPhysicalLocationsQuery()
+            )
+        )
+
+        physical_locations = [
+            location
+            for location in locations_result.locations
+            if (
+                location.is_active
+                or location.code
+                == asset.location_code
+            )
+        ]
+
+        response = render_template(
+            "pages/asset_edit_form.html",
+            asset=asset,
+            asset_models=(
+                asset_models_result.asset_models
+            ),
+            physical_locations=(
+                physical_locations
+            ),
+            form_data=form_data,
+            error_message=error_message,
+        )
+
+        return response, status_code
+
+
+# ============================================================
+# EDIT ASSET
+# ============================================================
+
+
+@assets.get(
+    "/activos/<string:codigo>/editar"
+)
+@permission_required("assets.manage")
+def edit_asset(
+    codigo: str,
+):
+    """
+    Formulario para editar un activo existente.
+    """
+
+    asset_result = find_asset_by_code.execute(
+        FindAssetByCodeQuery(
+            code=codigo,
+        )
+    )
+
+    asset = asset_result.asset
+
+    if asset is None:
+        return (
+            "Activo no encontrado.",
+            404,
+        )
+
+    asset_models_result = (
+        find_all_asset_models.execute(
+            FindAllAssetModelsCommand()
+        )
+    )
+
+    locations_result = (
+        find_all_physical_locations.execute(
+            FindAllPhysicalLocationsQuery()
+        )
+    )
+
+    physical_locations = [
+        location
+        for location in locations_result.locations
+        if (
+            location.is_active
+            or location.code
+            == asset.location_code
+        )
+    ]
+
+    form_data = {
+        "code": asset.code,
+        "name": asset.name,
+        "asset_model_code": (
+            asset.asset_model_code
+        ),
+        "serial_number": (
+            asset.serial_number
+        ),
+        "location_code": (
+            asset.location_code
+        ),
+        "installation_date": (
+            asset.installation_date.isoformat()
+            if asset.installation_date
+            else ""
+        ),
+    }
+
+    return _render_asset_edit_form(
+        asset=asset,
+        form_data=form_data,
+    )
+
+    return render_template(
+        "pages/asset_edit_form.html",
+        asset=asset,
+        asset_models=(
+            asset_models_result.asset_models
+        ),
+        physical_locations=(
+            physical_locations
+        ),
+        form_data=form_data,
+    )
+
+@assets.post(
+    "/activos/<string:codigo>/activar"
+)
+@permission_required("assets.manage")
+def activate_asset_route(
+    codigo: str,
+):
+    """
+    Reactiva un activo previamente desactivado.
+    """
+
+    result = activate_asset.execute(
+        ActivateAssetCommand(
+            code=codigo,
+        )
+    )
+
+    if not result.success:
+        return (
+            result.message,
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "assets.index"
+        )
+    )
+@assets.post(
+    "/activos/<string:codigo>/desactivar"
+)
+@permission_required("assets.manage")
+def deactivate_asset_route(
+    codigo: str,
+):
+    """
+    Desactiva un activo conservando su trazabilidad.
+    """
+
+    result = deactivate_asset.execute(
+        DeactivateAssetCommand(
+            code=codigo,
+            reason=request.form.get(
+                "reason",
+                "",
+            ),
+        )
+    )
+
+    if not result.success:
+        return (
+            result.message,
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "assets.index"
+        )
+    )
+
+
+@assets.post(
+    "/activos/<string:codigo>/editar"
+)
+@permission_required("assets.manage")
+def update_asset_route(
+    codigo: str,
+):
+    """
+    Actualiza los datos editables de un activo.
+    """
+
+    installation_date_raw = request.form.get(
+        "installation_date",
+        "",
+    ).strip()
+
+    try:
+        installation_date = (
+            date.fromisoformat(
+                installation_date_raw
+            )
+            if installation_date_raw
+            else None
+        )
+
+    except ValueError:
+
+        asset_result = (
+            find_asset_by_code.execute(
+                FindAssetByCodeQuery(
+                    code=codigo,
+                )
+            )
+        )
+
+        asset = asset_result.asset
+
+        if asset is None:
+            return (
+                "Activo no encontrado.",
+                404,
+            )
+
+        return _render_asset_edit_form(
+            asset=asset,
+            form_data=request.form,
+            error_message=(
+                "La fecha de instalacion no es valida."
+            ),
+            status_code=400,
+        )
+
+    command = UpdateAssetCommand(
+        code=codigo,
+        name=request.form.get(
+            "name",
+            "",
+        ),
+        asset_model_code=request.form.get(
+            "asset_model_code",
+            "",
+        ),
+        serial_number=request.form.get(
+            "serial_number",
+            "",
+        ),
+        location_code=request.form.get(
+            "location_code",
+            "",
+        ),
+        installation_date=installation_date,
+    )
+
+    result = update_asset.execute(
+        command
+    )
+
+    if not result.success:
+
+        asset_result = (
+            find_asset_by_code.execute(
+                FindAssetByCodeQuery(
+                    code=codigo,
+                )
+            )
+        )
+
+        asset = asset_result.asset
+
+        if asset is None:
+            return (
+                "Activo no encontrado.",
+                404,
+            )
+
+        return _render_asset_edit_form(
+            asset=asset,
+            form_data=request.form,
+            error_message=result.message,
+            status_code=400,
+        )
+
+    return redirect(
+        url_for(
+            "assets.index"
+        )
+    )
+
+
+
+@assets.get("/activos/nuevo")
+@permission_required("assets.manage")
+def new_asset():
+    """
+    Formulario para registrar un nuevo activo fisico.
+    """
+
+    asset_models_result = (
+        find_all_asset_models.execute(
+            FindAllAssetModelsCommand()
+        )
+    )
+
+    locations_result = (
+        find_all_physical_locations.execute(
+            FindAllPhysicalLocationsQuery()
+        )
+    )
+
+    active_locations = [
+        location
+        for location in locations_result.locations
+        if location.is_active
+    ]
+
+    return render_template(
+        "pages/asset_form.html",
+        asset_models=asset_models_result.asset_models,
+        physical_locations=active_locations,
+        form_data=session.get(
+            "new_asset_draft"
+        ),
+    )
+
+
+@assets.post(
+    "/activos/nuevo/borrador/modelo"
+)
+@permission_required("assets.manage")
+def save_new_asset_draft_for_model():
+    """
+    Guarda temporalmente el formulario de nuevo activo
+    antes de abrir el catalogo de modelos.
+    """
+
+    session["new_asset_draft"] = {
+        "code": request.form.get(
+            "code",
+            "",
+        ),
+        "name": request.form.get(
+            "name",
+            "",
+        ),
+        "asset_model_code": request.form.get(
+            "asset_model_code",
+            "",
+        ),
+        "serial_number": request.form.get(
+            "serial_number",
+            "",
+        ),
+        "location_code": request.form.get(
+            "location_code",
+            "",
+        ),
+        "status": request.form.get(
+            "status",
+            "",
+        ),
+        "installation_date": request.form.get(
+            "installation_date",
+            "",
+        ),
+    }
+
+    return redirect(
+        url_for(
+            "assets.new_asset_model",
+            return_to="new_asset",
+        )
+    )
+
+
+@assets.post(
+    "/activos/nuevo/borrador/ubicacion"
+)
+@permission_required("assets.manage")
+def save_new_asset_draft_for_location():
+    """
+    Guarda temporalmente el formulario de nuevo activo
+    antes de abrir el catalogo de ubicaciones.
+    """
+
+    session["new_asset_draft"] = {
+        "code": request.form.get(
+            "code",
+            "",
+        ),
+        "name": request.form.get(
+            "name",
+            "",
+        ),
+        "asset_model_code": request.form.get(
+            "asset_model_code",
+            "",
+        ),
+        "serial_number": request.form.get(
+            "serial_number",
+            "",
+        ),
+        "location_code": request.form.get(
+            "location_code",
+            "",
+        ),
+        "status": request.form.get(
+            "status",
+            "",
+        ),
+        "installation_date": request.form.get(
+            "installation_date",
+            "",
+        ),
+    }
+
+    return redirect(
+        url_for(
+            "assets.new_physical_location"
+        )
+    )
+
+
+@assets.post("/activos/nuevo")
+@permission_required("assets.manage")
+def create_asset():
+    """
+    Registra un nuevo activo fisico.
+    """
+
+    asset_models_result = (
+        find_all_asset_models.execute(
+            FindAllAssetModelsCommand()
+        )
+    )
+
+    locations_result = (
+        find_all_physical_locations.execute(
+            FindAllPhysicalLocationsQuery()
+        )
+    )
+
+    active_locations = [
+        location
+        for location in locations_result.locations
+        if location.is_active
+    ]
+
+    try:
+        status = AssetStatus(
+            request.form.get(
+                "status",
+                "",
+            )
+        )
+
+        installation_date_raw = request.form.get(
+            "installation_date",
+            "",
+        ).strip()
+
+        installation_date = (
+            date.fromisoformat(
+                installation_date_raw
+            )
+            if installation_date_raw
+            else None
+        )
+
+    except ValueError:
+        return render_template(
+            "pages/asset_form.html",
+            asset_models=(
+                asset_models_result.asset_models
+            ),
+            physical_locations=active_locations,
+            error_message=(
+                "Los datos del activo "
+                "contienen un valor invalido."
+            ),
+            form_data=request.form,
+        ), 400
+
+    command = RegisterAssetCommand(
+        code=request.form.get("code", ""),
+        name=request.form.get("name", ""),
+        asset_model_code=request.form.get(
+            "asset_model_code",
+            "",
+        ),
+        serial_number=request.form.get(
+            "serial_number",
+            "",
+        ),
+        location_code=request.form.get(
+            "location_code",
+            "",
+        ),
+        status=status,
+        installation_date=(
+            installation_date
+        ),
+    )
+
+    result = register_asset.execute(
+        command
+    )
+
+    if result.success:
+        session.pop(
+            "new_asset_draft",
+            None,
+        )
+
+        return redirect(
+            url_for(
+                "assets.index"
+            )
+        )
+
+    return render_template(
+        "pages/asset_form.html",
+        asset_models=(
+            asset_models_result.asset_models
+        ),
+        physical_locations=active_locations,
+        error_message=result.message,
+        form_data=request.form,
+    ), 400
+
+
+# ============================================================
+# PHYSICAL LOCATIONS
+# ============================================================
+
+
+@assets.route(
+    "/activos/ubicaciones/nueva",
+    methods=["GET", "POST"],
+)
+@permission_required("assets.manage")
+def new_physical_location():
+    """
+    Registra una ubicacion fisica reutilizable.
+    """
+
+    if request.method == "GET":
+        return render_template(
+            "pages/physical_location_form.html"
+        )
+
+    form_data = {
+        "code": request.form.get(
+            "code",
+            "",
+        ),
+        "name": request.form.get(
+            "name",
+            "",
+        ),
+        "area": request.form.get(
+            "area",
+            "",
+        ),
+    }
+
+    command = RegisterPhysicalLocationCommand(
+        code=form_data["code"],
+        name=form_data["name"],
+        area=form_data["area"],
+    )
+
+    try:
+        result = (
+            register_physical_location.execute(
+                command
+            )
+        )
+    except ValueError as exc:
+        return render_template(
+            "pages/physical_location_form.html",
+            error_message=str(exc),
+            form_data=form_data,
+        ), 400
+
+    if not result.success:
+        return render_template(
+            "pages/physical_location_form.html",
+            error_message=result.message,
+            form_data=form_data,
+        ), 400
+
+    draft = dict(
+        session.get(
+            "new_asset_draft"
+        )
+        or {}
+    )
+
+    draft["location_code"] = (
+        result.location.code
+    )
+
+    session["new_asset_draft"] = (
+        draft
+    )
+
+    return redirect(
+        url_for(
+            "assets.new_asset"
+        )
+    )
+
+
+@assets.get("/activos/modelos/nuevo")
+@permission_required("assets.manage")
+def new_asset_model():
+    """
+    Formulario para registrar un nuevo modelo de activo.
+    """
+
+    return_to = request.args.get(
+        "return_to",
+        "",
+    )
+
+    if return_to != "new_asset":
+        return_to = ""
+
+    return render_template(
+        "pages/asset_model_form.html",
+        return_to=return_to,
+    )
+
+
+@assets.post("/activos/modelos/nuevo")
+@permission_required("assets.manage")
+def create_asset_model():
+    """
+    Registra un nuevo modelo de activo.
+    """
+
+    command = RegisterAssetModelCommand(
+        code=request.form.get("code", ""),
+        name=request.form.get("name", ""),
+        model_number=request.form.get(
+            "model_number",
+            "",
+        ),
+        manufacturer_code=request.form.get(
+            "manufacturer_code",
+            "",
+        ),
+        asset_type_code=request.form.get(
+            "asset_type_code",
+            "",
+        ),
+        description=request.form.get(
+            "description",
+            "",
+        ),
+        specifications={},
+    )
+
+    result = register_asset_model.execute(
+        command
+    )
+
+    if result.success:
+        if (
+            request.form.get("return_to")
+            == "new_asset"
+        ):
+            draft = dict(
+                session.get(
+                    "new_asset_draft"
+                )
+                or {}
+            )
+
+            draft["asset_model_code"] = (
+                result.asset_model.code
+            )
+
+            session["new_asset_draft"] = (
+                draft
+            )
+
+            return redirect(
+                url_for(
+                    "assets.new_asset"
+                )
+            )
+
+        return redirect(
+            url_for(
+                "assets.asset_models_index"
+            )
+        )
+
+    return render_template(
+        "pages/asset_model_form.html",
+        error_message=result.message,
+        form_data=request.form,
+        return_to=request.form.get(
+            "return_to",
+            "",
+        ),
+    ), 400

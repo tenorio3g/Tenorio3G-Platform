@@ -1,18 +1,19 @@
 {% extends "layouts/base.html" %}
 
-
 {% block title %}
 Activos | Tenorio3G
 {% endblock %}
-
 
 {% block content %}
 
 <section class="assets-page">
 
-    <nav class="breadcrumb" aria-label="Ruta de navegación">
+    <nav
+        class="breadcrumb"
+        aria-label="Ruta de navegacion"
+    >
         <a href="/">Inicio</a>
-        <span aria-hidden="true">›</span>
+        <span aria-hidden="true">&rsaquo;</span>
         <span>Activos</span>
     </nav>
 
@@ -20,7 +21,7 @@ Activos | Tenorio3G
 
         <div>
             <p class="assets-page__eyebrow">
-                Gestión de activos
+                Gesti&oacute;n de activos
             </p>
 
             <h1 class="assets-page__title">
@@ -28,10 +29,21 @@ Activos | Tenorio3G
             </h1>
 
             <p class="assets-page__description">
-                Busca equipos por código, nombre, área o ubicación
+                Busca equipos por c&oacute;digo, nombre,
+                &aacute;rea o ubicaci&oacute;n
                 y accede a su Hoja de Vida.
             </p>
         </div>
+
+        {% if can_manage_assets %}
+            <a
+                class="btn btn-primary"
+                href="{{ url_for('assets.new_asset') }}"
+            >
+                <span aria-hidden="true">+</span>
+                Nuevo activo
+            </a>
+        {% endif %}
 
     </header>
 

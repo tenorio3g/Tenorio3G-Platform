@@ -20,7 +20,7 @@ class Asset:
         serial_number: str,
         location_code: str,
         status: AssetStatus,
-        installation_date: date,
+        installation_date: date | None,
         deactivation_reason: str | None = None,
     ) -> None:
 
@@ -66,6 +66,20 @@ class Asset:
     ) -> None:
 
         self.serial_number = serial_number.strip()
+
+    def change_asset_model(
+        self,
+        asset_model_code: str,
+    ) -> None:
+
+        self.asset_model_code = asset_model_code.strip()
+
+    def change_installation_date(
+        self,
+        installation_date: date | None,
+    ) -> None:
+
+        self.installation_date = installation_date
 
     def change_location(
         self,

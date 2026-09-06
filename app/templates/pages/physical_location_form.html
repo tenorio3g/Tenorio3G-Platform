@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Nueva ubicaci&oacute;n | Tenorio3G
+{% endblock %}
+
+{% block content %}
+
+<section class="assets-page">
+
+    <nav
+        class="breadcrumb"
+        aria-label="Ruta de navegacion"
+    >
+        <a href="/">Inicio</a>
+
+        <span aria-hidden="true">&rsaquo;</span>
+
+        <a href="/activos">
+            Activos
+        </a>
+
+        <span aria-hidden="true">&rsaquo;</span>
+
+        <span>
+            Nueva ubicaci&oacute;n
+        </span>
+    </nav>
+
+    <header class="assets-page__header">
+
+        <div>
+            <p class="assets-page__eyebrow">
+                Gesti&oacute;n de activos
+            </p>
+
+            <h1 class="assets-page__title">
+                Nueva ubicaci&oacute;n f&iacute;sica
+            </h1>
+
+            <p class="assets-page__description">
+                Registra una ubicaci&oacute;n reutilizable
+                para uno o varios activos.
+            </p>
+        </div>
+
+    </header>
+
+    <section class="asset-model-form">
+
+        {% if error_message %}
+        <div
+            class="asset-model-form__error"
+            role="alert"
+        >
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+
+            <div>
+                <label for="code">
+                    C&oacute;digo
+                </label>
+
+                <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    value="{{ form_data.get('code', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="name">
+                    Nombre
+                </label>
+
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value="{{ form_data.get('name', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="area">
+                    &Aacute;rea
+                </label>
+
+                <input
+                    id="area"
+                    name="area"
+                    type="text"
+                    value="{{ form_data.get('area', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <a
+                    class="btn btn-secondary"
+                    href="/activos/nuevo"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    class="btn btn-primary"
+                    type="submit"
+                >
+                    Guardar ubicaci&oacute;n
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</section>
+
+{% endblock %}

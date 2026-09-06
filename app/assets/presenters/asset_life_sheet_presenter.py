@@ -6,6 +6,9 @@ from app.assets.presenters.asset_life_sheet_view_model import (
 
 from app.domains.assets.entities.asset import Asset
 from app.domains.assets.entities.asset_model import AssetModel
+from app.domains.locations.entities.physical_location import (
+    PhysicalLocation,
+)
 
 
 class AssetLifeSheetPresenter:
@@ -24,6 +27,7 @@ class AssetLifeSheetPresenter:
         cls,
         asset: Asset,
         asset_model: AssetModel,
+        physical_location: PhysicalLocation | None = None,
     ) -> AssetLifeSheetViewModel:
 
         estado = cls.STATUS_LABELS.get(
@@ -31,20 +35,21 @@ class AssetLifeSheetPresenter:
             asset.status.name,
         )
 
+        ubicacion = asset.location_code
+        area = None
+
+        if physical_location is not None:
+            ubicacion = physical_location.name
+            area = physical_location.area
+
         return AssetLifeSheetViewModel(
             codigo=asset.code,
             nombre=asset.name,
             estado=estado,
-            ubicacion=asset.location_code,
-
-            # Temporal
-            area="Sin área registrada",
-
+            ubicacion=ubicacion,
+            area=area,
             modelo=asset_model.display_name,
-
-            # Temporal
-            salud=100,
-
+            salud=None,
             ultimo_mantenimiento=None,
             proximo_mantenimiento=None,
         )

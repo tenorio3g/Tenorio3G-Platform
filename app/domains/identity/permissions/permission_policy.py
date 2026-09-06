@@ -3,6 +3,7 @@ class PermissionPolicy:
     ROLE_PERMISSIONS = {
         "ADMIN": {
             "assets.view",
+            "assets.manage",
 
             "people.view",
             "people.manage",
@@ -48,6 +49,7 @@ class PermissionPolicy:
 
         "SUPERVISOR": {
             "assets.view",
+            "assets.manage",
 
             "people.view",
             "people.manage",

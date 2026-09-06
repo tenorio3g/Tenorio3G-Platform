@@ -14,9 +14,9 @@ class AssetLifeSheetViewModel:
     nombre: str
     estado: str
     ubicacion: str
-    area: str
+    area: str | None
     modelo: str
-    salud: int
+    salud: int | None
 
     ultimo_mantenimiento: str | None
     proximo_mantenimiento: str | None

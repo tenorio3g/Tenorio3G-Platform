@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from collections.abc import Callable
 
-from app.foundation.database import SessionLocal
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from app.maps.models.map_location import MapLocation
 
 from .map_location_repository import MapLocationRepository
@@ -12,11 +14,17 @@ class SQLiteMapLocationRepository(
     MapLocationRepository,
 ):
     """
-    Implementación SQLite del repositorio de ubicaciones.
+    Implementacion SQLite del repositorio de ubicaciones.
     """
 
+    def __init__(
+        self,
+        session_factory: Callable[[], Session],
+    ) -> None:
+        self._session_factory = session_factory
+
     def find_all(self) -> list[MapLocation]:
-        with SessionLocal() as session:
+        with self._session_factory() as session:
             statement = (
                 select(MapLocation)
                 .order_by(MapLocation.name)
@@ -32,9 +40,12 @@ class SQLiteMapLocationRepository(
     ) -> MapLocation | None:
         clean_code = asset_code.strip()
 
-        with SessionLocal() as session:
-            statement = select(MapLocation).where(
-                MapLocation.asset_code == clean_code
+        with self._session_factory() as session:
+            statement = select(
+                MapLocation
+            ).where(
+                MapLocation.asset_code
+                == clean_code
             )
 
             return session.scalar(statement)
@@ -43,7 +54,7 @@ class SQLiteMapLocationRepository(
         self,
         location: MapLocation,
     ) -> None:
-        with SessionLocal() as session:
+        with self._session_factory() as session:
             existing = session.scalar(
                 select(MapLocation).where(
                     MapLocation.asset_code
@@ -53,9 +64,12 @@ class SQLiteMapLocationRepository(
 
             if existing is None:
                 session.add(location)
+
             else:
                 existing.name = location.name
-                existing.category = location.category
+                existing.category = (
+                    location.category
+                )
                 existing.x = location.x
                 existing.y = location.y
 
@@ -67,10 +81,11 @@ class SQLiteMapLocationRepository(
     ) -> None:
         clean_code = asset_code.strip()
 
-        with SessionLocal() as session:
+        with self._session_factory() as session:
             location = session.scalar(
                 select(MapLocation).where(
-                    MapLocation.asset_code == clean_code
+                    MapLocation.asset_code
+                    == clean_code
                 )
             )
 

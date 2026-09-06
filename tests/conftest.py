@@ -636,3 +636,129 @@ def work_order_materials_test_db(
     )
 
     test_engine.dispose()
+
+
+@pytest.fixture
+def asset_models_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.foundation.database import Base
+
+    from app.domains.assets.bootstrap import (
+        asset_model_repository,
+    )
+
+    database_path = (
+        tmp_path
+        / "asset_models_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        asset_model_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield asset_model_repository
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()
+
+
+@pytest.fixture
+def assets_test_db(
+    tmp_path,
+    monkeypatch,
+):
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.foundation.database import Base
+
+    from app.domains.assets.bootstrap import (
+        asset_model_repository,
+        repository,
+    )
+    from app.domains.locations.bootstrap.locations_container import (
+        repository as physical_location_repository,
+    )
+
+    database_path = (
+        tmp_path
+        / "assets_test.db"
+    )
+
+    test_engine = create_engine(
+        f"sqlite:///{database_path.as_posix()}",
+        echo=False,
+        future=True,
+    )
+
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        test_engine
+    )
+
+    monkeypatch.setattr(
+        repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    monkeypatch.setattr(
+        asset_model_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    monkeypatch.setattr(
+        physical_location_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    yield {
+        "asset_repository": repository,
+        "asset_model_repository": (
+            asset_model_repository
+        ),
+        "physical_location_repository": (
+            physical_location_repository
+        ),
+    }
+
+    Base.metadata.drop_all(
+        test_engine
+    )
+
+    test_engine.dispose()

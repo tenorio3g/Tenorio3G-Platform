@@ -1,8 +1,8 @@
 from flask import Flask
-from app.identity import identity
 
 from config.config import Config
 
+from app.identity import identity
 from app.assets import assets
 from app.core.routes import core
 from app.foundation import foundation
@@ -15,18 +15,31 @@ from app.domains.identity.authentication import (
     can,
 )
 
+from app.foundation.database.initialization import (
+    initialize_database,
+)
+
+from app.domains.locations.bootstrap.locations_container import (
+    load_demo_physical_locations,
+)
+
+from app.domains.assets.bootstrap.assets_container import (
+    load_demo_assets,
+)
+
+
 def create_app(config_class=Config) -> Flask:
     """
-    Crea y configura la aplicación Flask de Tenorio3G.
+    Crea y configura la aplicaci?n Flask de Tenorio3G.
 
     Args:
         config_class:
-            Clase de configuración que será cargada por Flask.
+            Clase de configuraci?n que ser? cargada por Flask.
             Permite utilizar configuraciones diferentes para
-            desarrollo, pruebas y producción.
+            desarrollo, pruebas y producci?n.
 
     Returns:
-        Aplicación Flask completamente configurada.
+        Aplicaci?n Flask completamente configurada.
     """
 
     app = Flask(__name__)
@@ -34,17 +47,32 @@ def create_app(config_class=Config) -> Flask:
     app.config.from_object(config_class)
     app.jinja_env.globals["can"] = can
 
+    _initialize_persistence()
     _validate_foundation_registry()
     _register_blueprints(app)
 
     return app
 
 
+def _initialize_persistence() -> None:
+    """
+    Inicializa la persistencia necesaria para la aplicaci?n.
+
+    Primero asegura que el esquema de base de datos exista y
+    despu?s carga datos iniciales idempotentes.
+    """
+
+    initialize_database()
+
+    load_demo_physical_locations()
+    load_demo_assets()
+
+
 def _validate_foundation_registry() -> None:
     """
     Valida el registro estructural de Tenorio3G durante el arranque.
 
-    Si existe una inconsistencia crítica, la aplicación no debe
+    Si existe una inconsistencia cr?tica, la aplicaci?n no debe
     iniciar silenciosamente.
     """
 
@@ -53,13 +81,13 @@ def _validate_foundation_registry() -> None:
 
 def _register_blueprints(app: Flask) -> None:
     """
-    Registra los módulos disponibles en la aplicación.
+    Registra los m?dulos disponibles en la aplicaci?n.
 
-    El orden sigue la jerarquía general de la plataforma:
+    El orden sigue la jerarqu?a general de la plataforma:
 
     1. Core
     2. Foundation
-    3. Módulos funcionales
+    3. M?dulos funcionales
     """
 
     blueprints = (

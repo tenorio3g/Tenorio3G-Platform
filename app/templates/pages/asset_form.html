@@ -1,0 +1,228 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Nuevo activo | Tenorio3G
+{% endblock %}
+
+{% block content %}
+
+<section class="assets-page">
+
+    <nav
+        class="breadcrumb"
+        aria-label="Breadcrumb"
+    >
+        <a href="/">Inicio</a>
+        <span aria-hidden="true">›</span>
+        <a href="/activos">Activos</a>
+        <span aria-hidden="true">›</span>
+        <span>Nuevo</span>
+    </nav>
+
+    <header class="assets-page__header">
+
+        <div>
+            <p class="assets-page__eyebrow">
+                Gestión de activos
+            </p>
+
+            <h1 class="assets-page__title">
+                Nuevo activo
+            </h1>
+
+            <p class="assets-page__description">
+                Registra un equipo o activo físico
+                y relaciónalo con su modelo.
+            </p>
+        </div>
+
+    </header>
+
+    <section class="asset-model-form">
+
+        {% if error_message %}
+        <div
+            class="asset-model-form__error"
+            role="alert"
+        >
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+
+            <div>
+                <label for="code">
+                    Código
+                </label>
+
+                <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    value="{{ form_data.get('code', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="name">
+                    Nombre
+                </label>
+
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value="{{ form_data.get('name', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="asset_model_code">
+                    Modelo de activo
+                </label>
+
+                <select
+                    id="asset_model_code"
+                    name="asset_model_code"
+                    required
+                >
+                    <option value="">
+                        Selecciona un modelo
+                    </option>
+
+                    {% for asset_model in asset_models %}
+                        <option
+                            value="{{ asset_model.code }}"
+                            {% if form_data and form_data.get('asset_model_code') == asset_model.code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ asset_model.code }}
+                            —
+                            {{ asset_model.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button
+                    type="submit"
+                    formaction="/activos/nuevo/borrador/modelo"
+                    formmethod="post"
+                    formnovalidate
+                >
+                    + Nuevo modelo
+                </button>
+            </div>
+
+            <div>
+                <label for="serial_number">
+                    Número de serie (opcional)
+                </label>
+
+                <input
+                    id="serial_number"
+                    name="serial_number"
+                    type="text"
+                    value="{{ form_data.get('serial_number', '') if form_data else '' }}"
+                >
+            </div>
+
+            <div>
+                <label for="location_code">
+                    Ubicación
+                </label>
+
+                <select
+                    id="location_code"
+                    name="location_code"
+                    required
+                >
+                    <option value="">
+                        Selecciona una ubicación
+                    </option>
+
+                    {% for location in physical_locations %}
+                        <option
+                            value="{{ location.code }}"
+                            {% if form_data and form_data.get('location_code') == location.code %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ location.code }} — {{ location.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button
+                    type="submit"
+                    formaction="/activos/nuevo/borrador/ubicacion"
+                    formmethod="post"
+                    formnovalidate
+                >
+                    + Nueva ubicaci&oacute;n
+                </button>
+            </div>
+
+            <div>
+                <label for="status">
+                    Estado
+                </label>
+
+                <select
+                    id="status"
+                    name="status"
+                    required
+                >
+                    <option
+                        value="OPERATING"
+                        {% if not form_data or form_data.get('status') == 'OPERATING' %}
+                            selected
+                        {% endif %}
+                    >
+                        Operando
+                    </option>
+
+                    <option
+                        value="OUT_OF_SERVICE"
+                        {% if form_data and form_data.get('status') == 'OUT_OF_SERVICE' %}
+                            selected
+                        {% endif %}
+                    >
+                        Fuera de servicio
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label for="installation_date">
+                    Fecha de instalación (opcional)
+                </label>
+
+                <input
+                    id="installation_date"
+                    name="installation_date"
+                    type="date"
+                    value="{{ form_data.get('installation_date', '') if form_data else '' }}"
+                >
+            </div>
+
+            <div>
+                <a href="/activos">
+                    Cancelar
+                </a>
+
+                <button type="submit">
+                    Guardar activo
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</section>
+
+{% endblock %}

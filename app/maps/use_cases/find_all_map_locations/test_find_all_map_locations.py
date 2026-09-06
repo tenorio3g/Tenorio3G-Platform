@@ -1,7 +1,10 @@
-from __future__ import annotations
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-from app.foundation.database import Base, engine
-from app.maps.models.map_location import MapLocation
+from app.foundation.database import Base
+from app.maps.models.map_location import (
+    MapLocation,
+)
 from app.maps.repositories.sqlite_map_location_repository import (
     SQLiteMapLocationRepository,
 )
@@ -10,32 +13,70 @@ from app.maps.use_cases.find_all_map_locations.find_all_map_locations import (
 )
 
 
-def test_should_find_all_map_locations() -> None:
-    Base.metadata.create_all(engine)
+def test_should_find_all_map_locations(
+    tmp_path,
+) -> None:
+    database_path = (
+        tmp_path
+        / "maps_find_all.db"
+    )
 
-    repository = SQLiteMapLocationRepository()
+    engine = create_engine(
+        f"sqlite:///{database_path}"
+    )
 
-    repository.save(
-        MapLocation(
-            asset_code="TEST-USECASE-001",
-            name="Ubicación del caso de uso",
-            category="tableros",
-            x=33.5,
-            y=44.2,
+    TestSessionLocal = sessionmaker(
+        bind=engine,
+        autoflush=False,
+        autocommit=False,
+        expire_on_commit=False,
+    )
+
+    Base.metadata.create_all(
+        bind=engine
+    )
+
+    repository = (
+        SQLiteMapLocationRepository(
+            TestSessionLocal
         )
     )
 
-    use_case = FindAllMapLocations(repository)
+    repository.save(
+        MapLocation(
+            asset_code="ASSET-001",
+            name="Activo 1",
+            category="default",
+            x=10.0,
+            y=20.0,
+        )
+    )
+
+    repository.save(
+        MapLocation(
+            asset_code="ASSET-002",
+            name="Activo 2",
+            category="default",
+            x=30.0,
+            y=40.0,
+        )
+    )
+
+    use_case = FindAllMapLocations(
+        repository
+    )
 
     result = use_case.execute()
 
     assert result.success is True
-    assert result.message == (
-        "Ubicaciones obtenidas correctamente."
-    )
-    assert any(
-        location.asset_code == "TEST-USECASE-001"
-        for location in result.locations
+    assert len(result.locations) == 2
+
+    assert result.locations[0].asset_code == (
+        "ASSET-001"
     )
 
-    repository.delete("TEST-USECASE-001")
+    assert result.locations[1].asset_code == (
+        "ASSET-002"
+    )
+
+    engine.dispose()

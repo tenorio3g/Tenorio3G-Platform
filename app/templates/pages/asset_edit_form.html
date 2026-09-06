@@ -1,0 +1,145 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<section class="page-section">
+
+    <div class="page-header">
+        <div>
+            <h1>Editar activo</h1>
+            <p>
+                Actualiza los datos generales del activo.
+            </p>
+        </div>
+    </div>
+
+    {% if error_message %}
+        <div class="alert alert-danger">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <form
+        method="post"
+        action="{{ url_for('assets.edit_asset', codigo=asset.code) }}"
+    >
+
+        <div class="form-group">
+            <label for="code">
+                C&oacute;digo
+            </label>
+
+            <input
+                id="code"
+                type="text"
+                value="{{ asset.code }}"
+                readonly
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="name">
+                Nombre
+            </label>
+
+            <input
+                id="name"
+                name="name"
+                type="text"
+                value="{{ form_data.get('name', '') }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="asset_model_code">
+                Modelo
+            </label>
+
+            <select
+                id="asset_model_code"
+                name="asset_model_code"
+                required
+            >
+                {% for model in asset_models %}
+                    <option
+                        value="{{ model.code }}"
+                        {% if form_data.get('asset_model_code') == model.code %}selected{% endif %}
+                    >
+                        {{ model.code }} - {{ model.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="serial_number">
+                N&uacute;mero de serie (opcional)
+            </label>
+
+            <input
+                id="serial_number"
+                name="serial_number"
+                type="text"
+                value="{{ form_data.get('serial_number', '') }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="location_code">
+                Ubicaci&oacute;n
+            </label>
+
+            <select
+                id="location_code"
+                name="location_code"
+                required
+            >
+                {% for location in physical_locations %}
+                    <option
+                        value="{{ location.code }}"
+                        {% if form_data.get('location_code') == location.code %}selected{% endif %}
+                    >
+                        {{ location.code }} - {{ location.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="installation_date">
+                Fecha de instalaci&oacute;n
+            </label>
+
+            <input
+                id="installation_date"
+                name="installation_date"
+                type="date"
+                value="{{ form_data.get('installation_date', '') }}"
+                required
+            >
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Guardar cambios
+            </button>
+
+            <a
+                href="{{ url_for('assets.index') }}"
+                class="btn btn-secondary"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

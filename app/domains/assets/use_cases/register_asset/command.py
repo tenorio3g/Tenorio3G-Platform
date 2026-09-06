@@ -19,4 +19,4 @@ class RegisterAssetCommand:
     serial_number: str
     location_code: str
     status: AssetStatus
-    installation_date: date
+    installation_date: date | None

@@ -199,3 +199,44 @@ def test_manager_should_not_execute_preventive_maintenance():
         "MANAGER",
         "preventive.execute",
     ) is False
+
+def test_admin_should_manage_assets():
+
+    assert PermissionPolicy.has_permission(
+        "ADMIN",
+        "assets.manage",
+    ) is True
+
+
+def test_supervisor_should_manage_assets():
+
+    assert PermissionPolicy.has_permission(
+        "SUPERVISOR",
+        "assets.manage",
+    ) is True
+
+
+def test_manager_should_view_but_not_manage_assets():
+
+    assert PermissionPolicy.has_permission(
+        "MANAGER",
+        "assets.view",
+    ) is True
+
+    assert PermissionPolicy.has_permission(
+        "MANAGER",
+        "assets.manage",
+    ) is False
+
+
+def test_technician_should_view_but_not_manage_assets():
+
+    assert PermissionPolicy.has_permission(
+        "TECHNICIAN",
+        "assets.view",
+    ) is True
+
+    assert PermissionPolicy.has_permission(
+        "TECHNICIAN",
+        "assets.manage",
+    ) is False

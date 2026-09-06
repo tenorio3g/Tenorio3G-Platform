@@ -1,0 +1,190 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Nuevo modelo de activo | Tenorio3G
+{% endblock %}
+
+
+{% block content %}
+
+<section class="assets-page">
+
+    <nav
+        class="breadcrumb"
+        aria-label="Ruta de navegación"
+    >
+        <a href="/">Inicio</a>
+
+        <span aria-hidden="true">›</span>
+
+        <a href="/activos">
+            Activos
+        </a>
+
+        <span aria-hidden="true">›</span>
+
+        <a href="/activos/modelos">
+            Modelos
+        </a>
+
+        <span aria-hidden="true">›</span>
+
+        <span>
+            Nuevo
+        </span>
+    </nav>
+
+
+    <header class="assets-page__header">
+
+        <div>
+            <p class="assets-page__eyebrow">
+                Gestión de activos
+            </p>
+
+            <h1 class="assets-page__title">
+                Nuevo modelo de activo
+            </h1>
+
+            <p class="assets-page__description">
+                Registra la información maestra que podrá
+                ser compartida por uno o varios activos físicos.
+            </p>
+        </div>
+
+    </header>
+
+
+    <section class="asset-model-form">
+
+        {% if error_message %}
+        <div
+            class="asset-model-form__error"
+            role="alert"
+        >
+            {{ error_message }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+
+            {% if return_to %}
+                <input
+                    type="hidden"
+                    name="return_to"
+                    value="{{ return_to }}"
+                >
+            {% endif %}
+
+            <div>
+                <label for="code">
+                    Código
+                </label>
+
+                <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    value="{{ form_data.get('code', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+
+            <div>
+                <label for="name">
+                    Nombre
+                </label>
+
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value="{{ form_data.get('name', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+
+            <div>
+                <label for="model_number">
+                    Número de modelo
+                </label>
+
+                <input
+                    id="model_number"
+                    name="model_number"
+                    type="text"
+                    value="{{ form_data.get('model_number', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+
+            <div>
+                <label for="manufacturer_code">
+                    Fabricante
+                </label>
+
+                <input
+                    id="manufacturer_code"
+                    name="manufacturer_code"
+                    type="text"
+                    value="{{ form_data.get('manufacturer_code', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+
+            <div>
+                <label for="asset_type_code">
+                    Tipo de activo
+                </label>
+
+                <input
+                    id="asset_type_code"
+                    name="asset_type_code"
+                    type="text"
+                    value="{{ form_data.get('asset_type_code', '') if form_data else '' }}"
+                    required
+                >
+            </div>
+
+
+            <div>
+                <label for="description">
+                    Descripción
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                >{{ form_data.get('description', '') if form_data else '' }}</textarea>
+            </div>
+
+
+            <div>
+                {% if return_to == "new_asset" %}
+                    <a href="/activos/nuevo">
+                        Cancelar
+                    </a>
+                {% else %}
+                    <a href="/activos/modelos">
+                        Cancelar
+                    </a>
+                {% endif %}
+
+                <button type="submit">
+                    Guardar modelo
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+</section>
+
+{% endblock %}

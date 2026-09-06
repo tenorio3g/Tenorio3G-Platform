@@ -1022,3 +1022,241 @@
 .asset-metric-card--danger strong {
     color: #b91c1c;
 }
+
+/* ==========================================================
+   ASSET MODELS CATALOG
+========================================================== */
+
+.asset-models-catalog{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    overflow:hidden;
+}
+
+.asset-models-catalog__header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:1.25rem 1.50rem;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.asset-models-catalog__title{
+    margin:0;
+    font-size:1.15rem;
+}
+
+.asset-models-catalog__count{
+    margin:.35rem 0 0;
+    color:#6b7280;
+    font-size:.90rem;
+}
+
+
+/* ===========================
+   Tabla
+=========================== */
+
+.asset-models-table-wrapper{
+    width:100%;
+    overflow-x:auto;
+}
+
+.asset-models-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+}
+
+.asset-models-table th,
+.asset-models-table td{
+    padding:1rem 1.50rem;
+    text-align:left;
+    vertical-align:middle;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.asset-models-table th{
+    background:#f9fafb;
+    color:#4b5563;
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+}
+
+.asset-models-table td{
+    color:#374151;
+    font-size:.95rem;
+}
+
+.asset-models-table tbody tr{
+    transition:background-color .15s ease;
+}
+
+.asset-models-table tbody tr:hover{
+    background:#f9fafb;
+}
+
+.asset-models-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+
+/* ===========================
+   Estado vac?o
+=========================== */
+
+.asset-models-empty{
+    padding:3rem 1.50rem;
+    text-align:center;
+}
+
+.asset-models-empty__title{
+    margin:0;
+    font-weight:600;
+}
+
+.asset-models-empty__description{
+    margin:.50rem auto 0;
+    max-width:520px;
+    color:#6b7280;
+    font-size:.95rem;
+}
+
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 768px){
+
+    .asset-models-catalog__header{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .asset-models-table th,
+    .asset-models-table td{
+        padding:.85rem 1rem;
+    }
+
+}
+
+/* ===========================
+   Asset actions
+=========================== */
+
+.asset-card__footer{
+    display:block;
+}
+
+/* ===========================
+   Asset actions
+=========================== */
+
+.asset-card__footer{
+    display:block;
+}
+
+.asset-card__actions{
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:.75rem;
+}
+
+.asset-card__actions > form{
+    margin:0;
+}
+
+.asset-deactivation{
+    display:grid;
+    grid-template-columns:auto;
+    justify-items:end;
+}
+
+.asset-deactivation > summary{
+    list-style:none;
+    cursor:pointer;
+}
+
+.asset-deactivation > summary::-webkit-details-marker{
+    display:none;
+}
+
+.asset-deactivation__panel{
+    display:none;
+}
+
+.asset-deactivation[open]{
+    flex-basis:100%;
+    grid-template-columns:1fr auto;
+    width:100%;
+}
+
+.asset-deactivation[open] > summary{
+    grid-column:2;
+    grid-row:1;
+}
+
+.asset-deactivation[open] .asset-deactivation__panel{
+    display:block;
+    grid-column:1 / -1;
+    grid-row:2;
+    justify-self:end;
+
+    width:min(100%, 600px);
+    box-sizing:border-box;
+
+    margin-top:.75rem;
+    padding:1rem;
+
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    background:#f8fafc;
+}
+
+.asset-deactivation__header{
+    margin-bottom:1rem;
+}
+
+.asset-deactivation__header p{
+    margin:.35rem 0 0;
+    color:#6b7280;
+    font-size:.90rem;
+}
+
+.asset-deactivation__form{
+    display:grid;
+    gap:.65rem;
+}
+
+.asset-deactivation__form label{
+    font-weight:600;
+}
+
+.asset-deactivation__form textarea{
+    width:100%;
+    min-height:80px;
+    box-sizing:border-box;
+    resize:vertical;
+    padding:.75rem;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    font:inherit;
+}
+
+.asset-deactivation__form textarea:focus{
+    outline:2px solid var(--color-primary);
+    outline-offset:1px;
+}
+
+.asset-deactivation__actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:.25rem;
+}

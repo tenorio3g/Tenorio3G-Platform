@@ -27,7 +27,9 @@
 
             <strong>Área</strong>
 
-            <span>{{ activo.area }}</span>
+            <span>
+                {{ activo.area if activo.area is not none else "—" }}
+            </span>
 
         </div>
 
@@ -43,27 +45,142 @@
 
             <strong>Salud</strong>
 
-            <span>{{ activo.salud }}%</span>
+            <span>
+                {% if activo.salud is not none %}
+                    {{ activo.salud }}%
+                {% else %}
+                    —
+                {% endif %}
+            </span>
 
         </div>
 
-        <progress
-            max="100"
-            value="{{ activo.salud }}">
-        </progress>
+        {% if activo.salud is not none %}
+
+            <progress
+                max="100"
+                value="{{ activo.salud }}">
+            </progress>
+
+        {% endif %}
 
     </div>
 
 
     <footer class="asset-card__footer">
 
-        <a
-            class="btn btn-primary"
-            href="{{ url_for('assets.asset_detail', codigo=activo.codigo) }}">
+        <div class="asset-card__actions">
 
-            Abrir Hoja de Vida
+            <a
+                class="btn btn-primary"
+                href="{{ url_for(
+                    'assets.asset_detail',
+                    codigo=activo.codigo
+                ) }}"
+            >
+                Abrir Hoja de Vida
+            </a>
 
-        </a>
+            {% if can_manage_assets %}
+
+                <a
+                    class="btn btn-secondary"
+                    href="{{ url_for(
+                        'assets.edit_asset',
+                        codigo=activo.codigo
+                    ) }}"
+                >
+                    Editar
+                </a>
+
+                {% if activo.estado == "Operando" %}
+
+                    <details class="asset-deactivation">
+
+                        <summary class="btn btn-ghost">
+                            Desactivar
+                        </summary>
+
+                        <div class="asset-deactivation__panel">
+
+                            <div class="asset-deactivation__header">
+
+                                <strong>
+                                    Desactivar activo
+                                </strong>
+
+                                <p>
+                                    El activo quedara fuera de servicio.
+                                    Registra el motivo para conservar
+                                    la trazabilidad.
+                                </p>
+
+                            </div>
+
+                            <form
+                                class="asset-deactivation__form"
+                                method="post"
+                                action="{{ url_for(
+                                    'assets.deactivate_asset_route',
+                                    codigo=activo.codigo
+                                ) }}"
+                            >
+
+                                <label
+                                    for="deactivation-reason-{{ activo.codigo }}"
+                                >
+                                    Motivo de desactivaci&oacute;n
+                                    <span aria-hidden="true">*</span>
+                                </label>
+
+                                <textarea
+                                    id="deactivation-reason-{{ activo.codigo }}"
+                                    name="reason"
+                                    rows="3"
+                                    required
+                                ></textarea>
+
+                                <div class="asset-deactivation__actions">
+
+                                    <button
+                                        class="btn btn-danger"
+                                        type="submit"
+                                    >
+                                        Confirmar desactivaci&oacute;n
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </details>
+
+                {% endif %}
+
+                {% if activo.estado == "Fuera de servicio" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'assets.activate_asset_route',
+                            codigo=activo.codigo
+                        ) }}"
+                    >
+                        <button
+                            class="btn btn-success"
+                            type="submit"
+                        >
+                            Reactivar
+                        </button>
+                    </form>
+
+                {% endif %}
+
+            {% endif %}
+
+        </div>
 
     </footer>
 

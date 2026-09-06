@@ -1,0 +1,181 @@
+{% extends "layouts/base.html" %}
+
+
+{% block title %}
+Modelos de activo | Tenorio3G
+{% endblock %}
+
+
+{% block content %}
+
+<section class="assets-page">
+
+    <nav
+        class="breadcrumb"
+        aria-label="Ruta de navegación"
+    >
+        <a href="/">Inicio</a>
+
+        <span aria-hidden="true">›</span>
+
+        <a href="/activos">
+            Activos
+        </a>
+
+        <span aria-hidden="true">›</span>
+
+        <span>
+            Modelos
+        </span>
+    </nav>
+
+
+    <header class="assets-page__header">
+
+        <div>
+            <p class="assets-page__eyebrow">
+                Gestión de activos
+            </p>
+
+            <h1 class="assets-page__title">
+                Modelos de activo
+            </h1>
+
+            <p class="assets-page__description">
+                Catálogo maestro utilizado para clasificar
+                los equipos físicos registrados en la plataforma.
+            </p>
+        </div>
+
+    </header>
+
+
+    <section
+        class="asset-models-catalog"
+        aria-labelledby="asset-models-catalog-title"
+    >
+
+        <header class="asset-models-catalog__header">
+
+            <div>
+                <h2
+                    id="asset-models-catalog-title"
+                    class="asset-models-catalog__title"
+                >
+                    Catálogo
+                </h2>
+
+                <p class="asset-models-catalog__count">
+                    {% if asset_models %}
+                        {{ asset_models | length }}
+                        {% if asset_models | length == 1 %}
+                            modelo registrado
+                        {% else %}
+                            modelos registrados
+                        {% endif %}
+                    {% else %}
+                        No hay modelos registrados
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if can_manage_assets %}
+                <a
+                    class="asset-models-catalog__action"
+                    href="{{ url_for('assets.new_asset_model') }}"
+                >
+                    Nuevo modelo
+                </a>
+            {% endif %}
+
+        </header>
+
+
+        {% if asset_models %}
+
+            <div class="asset-models-table-wrapper">
+
+                <table class="asset-models-table">
+
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                Código
+                            </th>
+
+                            <th scope="col">
+                                Nombre
+                            </th>
+
+                            <th scope="col">
+                                Modelo
+                            </th>
+
+                            <th scope="col">
+                                Fabricante
+                            </th>
+
+                            <th scope="col">
+                                Tipo
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for model in asset_models %}
+
+                            <tr>
+                                <td>
+                                    <strong>
+                                        {{ model.code }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ model.name }}
+                                </td>
+
+                                <td>
+                                    {{ model.model_number }}
+                                </td>
+
+                                <td>
+                                    {{ model.manufacturer_code }}
+                                </td>
+
+                                <td>
+                                    {{ model.asset_type_code }}
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="asset-models-empty">
+
+                <p class="asset-models-empty__title">
+                    No hay modelos de activo registrados.
+                </p>
+
+                <p class="asset-models-empty__description">
+                    Los modelos permiten definir información
+                    compartida por varios activos físicos.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</section>
+
+{% endblock %}

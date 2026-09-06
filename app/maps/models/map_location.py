@@ -8,7 +8,7 @@ from app.foundation.database import Base
 
 class MapLocation(Base):
     """
-    Modelo persistente que representa la posición de un activo
+    Modelo persistente que representa la posicion de un activo
     dentro del mapa industrial.
     """
 
@@ -47,6 +47,34 @@ class MapLocation(Base):
         Float,
         nullable=False,
     )
+
+    def move_to(
+        self,
+        x: float,
+        y: float,
+    ) -> None:
+        if not self._coordinates_are_valid(
+            x,
+            y,
+        ):
+            raise ValueError(
+                "Las coordenadas deben estar "
+                "entre 0 y 100."
+            )
+
+        self.x = x
+        self.y = y
+
+    @staticmethod
+    def _coordinates_are_valid(
+        x: float,
+        y: float,
+    ) -> bool:
+        return (
+            0.0 <= x <= 100.0
+            and
+            0.0 <= y <= 100.0
+        )
 
     def __repr__(self) -> str:
         return (
