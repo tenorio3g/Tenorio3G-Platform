@@ -9,6 +9,11 @@ const AVAILABLE_ASSETS_API_URL =
 const mapa =
     document.getElementById("mapa");
 
+const mapViewport =
+    mapa
+        ? mapa.closest(".plant-map-viewport")
+        : null;
+
 const popup =
     document.getElementById("popup");
 
@@ -36,13 +41,40 @@ const cancelarPosicion =
 const estadoPosicion =
     document.getElementById("estadoPosicion");
 
+const nivelZoomMapa =
+    document.getElementById("nivelZoomMapa");
 
-let escalaMapa = 1;
+const restablecerVistaMapa =
+    document.getElementById("restablecerVistaMapa");
+
+
+const MIN_MAP_SCALE = 0.75;
+const MAX_MAP_SCALE = 4;
+const PAN_DRAG_THRESHOLD = 5;
+
+const camera = {
+    scale: 1,
+    x: 0,
+    y: 0,
+};
+
 let filtroCategoria = "todos";
 let ubicaciones = [];
 
 let posicionPendiente = null;
 let marcadorProvisional = null;
+
+const panState = {
+    active: false,
+    dragging: false,
+    pointerId: null,
+    startClientX: 0,
+    startClientY: 0,
+    startCameraX: 0,
+    startCameraY: 0,
+};
+
+let ignorarSiguienteClickMapa = false;
 
 
 async function cargarUbicaciones() {
@@ -211,6 +243,216 @@ function renderPuntos(locations) {
 }
 
 
+function limitarEscalaMapa(scale) {
+    return Math.min(
+        MAX_MAP_SCALE,
+        Math.max(
+            MIN_MAP_SCALE,
+            scale
+        )
+    );
+}
+
+
+function actualizarIndicadorZoom() {
+    if (!nivelZoomMapa) {
+        return;
+    }
+
+    nivelZoomMapa.textContent =
+        `${Math.round(camera.scale * 100)}%`;
+}
+
+
+function aplicarCamara() {
+    if (!mapa) {
+        return;
+    }
+
+    mapa.style.transform =
+        `translate(${camera.x}px, ${camera.y}px) `
+        + `scale(${camera.scale})`;
+
+    actualizarIndicadorZoom();
+}
+
+
+function restablecerCamaraMapa() {
+    camera.scale = 1;
+    camera.x = 0;
+    camera.y = 0;
+
+    aplicarCamara();
+}
+
+
+function manejarZoomRueda(event) {
+    if (!mapViewport) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const viewportRect =
+        mapViewport.getBoundingClientRect();
+
+    const pointerX =
+        event.clientX - viewportRect.left;
+
+    const pointerY =
+        event.clientY - viewportRect.top;
+
+    const previousScale =
+        camera.scale;
+
+    const zoomFactor =
+        event.deltaY < 0
+            ? 1.12
+            : 1 / 1.12;
+
+    const nextScale =
+        limitarEscalaMapa(
+            previousScale * zoomFactor
+        );
+
+    if (nextScale === previousScale) {
+        return;
+    }
+
+    const mapX = (
+        pointerX - camera.x
+    ) / previousScale;
+
+    const mapY = (
+        pointerY - camera.y
+    ) / previousScale;
+
+    camera.scale = nextScale;
+
+    camera.x =
+        pointerX - mapX * nextScale;
+
+    camera.y =
+        pointerY - mapY * nextScale;
+
+    aplicarCamara();
+}
+
+
+function iniciarPanMapa(event) {
+    if (
+        event.button !== 0
+        || event.target.closest(
+            ".punto, .map-popup"
+        )
+    ) {
+        return;
+    }
+
+    panState.active = true;
+    panState.dragging = false;
+    panState.pointerId = event.pointerId;
+
+    panState.startClientX =
+        event.clientX;
+
+    panState.startClientY =
+        event.clientY;
+
+    panState.startCameraX =
+        camera.x;
+
+    panState.startCameraY =
+        camera.y;
+
+    mapa.classList.add(
+        "is-pan-ready"
+    );
+
+}
+
+
+function moverPanMapa(event) {
+    if (
+        !panState.active
+        || event.pointerId
+            !== panState.pointerId
+    ) {
+        return;
+    }
+
+    const deltaX =
+        event.clientX
+        - panState.startClientX;
+
+    const deltaY =
+        event.clientY
+        - panState.startClientY;
+
+    const distance =
+        Math.hypot(
+            deltaX,
+            deltaY
+        );
+
+    if (
+        !panState.dragging
+        && distance < PAN_DRAG_THRESHOLD
+    ) {
+        return;
+    }
+
+    if (!panState.dragging) {
+        panState.dragging = true;
+
+        mapa.classList.remove(
+            "is-pan-ready"
+        );
+
+        mapa.classList.add(
+            "is-panning"
+        );
+    }
+
+    camera.x =
+        panState.startCameraX
+        + deltaX;
+
+    camera.y =
+        panState.startCameraY
+        + deltaY;
+
+    aplicarCamara();
+}
+
+
+function finalizarPanMapa(event) {
+    if (
+        !panState.active
+        || event.pointerId
+            !== panState.pointerId
+    ) {
+        return;
+    }
+
+    const wasDragging =
+        panState.dragging;
+
+    panState.active = false;
+    panState.dragging = false;
+    panState.pointerId = null;
+
+    mapa.classList.remove(
+        "is-pan-ready",
+        "is-panning"
+    );
+
+    if (wasDragging) {
+        ignorarSiguienteClickMapa = true;
+    }
+}
+
+
 function buscarEquipo() {
     const texto = document
         .getElementById("busqueda")
@@ -245,37 +487,8 @@ function buscarEquipo() {
 
                 encontrado = true;
 
-                const rectMapa =
-                    mapa.getBoundingClientRect();
-
-                const rectPunto =
-                    punto.getBoundingClientRect();
-
-                const offsetX = (
-                    (
-                        rectPunto.left
-                        + rectPunto.width / 2
-                        - rectMapa.left
-                    )
-                    / rectMapa.width
-                    * 100
-                );
-
-                const offsetY = (
-                    (
-                        rectPunto.top
-                        + rectPunto.height / 2
-                        - rectMapa.top
-                    )
-                    / rectMapa.height
-                    * 100
-                );
-
-                mapa.style.transformOrigin =
-                    `${offsetX}% ${offsetY}%`;
-
-                mapa.style.transform =
-                    `scale(${escalaMapa})`;
+                // El centrado automatico del activo
+                // se implementara en MAP-UX-002.
             }
         }
     );
@@ -292,10 +505,11 @@ function buscarEquipo() {
 
 
 function zoomMapa(factor) {
-    escalaMapa *= factor;
+    camera.scale = limitarEscalaMapa(
+        camera.scale * factor
+    );
 
-    mapa.style.transform =
-        `scale(${escalaMapa})`;
+    aplicarCamara();
 }
 
 
@@ -342,6 +556,11 @@ function obtenerCoordenadasMapa(event) {
 
 
 function seleccionarPosicion(event) {
+    if (ignorarSiguienteClickMapa) {
+        ignorarSiguienteClickMapa = false;
+        return;
+    }
+
     if (
         !activoDisponible
         || !activoDisponible.value
@@ -561,6 +780,39 @@ if (mapa) {
         "click",
         seleccionarPosicion
     );
+
+    mapa.addEventListener(
+        "pointerdown",
+        iniciarPanMapa
+    );
+
+}
+
+
+window.addEventListener(
+    "pointermove",
+    moverPanMapa
+);
+
+window.addEventListener(
+    "pointerup",
+    finalizarPanMapa
+);
+
+window.addEventListener(
+    "pointercancel",
+    finalizarPanMapa
+);
+
+
+if (mapViewport) {
+    mapViewport.addEventListener(
+        "wheel",
+        manejarZoomRueda,
+        {
+            passive: false,
+        }
+    );
 }
 
 
@@ -586,6 +838,14 @@ if (cancelarPosicion) {
 }
 
 
+if (restablecerVistaMapa) {
+    restablecerVistaMapa.addEventListener(
+        "click",
+        restablecerCamaraMapa
+    );
+}
+
+
 if (activoDisponible) {
     activoDisponible.addEventListener(
         "change",
@@ -605,6 +865,8 @@ if (activoDisponible) {
     );
 }
 
+
+aplicarCamara();
 
 cargarUbicaciones();
 cargarActivosDisponibles();

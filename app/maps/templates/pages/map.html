@@ -232,21 +232,42 @@ Mapa de activos | Tenorio3G
             </div>
 
             <div class="plant-map-zoom">
+
+                <button
+                    type="button"
+                    onclick="zoomMapa(1 / 1.2)"
+                    aria-label="Alejar mapa"
+                    title="Alejar"
+                >
+                    &minus;
+                </button>
+
+                <span
+                    id="nivelZoomMapa"
+                    class="plant-map-zoom__level"
+                    aria-live="polite"
+                >
+                    100%
+                </span>
+
                 <button
                     type="button"
                     onclick="zoomMapa(1.2)"
                     aria-label="Acercar mapa"
+                    title="Acercar"
                 >
                     +
                 </button>
 
                 <button
                     type="button"
-                    onclick="zoomMapa(0.8)"
-                    aria-label="Alejar mapa"
+                    id="restablecerVistaMapa"
+                    class="plant-map-zoom__reset"
+                    title="Restablecer vista"
                 >
-                    &minus;
+                    Restablecer
                 </button>
+
             </div>
 
         </footer>

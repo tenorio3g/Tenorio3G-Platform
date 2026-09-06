@@ -83,8 +83,10 @@
 }
 
 .plant-map-viewport {
-    overflow: auto;
+    position: relative;
+    overflow: hidden;
     min-height: 520px;
+    height: min(68vh, 720px);
     background: #eef1f5;
 }
 
@@ -92,8 +94,21 @@
     position: relative;
     width: 100%;
     min-width: 900px;
-    transform-origin: center center;
+    transform-origin: 0 0;
     transition: transform 180ms ease;
+    will-change: transform;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.plant-map.is-pan-ready {
+    cursor: grab;
+}
+
+.plant-map.is-panning {
+    transition: none;
+    cursor: grabbing;
 }
 
 .plant-map img {
@@ -181,7 +196,20 @@
 
 .plant-map-zoom {
     display: flex;
+    align-items: center;
     gap: 0.45rem;
+}
+
+.plant-map-zoom__level {
+    min-width: 58px;
+    padding: 0 0.35rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.plant-map-zoom .plant-map-zoom__reset {
+    min-width: auto;
 }
 
 @media (max-width: 760px) {
@@ -333,4 +361,13 @@
     .map-placement-actions {
         flex-wrap: wrap;
     }
+}
+
+
+/* Prevent native browser image dragging inside the map. */
+.plant-map > img {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 }
