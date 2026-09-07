@@ -65,28 +65,71 @@ function obtenerIconoEstado(estado) {
 /**
  * Construye el contenido visual del popup.
  */
+function obtenerCodigoCortoActivo(
+    codigo
+) {
+    const codigoNormalizado =
+        String(codigo || "").trim();
+
+    if (!codigoNormalizado) {
+        return "Sin codigo";
+    }
+
+    const partes =
+        codigoNormalizado.split("-");
+
+    return partes[
+        partes.length - 1
+    ].trim();
+}
+
+
 function construirPopupActivo(activo) {
-    const saludNumerica = Number(activo.salud);
+    const codigoCorto =
+        obtenerCodigoCortoActivo(
+            activo.codigo
+        );
 
-    const saludValida = Number.isFinite(
-        saludNumerica
-    );
+    const tieneSalud =
+        activo.salud !== null
+        && activo.salud !== undefined
+        && activo.salud !== "";
 
-    const salud = saludValida
-        ? Math.min(100, Math.max(0, saludNumerica))
-        : 0;
+    const saludNumerica =
+        tieneSalud
+            ? Number(activo.salud)
+            : Number.NaN;
 
-    const textoSalud = saludValida
-        ? `${salud}%`
-        : "Sin evaluar";
+    const saludValida =
+        Number.isFinite(
+            saludNumerica
+        );
 
-    const claseEstado = obtenerClaseEstado(
-        activo.estado
-    );
+    const salud =
+        saludValida
+            ? Math.min(
+                100,
+                Math.max(
+                    0,
+                    saludNumerica
+                )
+            )
+            : null;
 
-    const iconoEstado = obtenerIconoEstado(
-        activo.estado
-    );
+    const textoSalud =
+        salud !== null
+            ? `${salud}%`
+            : "Sin evaluar";
+
+    const claseEstado =
+        obtenerClaseEstado(
+            activo.estado
+        );
+
+    const iconoEstado =
+        obtenerIconoEstado(
+            activo.estado
+        );
 
     return `
         <article class="asset-popup">
@@ -95,16 +138,22 @@ function construirPopupActivo(activo) {
 
                 <div class="asset-popup__identity">
 
-                    <p class="asset-popup__eyebrow">
-                        Activo industrial
-                    </p>
-
-                    <h3 class="asset-popup__title">
-                        ${escaparHtml(activo.nombre)}
+                    <h3 class="asset-popup__short-code">
+                        ${escaparHtml(codigoCorto)}
                     </h3>
 
+                    <p class="asset-popup__title">
+                        ${escaparHtml(
+                            activo.nombre
+                            || "Activo sin nombre"
+                        )}
+                    </p>
+
                     <p class="asset-popup__code">
-                        ${escaparHtml(activo.codigo)}
+                        ${escaparHtml(
+                            activo.codigo
+                            || "Sin codigo"
+                        )}
                     </p>
 
                 </div>
@@ -120,7 +169,8 @@ function construirPopupActivo(activo) {
                     </span>
 
                     ${escaparHtml(
-                        activo.estado || "Sin estado"
+                        activo.estado
+                        || "Sin estado"
                     )}
                 </span>
 
@@ -128,40 +178,25 @@ function construirPopupActivo(activo) {
 
             <div class="asset-popup__details">
 
-                <div class="asset-popup__detail">
-
-                    <span
-                        class="asset-popup__detail-icon"
-                        aria-hidden="true"
-                    >
-                        📍
+                <div class="
+                    asset-popup__detail
+                    asset-popup__location
+                ">
+                    <span class="asset-popup__label">
+                        Ubicación
                     </span>
 
-                    <div>
-                        <span class="asset-popup__label">
-                            Ubicación
-                        </span>
-
-                        <strong class="asset-popup__value">
-                            ${escaparHtml(
-                                activo.ubicacion
-                                || "Sin ubicación registrada"
-                            )}
-                        </strong>
-                    </div>
-
+                    <strong class="asset-popup__value">
+                        ${escaparHtml(
+                            activo.ubicacion
+                            || "Sin ubicación registrada"
+                        )}
+                    </strong>
                 </div>
 
-                <div class="asset-popup__detail">
+                <div class="asset-popup__summary">
 
-                    <span
-                        class="asset-popup__detail-icon"
-                        aria-hidden="true"
-                    >
-                        🏭
-                    </span>
-
-                    <div>
+                    <div class="asset-popup__detail">
                         <span class="asset-popup__label">
                             Área
                         </span>
@@ -169,95 +204,21 @@ function construirPopupActivo(activo) {
                         <strong class="asset-popup__value">
                             ${escaparHtml(
                                 activo.area
-                                || "Sin área registrada"
+                                || "Sin Área registrada"
                             )}
                         </strong>
                     </div>
 
-                </div>
-
-                <div class="asset-popup__detail">
-
-                    <span
-                        class="asset-popup__detail-icon"
-                        aria-hidden="true"
-                    >
-                        ⚙️
-                    </span>
-
-                    <div>
+                    <div class="asset-popup__detail">
                         <span class="asset-popup__label">
-                            Modelo
+                            Condición
                         </span>
 
                         <strong class="asset-popup__value">
-                            ${escaparHtml(
-                                activo.modelo
-                                || "Sin modelo registrado"
-                            )}
+                            ${textoSalud}
                         </strong>
                     </div>
 
-                </div>
-
-            </div>
-
-            <section class="asset-popup__health">
-
-                <div class="asset-popup__health-header">
-
-                    <span class="asset-popup__label">
-                        Salud del activo
-                    </span>
-
-                    <strong>
-                        ${textoSalud}
-                    </strong>
-
-                </div>
-
-                <div
-                    class="asset-popup__health-track"
-                    role="progressbar"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    aria-valuenow="${salud}"
-                    aria-label="Salud del activo"
-                >
-                    <span
-                        class="asset-popup__health-fill"
-                        style="width: ${salud}%"
-                    ></span>
-                </div>
-
-            </section>
-
-            <div class="asset-popup__maintenance">
-
-                <div>
-                    <span class="asset-popup__label">
-                        Último mantenimiento
-                    </span>
-
-                    <strong class="asset-popup__value">
-                        ${escaparHtml(
-                            activo.ultimo_mantenimiento
-                            || "Sin registro"
-                        )}
-                    </strong>
-                </div>
-
-                <div>
-                    <span class="asset-popup__label">
-                        Próximo mantenimiento
-                    </span>
-
-                    <strong class="asset-popup__value">
-                        ${escaparHtml(
-                            activo.proximo_mantenimiento
-                            || "Sin programación"
-                        )}
-                    </strong>
                 </div>
 
             </div>
@@ -276,6 +237,7 @@ function construirPopupActivo(activo) {
 
                 <button
                     type="button"
+                    class="asset-popup__secondary-action"
                     onclick="reubicarActivoDesdePopup()"
                 >
                     Reubicar

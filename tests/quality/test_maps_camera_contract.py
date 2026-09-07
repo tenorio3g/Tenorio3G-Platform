@@ -632,3 +632,158 @@ def test_relocation_save_should_start_disabled():
     ]
 
     assert "disabled" in button_source
+
+
+def test_popup_should_define_short_asset_identifier():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "function obtenerCodigoCortoActivo(" in source
+    assert 'split("-")' in source
+
+
+def test_popup_should_prioritize_operational_information():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function construirPopupActivo("
+    )
+
+    end = source.index(
+        "async function abrirPopup(",
+        start,
+    )
+
+    popup_source = source[start:end]
+
+    assert "obtenerCodigoCortoActivo(" in popup_source
+    assert "Ubicación" in popup_source
+    assert "Área" in popup_source
+    assert "Condición" in popup_source
+    assert "Abrir Hoja de Vida" in popup_source
+    assert "Reubicar" in popup_source
+
+
+def test_popup_should_not_show_detailed_technical_information():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function construirPopupActivo("
+    )
+
+    end = source.index(
+        "async function abrirPopup(",
+        start,
+    )
+
+    popup_source = source[start:end]
+
+    assert "Modelo" not in popup_source
+    assert "?ltimo mantenimiento" not in popup_source
+    assert "Pr?ximo mantenimiento" not in popup_source
+    assert "Salud del activo" not in popup_source
+    assert "Activo industrial" not in popup_source
+
+
+def test_popup_should_treat_missing_health_as_not_evaluated():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function construirPopupActivo("
+    )
+
+    end = source.index(
+        "async function abrirPopup(",
+        start,
+    )
+
+    popup_source = source[start:end]
+
+    assert "activo.salud !== null" in popup_source
+    assert "activo.salud !== undefined" in popup_source
+    assert 'activo.salud !== ""' in popup_source
+    assert '"Sin evaluar"' in popup_source
+
+
+def test_popup_should_keep_full_asset_code():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function construirPopupActivo("
+    )
+
+    end = source.index(
+        "async function abrirPopup(",
+        start,
+    )
+
+    popup_source = source[start:end]
+
+    assert "activo.codigo" in popup_source
+    assert "asset-popup__code" in popup_source
+
+
+def test_map_should_load_popup_stylesheet():
+    source = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "css/popup.css" in source
+
+
+def test_popup_should_define_compact_visual_structure():
+    popup_source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "asset-popup__short-code" in popup_source
+    assert "asset-popup__location" in popup_source
+    assert "asset-popup__summary" in popup_source
+
+
+def test_popup_styles_should_support_compact_layout():
+    popup_css_path = (
+        PROJECT_ROOT
+        / "app"
+        / "maps"
+        / "static"
+        / "css"
+        / "popup.css"
+    )
+
+    source = popup_css_path.read_text(
+        encoding="utf-8"
+    )
+
+    assert ".asset-popup__short-code" in source
+    assert ".asset-popup__location" in source
+    assert ".asset-popup__summary" in source
+    assert "grid-template-columns: 1fr 1fr;" in source
+
+
+def test_popup_should_not_keep_obsolete_visual_sections():
+    popup_css_path = (
+        PROJECT_ROOT
+        / "app"
+        / "maps"
+        / "static"
+        / "css"
+        / "popup.css"
+    )
+
+    source = popup_css_path.read_text(
+        encoding="utf-8"
+    )
+
+    assert ".asset-popup__health" not in source
+    assert ".asset-popup__maintenance" not in source
+    assert ".asset-popup__detail-icon" not in source
