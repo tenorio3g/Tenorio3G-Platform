@@ -38,6 +38,19 @@ const guardarPosicion =
 const cancelarPosicion =
     document.getElementById("cancelarPosicion");
 
+const mapRelocationOverlay =
+    document.getElementById("mapRelocationOverlay");
+
+const mapRelocationStatus =
+    document.getElementById("mapRelocationStatus");
+
+const guardarReubicacion =
+    document.getElementById("guardarReubicacion");
+
+const cancelarReubicacion =
+    document.getElementById("cancelarReubicacion");
+
+
 const estadoPosicion =
     document.getElementById("estadoPosicion");
 
@@ -63,6 +76,13 @@ let ubicaciones = [];
 
 let posicionPendiente = null;
 let marcadorProvisional = null;
+
+const modoUbicacion = {
+    tipo: "place",
+    assetCode: null,
+    originalX: null,
+    originalY: null,
+};
 
 const panState = {
     active: false,
@@ -825,18 +845,177 @@ function obtenerCoordenadasMapa(event) {
 }
 
 
+function mostrarControlesReubicacion(
+    assetCode
+) {
+    if (
+        !mapRelocationOverlay
+        || !mapRelocationStatus
+    ) {
+        return;
+    }
+
+    mapRelocationStatus.textContent =
+        `Reubicando ${assetCode}. `
+        + "Selecciona la nueva posicion.";
+
+    mapRelocationOverlay.hidden =
+        false;
+
+    if (guardarReubicacion) {
+        guardarReubicacion.disabled =
+            true;
+    }
+}
+
+
+function actualizarControlesReubicacion(
+    coordinates
+) {
+    if (
+        !mapRelocationStatus
+        || !coordinates
+    ) {
+        return;
+    }
+
+    const assetCode =
+        modoUbicacion.assetCode
+        || "Activo";
+
+    mapRelocationStatus.textContent =
+        `${assetCode} ? Nueva posicion `
+        + `X: ${coordinates.x.toFixed(2)}%, `
+        + `Y: ${coordinates.y.toFixed(2)}%`;
+
+    if (guardarReubicacion) {
+        guardarReubicacion.disabled =
+            false;
+    }
+}
+
+
+function ocultarControlesReubicacion() {
+    if (mapRelocationOverlay) {
+        mapRelocationOverlay.hidden =
+            true;
+    }
+
+    if (guardarReubicacion) {
+        guardarReubicacion.disabled =
+            true;
+    }
+}
+
+
+function iniciarReubicacionActivo(
+    punto
+) {
+    if (!punto) {
+        return;
+    }
+
+    const assetCode =
+        punto.dataset.codigo
+        || "";
+
+    const originalX =
+        Number.parseFloat(
+            punto.style.left
+        );
+
+    const originalY =
+        Number.parseFloat(
+            punto.style.top
+        );
+
+    if (
+        !assetCode
+        || !Number.isFinite(originalX)
+        || !Number.isFinite(originalY)
+    ) {
+        return;
+    }
+
+    limpiarPosicionPendiente();
+
+    modoUbicacion.tipo =
+        "move";
+
+    modoUbicacion.assetCode =
+        assetCode;
+
+    modoUbicacion.originalX =
+        originalX;
+
+    modoUbicacion.originalY =
+        originalY;
+
+    mostrarControlesReubicacion(
+        assetCode
+    );
+
+    actualizarEstadoPosicion(
+        `Reubicando ${assetCode}. `
+        + "Selecciona la nueva posicion."
+    );
+}
+
+
+function restablecerModoUbicacion() {
+    modoUbicacion.tipo =
+        "place";
+
+    modoUbicacion.assetCode =
+        null;
+
+    modoUbicacion.originalX =
+        null;
+
+    modoUbicacion.originalY =
+        null;
+}
+
+
+function obtenerActivoParaPosicion() {
+    if (
+        modoUbicacion.tipo === "move"
+    ) {
+        return modoUbicacion.assetCode;
+    }
+
+    if (!activoDisponible) {
+        return "";
+    }
+
+    return activoDisponible.value;
+}
+
+
 function seleccionarPosicion(event) {
     if (ignorarSiguienteClickMapa) {
         ignorarSiguienteClickMapa = false;
         return;
     }
 
-    if (
-        !activoDisponible
-        || !activoDisponible.value
-    ) {
+    const assetCode =
+        obtenerActivoParaPosicion();
+
+    if (!assetCode) {
         actualizarEstadoPosicion(
             "Selecciona primero un activo.",
+            true
+        );
+
+        return;
+    }
+
+    if (
+        modoUbicacion.tipo === "move"
+        && !modoUbicacion.assetCode
+    ) {
+        actualizarEstadoPosicion(
+            "No hay un activo seleccionado para reubicar.",
             true
         );
 
@@ -860,6 +1039,14 @@ function seleccionarPosicion(event) {
     mostrarMarcadorProvisional(
         coordinates
     );
+
+    if (
+        modoUbicacion.tipo === "move"
+    ) {
+        actualizarControlesReubicacion(
+            coordinates
+        );
+    }
 
     posicionSeleccionada.textContent =
         `X: ${coordinates.x}%, Y: ${coordinates.y}%`;
@@ -932,8 +1119,11 @@ function limpiarPosicionPendiente() {
 
 
 async function guardarPosicionSeleccionada() {
+    const assetCode =
+        obtenerActivoParaPosicion();
+
     if (
-        !activoDisponible.value
+        !assetCode
         || !posicionPendiente
     ) {
         actualizarEstadoPosicion(
@@ -944,35 +1134,69 @@ async function guardarPosicionSeleccionada() {
         return;
     }
 
+    const isMove =
+        modoUbicacion.tipo === "move";
+
+    const requestUrl =
+        isMove
+            ? `${LOCATIONS_API_URL}/${encodeURIComponent(
+                assetCode
+            )}`
+            : LOCATIONS_API_URL;
+
+    let requestOptions;
+
+    if (isMove) {
+        requestOptions = {
+            method: "PATCH",
+            headers: {
+                "Content-Type":
+                    "application/json",
+            },
+            body: JSON.stringify(
+                {
+                    x:
+                        posicionPendiente.x,
+                    y:
+                        posicionPendiente.y,
+                }
+            ),
+        };
+    } else {
+        requestOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type":
+                    "application/json",
+            },
+            body: JSON.stringify(
+                {
+                    asset_code:
+                        assetCode,
+                    category:
+                        categoriaPosicion.value,
+                    x:
+                        posicionPendiente.x,
+                    y:
+                        posicionPendiente.y,
+                }
+            ),
+        };
+    }
+
     guardarPosicion.disabled =
         true;
 
     actualizarEstadoPosicion(
-        "Guardando posicion..."
+        isMove
+            ? "Guardando nueva ubicacion..."
+            : "Guardando posicion..."
     );
 
     try {
         const response = await fetch(
-            LOCATIONS_API_URL,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type":
-                        "application/json",
-                },
-                body: JSON.stringify(
-                    {
-                        asset_code:
-                            activoDisponible.value,
-                        category:
-                            categoriaPosicion.value,
-                        x:
-                            posicionPendiente.x,
-                        y:
-                            posicionPendiente.y,
-                    }
-                ),
-            }
+            requestUrl,
+            requestOptions
         );
 
         const payload =
@@ -981,11 +1205,20 @@ async function guardarPosicionSeleccionada() {
         if (!response.ok) {
             throw new Error(
                 payload.message
-                || "No fue posible guardar la posicion."
+                || (
+                    isMove
+                        ? "No fue posible reubicar el activo."
+                        : "No fue posible guardar la posicion."
+                )
             );
         }
 
         limpiarPosicionPendiente();
+
+        if (isMove) {
+            restablecerModoUbicacion();
+            ocultarControlesReubicacion();
+        }
 
         actualizarEstadoPosicion(
             payload.message
@@ -996,7 +1229,9 @@ async function guardarPosicionSeleccionada() {
 
     } catch (error) {
         console.error(
-            "Error guardando posicion:",
+            isMove
+                ? "Error reubicando activo:"
+                : "Error guardando posicion:",
             error
         );
 
@@ -1115,6 +1350,31 @@ if (cancelarPosicion) {
         "click",
         () => {
             limpiarPosicionPendiente();
+            restablecerModoUbicacion();
+
+            actualizarEstadoPosicion(
+                "Selecciona una nueva posicion sobre el mapa."
+            );
+        }
+    );
+}
+
+
+if (guardarReubicacion) {
+    guardarReubicacion.addEventListener(
+        "click",
+        guardarPosicionSeleccionada
+    );
+}
+
+
+if (cancelarReubicacion) {
+    cancelarReubicacion.addEventListener(
+        "click",
+        () => {
+            limpiarPosicionPendiente();
+            restablecerModoUbicacion();
+            ocultarControlesReubicacion();
 
             actualizarEstadoPosicion(
                 "Selecciona una nueva posicion sobre el mapa."

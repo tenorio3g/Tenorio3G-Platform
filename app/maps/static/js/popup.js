@@ -1,5 +1,7 @@
 "use strict";
 
+let marcadorPopupActual = null;
+
 /**
  * Convierte texto dinámico en contenido seguro para HTML.
  */
@@ -272,6 +274,13 @@ function construirPopupActivo(activo) {
                     Abrir Hoja de Vida
                 </button>
 
+                <button
+                    type="button"
+                    onclick="reubicarActivoDesdePopup()"
+                >
+                    Reubicar
+                </button>
+
             </footer>
 
         </article>
@@ -287,6 +296,8 @@ async function abrirPopup(
     assetCode,
     nombre
 ) {
+    marcadorPopupActual = elemento;
+
     popup.style.display = "block";
 
     contenidoPopup.innerHTML = `
@@ -357,6 +368,27 @@ function posicionarPopup(elemento) {
         - mapaRect.top
         - 8
     ) + "px";
+}
+
+
+/**
+ * Inicia la reubicacion controlada del activo
+ * mostrado actualmente en el popup.
+ */
+function reubicarActivoDesdePopup() {
+    if (!marcadorPopupActual) {
+        return;
+    }
+
+    iniciarReubicacionActivo(
+        marcadorPopupActual
+    );
+
+    popup.style.display =
+        "none";
+
+    marcadorPopupActual =
+        null;
 }
 
 

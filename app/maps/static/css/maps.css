@@ -430,3 +430,76 @@
     font-size: 0.75rem;
     opacity: 0.72;
 }
+
+
+/* =========================================================
+   Controlled asset relocation
+   ========================================================= */
+
+.map-relocation-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 40;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 0.75rem;
+    background: var(--color-surface, #ffffff);
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
+}
+
+.map-relocation-overlay[hidden] {
+    display: none;
+}
+
+.map-relocation-overlay__content {
+    min-width: 0;
+}
+
+.map-relocation-overlay__status {
+    display: block;
+    line-height: 1.4;
+}
+
+.map-relocation-overlay__actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
+.map-relocation-overlay__actions button {
+    min-height: 40px;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--color-border, #d0d5dd);
+    border-radius: 0.55rem;
+    background: var(--color-surface, #ffffff);
+    font: inherit;
+    cursor: pointer;
+}
+
+.map-relocation-overlay__actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+    .map-relocation-overlay {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .map-relocation-overlay__actions {
+        width: 100%;
+    }
+
+    .map-relocation-overlay__actions button {
+        flex: 1;
+    }
+}

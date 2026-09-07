@@ -201,6 +201,42 @@ Mapa de activos | Tenorio3G
 
         <div class="plant-map-viewport">
 
+                <div
+                    id="mapRelocationOverlay"
+                    class="map-relocation-overlay"
+                    hidden
+                >
+                    <div class="map-relocation-overlay__content">
+
+                        <strong
+                            id="mapRelocationStatus"
+                            class="map-relocation-overlay__status"
+                        >
+                            Reubicando activo
+                        </strong>
+
+                    </div>
+
+                    <div class="map-relocation-overlay__actions">
+
+                        <button
+                            type="button"
+                            id="guardarReubicacion"
+                            disabled
+                        >
+                            Guardar posicion
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cancelarReubicacion"
+                        >
+                            Cancelar
+                        </button>
+
+                    </div>
+                </div>
+
             <div id="mapa" class="plant-map">
 
                 <img

@@ -22,6 +22,35 @@ MAP_TEMPLATE_PATH = (
 )
 
 
+POPUP_JS_PATH = (
+    PROJECT_ROOT
+    / "app"
+    / "maps"
+    / "static"
+    / "js"
+    / "popup.js"
+)
+
+
+MAP_HTML_PATH = (
+    PROJECT_ROOT
+    / "app"
+    / "maps"
+    / "templates"
+    / "pages"
+    / "map.html"
+)
+
+MAP_CSS_PATH = (
+    PROJECT_ROOT
+    / "app"
+    / "maps"
+    / "static"
+    / "css"
+    / "maps.css"
+)
+
+
 def test_map_should_use_centralized_camera_state():
     source = MAP_JS_PATH.read_text(
         encoding="utf-8"
@@ -237,3 +266,369 @@ def test_map_template_should_include_search_results_container():
     )
 
     assert 'id="resultadosBusquedaMapa"' in source
+
+def test_map_should_define_controlled_relocation_state():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "const modoUbicacion = {" in source
+    assert 'tipo: "place"' in source
+    assert "assetCode: null" in source
+    assert "originalX: null" in source
+    assert "originalY: null" in source
+
+
+def test_map_should_support_starting_asset_relocation():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "function iniciarReubicacionActivo(" in source
+    assert "modoUbicacion.tipo" in source
+    assert '"move"' in source
+    assert "modoUbicacion.assetCode =" in source
+
+
+def test_map_should_preserve_original_coordinates_when_relocating():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function iniciarReubicacionActivo("
+    )
+
+    end = source.index(
+        "function seleccionarPosicion(",
+        start,
+    )
+
+    relocation_source = source[
+        start:end
+    ]
+
+    assert "modoUbicacion.originalX =" in relocation_source
+    assert "modoUbicacion.originalY =" in relocation_source
+
+def test_map_position_selection_should_support_move_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function seleccionarPosicion("
+    )
+
+    end = source.index(
+        "function mostrarMarcadorProvisional(",
+        start,
+    )
+
+    selection_source = source[
+        start:end
+    ]
+
+    assert 'modoUbicacion.tipo === "move"' in selection_source
+    assert "modoUbicacion.assetCode" in selection_source
+
+
+def test_map_move_mode_should_not_depend_on_available_asset_selector():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "function obtenerActivoParaPosicion()" in source
+    assert 'modoUbicacion.tipo === "move"' in source
+    assert "return modoUbicacion.assetCode;" in source
+
+
+def test_map_relocation_should_keep_new_coordinates_pending_until_save():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function seleccionarPosicion("
+    )
+
+    end = source.index(
+        "function mostrarMarcadorProvisional(",
+        start,
+    )
+
+    selection_source = source[
+        start:end
+    ]
+
+    assert "posicionPendiente =" in selection_source
+    assert "mostrarMarcadorProvisional(" in selection_source
+
+def test_map_should_save_new_location_with_post():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "async function guardarPosicionSeleccionada("
+    )
+
+    end = source.index(
+        "function actualizarEstadoPosicion(",
+        start,
+    )
+
+    save_source = source[start:end]
+
+    assert 'method: "POST"' in save_source
+
+
+def test_map_should_save_relocation_with_patch():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'modoUbicacion.tipo === "move"' in source
+    assert 'method: "PATCH"' in source
+    assert "modoUbicacion.assetCode" in source
+
+
+def test_map_should_build_relocation_url_from_asset_code():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "encodeURIComponent(" in source
+    assert "modoUbicacion.assetCode" in source
+
+def test_map_marker_should_expose_controlled_relocation_action():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function renderPuntos("
+    )
+
+    end = source.index(
+        "function limitarEscalaMapa(",
+        start,
+    )
+
+    render_source = source[start:end]
+
+    assert "abrirPopup(" in render_source
+
+
+def test_starting_relocation_should_inform_user():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function iniciarReubicacionActivo("
+    )
+
+    end = source.index(
+        "function obtenerActivoParaPosicion()",
+        start,
+    )
+
+    relocation_source = source[start:end]
+
+    assert "actualizarEstadoPosicion(" in relocation_source
+    assert "Selecciona la nueva posicion" in relocation_source
+
+
+def test_starting_relocation_should_clear_previous_pending_position():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function iniciarReubicacionActivo("
+    )
+
+    end = source.index(
+        "function obtenerActivoParaPosicion()",
+        start,
+    )
+
+    relocation_source = source[start:end]
+
+    assert "limpiarPosicionPendiente()" in relocation_source
+
+
+def test_popup_should_remember_marker_that_opened_it():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "let marcadorPopupActual = null;" in source
+    assert "marcadorPopupActual = elemento;" in source
+
+
+def test_popup_should_offer_relocation_action():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "Reubicar" in source
+    assert "reubicarActivoDesdePopup()" in source
+
+
+def test_popup_relocation_should_delegate_to_map():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "function reubicarActivoDesdePopup()" in source
+    assert "iniciarReubicacionActivo(" in source
+    assert "marcadorPopupActual" in source
+
+def test_map_should_define_location_mode_reset():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "function restablecerModoUbicacion()" in source
+    assert "modoUbicacion.tipo" in source
+    assert '"place"' in source
+    assert "modoUbicacion.assetCode" in source
+    assert "modoUbicacion.originalX" in source
+    assert "modoUbicacion.originalY" in source
+
+
+def test_cancel_position_should_reset_location_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "if (cancelarPosicion) {"
+    )
+
+    end = source.index(
+        "if (restablecerVistaMapa)",
+        start,
+    )
+
+    cancel_source = source[start:end]
+
+    assert "limpiarPosicionPendiente()" in cancel_source
+    assert "restablecerModoUbicacion()" in cancel_source
+
+
+def test_successful_relocation_should_use_location_mode_reset():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "async function guardarPosicionSeleccionada("
+    )
+
+    end = source.index(
+        "function actualizarEstadoPosicion(",
+        start,
+    )
+
+    save_source = source[start:end]
+
+    assert "restablecerModoUbicacion()" in save_source
+
+
+def test_map_should_define_relocation_overlay():
+    html = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="mapRelocationOverlay"' in html
+    assert 'class="map-relocation-overlay"' in html
+    assert 'id="mapRelocationStatus"' in html
+    assert 'id="guardarReubicacion"' in html
+    assert 'id="cancelarReubicacion"' in html
+
+
+def test_relocation_overlay_should_be_anchored_to_viewport():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert ".map-relocation-overlay {" in css
+    assert "position: absolute;" in css
+    assert "z-index:" in css
+
+
+def test_map_should_control_relocation_overlay():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'document.getElementById("mapRelocationOverlay")' in source
+    assert 'document.getElementById("mapRelocationStatus")' in source
+    assert 'document.getElementById("guardarReubicacion")' in source
+    assert 'document.getElementById("cancelarReubicacion")' in source
+
+
+def test_starting_relocation_should_show_overlay():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function iniciarReubicacionActivo("
+    )
+
+    end = source.index(
+        "function restablecerModoUbicacion()",
+        start,
+    )
+
+    relocation_source = source[start:end]
+
+    assert "mostrarControlesReubicacion(" in relocation_source
+
+
+def test_relocation_overlay_should_update_pending_coordinates():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function seleccionarPosicion("
+    )
+
+    end = source.index(
+        "function mostrarMarcadorProvisional(",
+        start,
+    )
+
+    selection_source = source[start:end]
+
+    assert "actualizarControlesReubicacion(" in selection_source
+
+
+def test_relocation_cancel_should_be_available_before_new_position():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "cancelarReubicacion.disabled" not in source
+
+
+def test_relocation_save_should_start_disabled():
+    html = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = html.index(
+        'id="guardarReubicacion"'
+    )
+
+    button_source = html[
+        max(0, start - 120):
+        start + 200
+    ]
+
+    assert "disabled" in button_source
