@@ -38,6 +38,18 @@ const guardarPosicion =
 const cancelarPosicion =
     document.getElementById("cancelarPosicion");
 
+const editarMapa =
+    document.getElementById("editarMapa");
+
+const modoVisualizacionMapaControl =
+    document.getElementById("modoVisualizacionMapa");
+
+const estadoVisualizacionMapa =
+    document.getElementById("estadoVisualizacionMapa");
+
+const panelPosicionamientoMapa =
+    document.getElementById("panelPosicionamientoMapa");
+
 const mapRelocationOverlay =
     document.getElementById("mapRelocationOverlay");
 
@@ -76,6 +88,9 @@ let ubicaciones = [];
 
 let posicionPendiente = null;
 let marcadorProvisional = null;
+let modoEdicionMapa = false;
+let modoVisualizacionMapa = "all";
+let codigoActivoBusqueda = null;
 
 const modoUbicacion = {
     tipo: "place",
@@ -97,6 +112,85 @@ const panState = {
 let ignorarSiguienteClickMapa = false;
 
 
+
+
+function actualizarEstadoVisualizacionMapa() {
+    if (!estadoVisualizacionMapa) {
+        return;
+    }
+
+    if (modoVisualizacionMapa === "search") {
+        if (codigoActivoBusqueda) {
+            estadoVisualizacionMapa.textContent =
+                `Solo busqueda \u00b7 Mostrando ${codigoActivoBusqueda}`;
+            return;
+        }
+
+        estadoVisualizacionMapa.textContent =
+            "Solo busqueda \u00b7 Mapa limpio \u00b7 Busca un activo para localizarlo";
+        return;
+    }
+
+    estadoVisualizacionMapa.textContent =
+        "Vista normal \u00b7 Mostrando todos los activos del filtro actual";
+}
+
+
+
+function cambiarModoVisualizacionMapa(modo) {
+    modoVisualizacionMapa =
+        modo === "search"
+            ? "search"
+            : "all";
+
+    if (modoVisualizacionMapa === "search") {
+        codigoActivoBusqueda = null;
+        limpiarResultadosBusqueda();
+    }
+
+    renderPuntos(
+        obtenerUbicacionesVisibles()
+    );
+
+    actualizarEstadoVisualizacionMapa();
+}
+
+
+function establecerModoEdicionMapa(activo) {
+    modoEdicionMapa =
+        Boolean(activo);
+
+    if (
+        !modoEdicionMapa
+        && modoUbicacion.tipo === "place"
+    ) {
+        limpiarPosicionPendiente();
+        restablecerModoUbicacion();
+
+        actualizarEstadoPosicion(
+            "Selecciona un activo y despues haz clic sobre el mapa."
+        );
+    }
+
+    if (panelPosicionamientoMapa) {
+        panelPosicionamientoMapa.hidden =
+            !modoEdicionMapa;
+    }
+
+    if (editarMapa) {
+        editarMapa.textContent =
+            modoEdicionMapa
+                ? "Salir de edicion"
+                : "Editar mapa";
+
+        editarMapa.setAttribute(
+            "aria-expanded",
+            String(modoEdicionMapa)
+        );
+    }
+}
+
+
 async function cargarUbicaciones() {
     try {
         const response = await fetch(
@@ -112,7 +206,7 @@ async function cargarUbicaciones() {
         ubicaciones = await response.json();
 
         renderPuntos(
-            obtenerUbicacionesFiltradas()
+            obtenerUbicacionesVisibles()
         );
 
     } catch (error) {
@@ -216,6 +310,24 @@ function obtenerUbicacionesFiltradas() {
         location =>
             location.category === filtroCategoria
     );
+}
+
+
+
+function obtenerUbicacionesVisibles() {
+    if (modoVisualizacionMapa === "search") {
+        if (!codigoActivoBusqueda) {
+            return [];
+        }
+
+        return ubicaciones.filter(
+            location =>
+                location.asset_code
+                === codigoActivoBusqueda
+        );
+    }
+
+    return obtenerUbicacionesFiltradas();
 }
 
 
@@ -577,13 +689,76 @@ function limpiarResultadosBusqueda() {
 }
 
 
-function seleccionarResultadoBusqueda(punto) {
+
+function limpiarEnfoqueBusqueda() {
     mapa.querySelectorAll(
         ".punto"
     ).forEach(
-        item => item.classList.remove(
+        punto => punto.classList.remove(
             "parpadeo"
         )
+    );
+}
+
+
+function obtenerCoincidenciasBusqueda(texto) {
+    return ubicaciones.filter(
+        location => {
+            const codigo = (
+                location.asset_code
+                || ""
+            ).toLowerCase();
+
+            const nombre = (
+                location.name
+                || ""
+            ).toLowerCase();
+
+            const identificadorCorto =
+                obtenerIdentificadorCorto(
+                    location.asset_code
+                ).toLowerCase();
+
+            return (
+                codigo.includes(texto)
+                || identificadorCorto.includes(texto)
+                || nombre.includes(texto)
+            );
+        }
+    );
+}
+
+
+
+
+
+function seleccionarResultadoBusqueda(location) {
+    codigoActivoBusqueda =
+        location.asset_code;
+
+    if (modoVisualizacionMapa === "search") {
+        renderPuntos(
+            obtenerUbicacionesVisibles()
+        );
+    }
+
+    limpiarEnfoqueBusqueda();
+
+    const punto = Array.from(
+        mapa.querySelectorAll(".punto")
+    ).find(
+        item =>
+            item.dataset.codigo
+            === location.asset_code
+    );
+
+    if (!punto) {
+        actualizarEstadoVisualizacionMapa();
+        return;
+    }
+
+    punto.classList.add(
+        "is-search-match"
     );
 
     punto.classList.add(
@@ -595,7 +770,9 @@ function seleccionarResultadoBusqueda(punto) {
     );
 
     limpiarResultadosBusqueda();
+    actualizarEstadoVisualizacionMapa();
 }
+
 
 
 function mostrarResultadosBusqueda(coincidencias) {
@@ -624,7 +801,7 @@ function mostrarResultadosBusqueda(coincidencias) {
     );
 
     coincidencias.forEach(
-        punto => {
+        location => {
             const boton =
                 document.createElement("button");
 
@@ -640,7 +817,7 @@ function mostrarResultadosBusqueda(coincidencias) {
 
             identificador.textContent =
                 obtenerIdentificadorCorto(
-                    punto.dataset.codigo
+                    location.asset_code
                 );
 
             const nombre =
@@ -650,7 +827,7 @@ function mostrarResultadosBusqueda(coincidencias) {
                 "map-search-result__name";
 
             nombre.textContent =
-                punto.dataset.nombre
+                location.name
                 || "Activo sin nombre";
 
             const codigo =
@@ -660,7 +837,7 @@ function mostrarResultadosBusqueda(coincidencias) {
                 "map-search-result__code";
 
             codigo.textContent =
-                punto.dataset.codigo
+                location.asset_code
                 || "";
 
             boton.appendChild(
@@ -679,7 +856,7 @@ function mostrarResultadosBusqueda(coincidencias) {
                 "click",
                 () => {
                     seleccionarResultadoBusqueda(
-                        punto
+                        location
                     );
                 }
             );
@@ -692,6 +869,7 @@ function mostrarResultadosBusqueda(coincidencias) {
 
     contenedor.hidden = false;
 }
+
 
 
 function buscarEquipo() {
@@ -711,58 +889,14 @@ function buscarEquipo() {
 
     limpiarResultadosBusqueda();
 
-    mapa.querySelectorAll(
-        ".punto"
-    ).forEach(
-        punto => punto.classList.remove(
-            "parpadeo"
-        )
-    );
+    limpiarEnfoqueBusqueda();
 
     if (texto === "") {
         return;
     }
 
-    const coincidencias = [];
-
-    mapa.querySelectorAll(
-        ".punto"
-    ).forEach(
-        punto => {
-            const codigo = (
-                punto.dataset.codigo
-                || ""
-            ).toLowerCase();
-
-            const nombre = (
-                punto.dataset.nombre
-                || ""
-            ).toLowerCase();
-
-            const titulo = (
-                punto.title
-                || ""
-            ).toLowerCase();
-
-            const identificadorCorto =
-                obtenerIdentificadorCorto(
-                    punto.dataset.codigo
-                ).toLowerCase();
-
-            const coincide = (
-                codigo.includes(texto)
-                || identificadorCorto.includes(texto)
-                || nombre.includes(texto)
-                || titulo.includes(texto)
-            );
-
-            if (coincide) {
-                coincidencias.push(
-                    punto
-                );
-            }
-        }
-    );
+    const coincidencias =
+        obtenerCoincidenciasBusqueda(texto);
 
     if (coincidencias.length === 0) {
         alert(
@@ -772,25 +906,15 @@ function buscarEquipo() {
     }
 
     if (coincidencias.length === 1) {
-        const punto =
-            coincidencias[0];
-
-        punto.classList.add(
-            "parpadeo"
+        seleccionarResultadoBusqueda(
+            coincidencias[0]
         );
-
-        enfocarActivoMapa(
-            punto
-        );
-
         return;
     }
 
-    if (coincidencias.length > 1) {
-        mostrarResultadosBusqueda(
-            coincidencias
-        );
-    }
+    mostrarResultadosBusqueda(
+        coincidencias
+    );
 }
 
 
@@ -807,7 +931,7 @@ function cambiarCategoria(categoria) {
     filtroCategoria = categoria;
 
     renderPuntos(
-        obtenerUbicacionesFiltradas()
+        obtenerUbicacionesVisibles()
     );
 }
 
@@ -1332,6 +1456,30 @@ if (mapViewport) {
         manejarZoomRueda,
         {
             passive: false,
+        }
+    );
+}
+
+
+if (modoVisualizacionMapaControl) {
+    modoVisualizacionMapaControl.addEventListener(
+        "change",
+        () => {
+            cambiarModoVisualizacionMapa(
+                modoVisualizacionMapaControl.value
+            );
+        }
+    );
+}
+
+
+if (editarMapa) {
+    editarMapa.addEventListener(
+        "click",
+        () => {
+            establecerModoEdicionMapa(
+                !modoEdicionMapa
+            );
         }
     );
 }

@@ -36,21 +36,28 @@
 
 .plant-map-toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 260px;
+    grid-template-columns:
+        minmax(0, 1fr)
+        220px
+        200px
+        auto;
     gap: 1rem;
+    align-items: end;
     padding: 1rem;
     border-bottom: 1px solid var(--color-border, #d0d5dd);
 }
 
 .plant-map-search,
-.plant-map-filter {
+.plant-map-filter,
+.plant-map-visibility {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
 }
 
 .plant-map-search label,
-.plant-map-filter label {
+.plant-map-filter label,
+.plant-map-visibility label {
     font-size: 0.8rem;
     font-weight: 700;
 }
@@ -61,13 +68,48 @@
 }
 
 .plant-map-search input,
-.plant-map-filter select {
+.plant-map-filter select,
+.plant-map-visibility select {
     width: 100%;
     min-height: 42px;
     padding: 0.65rem 0.75rem;
     border: 1px solid var(--color-border, #d0d5dd);
     border-radius: 0.55rem;
+    background: var(--color-surface, #ffffff);
     font: inherit;
+}
+
+
+.plant-map-edit {
+    display: flex;
+    align-items: flex-end;
+}
+
+.plant-map-edit button {
+    min-height: 42px;
+    padding: 0.65rem 1rem;
+    border: 1px solid #2563eb;
+    border-radius: 0.55rem;
+    background: #2563eb;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        border-color 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.plant-map-edit button:hover {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+}
+
+.plant-map-edit button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.22);
+    outline-offset: 2px;
 }
 
 .plant-map-search button,
@@ -231,9 +273,53 @@
     }
 }
 
+@media (max-width: 900px) {
+    .plant-map-toolbar {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(0, 1fr);
+    }
+
+    .plant-map-search {
+        grid-column: 1 / -1;
+    }
+
+    .plant-map-edit {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 620px) {
+    .plant-map-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .plant-map-search {
+        grid-column: auto;
+    }
+
+    .plant-map-search__controls {
+        flex-direction: column;
+    }
+
+    .plant-map-edit {
+        grid-column: auto;
+    }
+
+    .plant-map-edit button {
+        width: 100%;
+    }
+}
+
+
 /* =========================================================
    Asset placement
    ========================================================= */
+
+.map-placement-card[hidden] {
+    display: none;
+}
 
 .map-placement-card {
     margin-bottom: 1rem;
@@ -502,4 +588,41 @@
     .map-relocation-overlay__actions button {
         flex: 1;
     }
+}
+
+
+.punto.is-search-match {
+    width: 21px;
+    height: 21px;
+    background: #7c3aed;
+    border: 3px solid #ffffff;
+    z-index: 12;
+}
+
+.punto.is-search-match.parpadeo {
+    animation: map-search-match-pulse 0.8s infinite alternate;
+}
+
+@keyframes map-search-match-pulse {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow:
+            0 0 0 0 rgba(124, 58, 237, 0.55);
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1.35);
+        box-shadow:
+            0 0 0 12px rgba(124, 58, 237, 0);
+    }
+}
+
+
+.plant-map-view-status {
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid var(--color-border, #d0d5dd);
+    background: #f8fafc;
+    color: #475467;
+    font-size: 0.82rem;
+    font-weight: 600;
 }

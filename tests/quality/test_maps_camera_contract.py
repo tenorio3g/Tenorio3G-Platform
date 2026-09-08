@@ -169,18 +169,23 @@ def test_map_search_should_call_asset_focus():
         encoding="utf-8"
     )
 
+    assert (
+        "seleccionarResultadoBusqueda("
+        in source
+    )
+
     start = source.index(
-        "function buscarEquipo("
+        "function seleccionarResultadoBusqueda("
     )
 
     end = source.index(
-        "function zoomMapa(",
-        start
-    )
+        "\n}\n",
+        start,
+    ) + 3
 
-    search_source = source[start:end]
+    selection_source = source[start:end]
 
-    assert "enfocarActivoMapa(" in search_source
+    assert "enfocarActivoMapa(" in selection_source
 
 def test_map_search_should_support_short_asset_identifier():
     source = MAP_JS_PATH.read_text(
@@ -198,17 +203,25 @@ def test_map_search_should_match_short_asset_identifier():
     )
 
     start = source.index(
-        "function buscarEquipo("
+        "function obtenerCoincidenciasBusqueda("
     )
 
     end = source.index(
-        "function zoomMapa(",
-        start
+        "\n}\n",
+        start,
+    ) + 3
+
+    matching_source = source[start:end]
+
+    assert (
+        "obtenerIdentificadorCorto("
+        in matching_source
     )
 
-    search_source = source[start:end]
-
-    assert "obtenerIdentificadorCorto(" in search_source
+    assert (
+        "identificadorCorto.includes(texto)"
+        in matching_source
+    )
 
 
 def test_map_search_should_run_when_pressing_enter():
@@ -225,8 +238,36 @@ def test_map_search_should_collect_all_matches_before_focusing():
         encoding="utf-8"
     )
 
-    assert "const coincidencias = []" in source
-    assert "coincidencias.push(" in source
+    start = source.index(
+        "function buscarEquipo()"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    search_source = source[start:end]
+
+    assert (
+        "const coincidencias ="
+        in search_source
+    )
+
+    assert (
+        "obtenerCoincidenciasBusqueda(texto)"
+        in search_source
+    )
+
+    assert (
+        "coincidencias.length === 1"
+        in search_source
+    )
+
+    assert (
+        "seleccionarResultadoBusqueda("
+        in search_source
+    )
 
 
 def test_map_search_should_distinguish_zero_one_and_multiple_matches():
@@ -235,19 +276,23 @@ def test_map_search_should_distinguish_zero_one_and_multiple_matches():
     )
 
     start = source.index(
-        "function buscarEquipo("
+        "function buscarEquipo()"
     )
 
     end = source.index(
-        "function zoomMapa(",
-        start
-    )
+        "\n}\n",
+        start,
+    ) + 3
 
     search_source = source[start:end]
 
     assert "coincidencias.length === 0" in search_source
     assert "coincidencias.length === 1" in search_source
-    assert "coincidencias.length > 1" in search_source
+
+    assert (
+        "mostrarResultadosBusqueda("
+        in search_source
+    )
 
 
 def test_map_should_render_multiple_search_results():
@@ -787,3 +832,586 @@ def test_popup_should_not_keep_obsolete_visual_sections():
     assert ".asset-popup__health" not in source
     assert ".asset-popup__maintenance" not in source
     assert ".asset-popup__detail-icon" not in source
+
+
+def test_map_should_start_with_placement_panel_hidden():
+    source = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="panelPosicionamientoMapa"' in source
+
+    panel_start = source.index(
+        'id="panelPosicionamientoMapa"'
+    )
+
+    panel_context = source[
+        max(0, panel_start - 120):
+        panel_start + 180
+    ]
+
+    assert "map-placement-card" in panel_context
+    assert "hidden" in panel_context
+
+
+def test_map_should_offer_explicit_edit_mode_control():
+    source = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="editarMapa"' in source
+    assert "Editar mapa" in source
+
+
+def test_map_script_should_define_edit_mode_state():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        'document.getElementById("editarMapa")'
+        in source
+    )
+
+    assert (
+        'document.getElementById('
+        '"panelPosicionamientoMapa")'
+        in source
+    )
+
+    assert "let modoEdicionMapa = false;" in source
+
+
+def test_map_script_should_control_edit_mode_visibility():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function establecerModoEdicionMapa("
+        in source
+    )
+
+    start = source.index(
+        "function establecerModoEdicionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "panelPosicionamientoMapa.hidden"
+        in function_source
+    )
+
+    assert (
+        "modoEdicionMapa"
+        in function_source
+    )
+
+
+def test_edit_map_control_should_toggle_edit_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "editarMapa.addEventListener(" in source
+
+    assert (
+        "establecerModoEdicionMapa("
+        in source
+    )
+
+
+def test_leaving_map_edit_mode_should_clear_pending_placement():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function establecerModoEdicionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert "!modoEdicionMapa" in function_source
+    assert (
+        'modoUbicacion.tipo === "place"'
+        in function_source
+    )
+    assert (
+        "limpiarPosicionPendiente();"
+        in function_source
+    )
+    assert (
+        "restablecerModoUbicacion();"
+        in function_source
+    )
+
+
+def test_leaving_edit_mode_should_restore_placement_message():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function establecerModoEdicionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "actualizarEstadoPosicion("
+        in function_source
+    )
+
+    assert (
+        "Selecciona un activo"
+        in function_source
+    )
+
+
+def test_map_should_offer_marker_visibility_control():
+    source = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="modoVisualizacionMapa"' in source
+    assert 'value="all"' in source
+    assert 'value="search"' in source
+    assert "Vista normal" in source
+    assert "Solo busqueda" in source
+
+
+def test_map_script_should_define_visualization_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        'document.getElementById("modoVisualizacionMapa")'
+        in source
+    )
+
+    assert (
+        'let modoVisualizacionMapa = "all";'
+        in source
+    )
+
+
+def test_map_script_should_change_visualization_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function cambiarModoVisualizacionMapa("
+        in source
+    )
+
+    start = source.index(
+        "function cambiarModoVisualizacionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        'modo === "search"'
+        in function_source
+    )
+
+    assert (
+        '"all"'
+        in function_source
+    )
+
+    assert (
+        '"search"'
+        in function_source
+    )
+
+
+def test_visualization_control_should_listen_for_changes():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "modoVisualizacionMapaControl.addEventListener("
+        in source
+    )
+
+    assert (
+        "cambiarModoVisualizacionMapa("
+        in source
+    )
+
+
+def test_map_search_should_use_location_data_not_rendered_markers():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function obtenerCoincidenciasBusqueda("
+        in source
+    )
+
+    start = source.index(
+        "function obtenerCoincidenciasBusqueda("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert "ubicaciones.filter(" in function_source
+    assert "location.asset_code" in function_source
+    assert "location.name" in function_source
+    assert 'querySelectorAll(".punto")' not in function_source
+
+
+def test_search_should_delegate_matching_to_location_data():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function buscarEquipo()"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "obtenerCoincidenciasBusqueda(texto)"
+        in function_source
+    )
+
+    assert (
+        'querySelectorAll(\n        ".punto"'
+        not in function_source
+    )
+
+
+def test_multiple_search_results_should_use_location_data():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function mostrarResultadosBusqueda("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert "location =>" in function_source
+    assert "location.asset_code" in function_source
+    assert "location.name" in function_source
+    assert "punto.dataset.codigo" not in function_source
+    assert "punto.dataset.nombre" not in function_source
+
+
+def test_search_result_selection_should_receive_location():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function seleccionarResultadoBusqueda(location)"
+        in source
+    )
+
+    start = source.index(
+        "function seleccionarResultadoBusqueda(location)"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert "location.asset_code" in function_source
+
+
+def test_search_mode_should_render_no_markers_without_selected_asset():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function obtenerUbicacionesVisibles("
+        in source
+    )
+
+    start = source.index(
+        "function obtenerUbicacionesVisibles("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        'modoVisualizacionMapa === "search"'
+        in function_source
+    )
+
+    assert "return [];" in function_source
+
+
+def test_map_should_track_selected_search_asset():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "let codigoActivoBusqueda = null;"
+        in source
+    )
+
+
+def test_search_selection_should_render_only_selected_asset_in_search_mode():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function seleccionarResultadoBusqueda(location)"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert "codigoActivoBusqueda" in function_source
+    assert "location.asset_code" in function_source
+
+    assert (
+        'modoVisualizacionMapa === "search"'
+        in function_source
+    )
+
+    assert (
+        "renderPuntos("
+        in function_source
+    )
+
+
+def test_visualization_mode_change_should_rerender_visible_locations():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function cambiarModoVisualizacionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "renderPuntos("
+        in function_source
+    )
+
+    assert (
+        "obtenerUbicacionesVisibles()"
+        in function_source
+    )
+
+
+def test_search_match_marker_should_receive_visual_focus_class():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        '"is-search-match"'
+        in source
+    )
+
+
+def test_map_toolbar_should_style_visibility_control_like_other_filters():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert ".plant-map-visibility" in css
+    assert ".plant-map-visibility label" in css
+    assert ".plant-map-visibility select" in css
+
+
+def test_map_toolbar_should_support_four_desktop_controls():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = css.index(
+        ".plant-map-toolbar {"
+    )
+
+    end = css.index(
+        "\n}",
+        start,
+    ) + 2
+
+    toolbar_css = css[start:end]
+
+    assert "grid-template-columns:" in toolbar_css
+    assert "minmax(0, 1fr)" in toolbar_css
+    assert "220px" in toolbar_css
+    assert "200px" in toolbar_css
+    assert "auto" in toolbar_css
+
+
+def test_map_toolbar_should_use_intentional_two_column_tablet_layout():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "@media (max-width: 900px)" in css
+    assert ".plant-map-search {" in css
+    assert "grid-column: 1 / -1;" in css
+
+
+def test_map_toolbar_should_stack_controls_on_small_screens():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert "@media (max-width: 620px)" in css
+    assert ".plant-map-search__controls {" in css
+    assert "flex-direction: column;" in css
+
+
+def test_map_should_have_visualization_status_region():
+    html = MAP_HTML_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="estadoVisualizacionMapa"' in html
+    assert 'class="plant-map-view-status"' in html
+    assert 'role="status"' in html
+    assert 'aria-live="polite"' in html
+
+
+def test_map_js_should_reference_visualization_status_region():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        'document.getElementById("estadoVisualizacionMapa")'
+        in source
+    )
+
+
+def test_map_should_have_visualization_status_updater():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        "function actualizarEstadoVisualizacionMapa()"
+        in source
+    )
+
+    assert "modoVisualizacionMapa" in source
+    assert "codigoActivoBusqueda" in source
+    assert "estadoVisualizacionMapa" in source
+
+
+def test_visualization_changes_should_refresh_status():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function cambiarModoVisualizacionMapa("
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "actualizarEstadoVisualizacionMapa()"
+        in function_source
+    )
+
+
+def test_search_selection_should_refresh_visualization_status():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function seleccionarResultadoBusqueda(location)"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    function_source = source[start:end]
+
+    assert (
+        "actualizarEstadoVisualizacionMapa()"
+        in function_source
+    )
+
+
+def test_visualization_status_should_have_dedicated_styles():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert ".plant-map-view-status" in css

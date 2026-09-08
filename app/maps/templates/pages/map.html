@@ -48,7 +48,11 @@ Mapa de activos | Tenorio3G
 
     </header>
 
-    <section class="map-placement-card">
+    <section
+        id="panelPosicionamientoMapa"
+        class="map-placement-card"
+        hidden
+    >
 
         <div class="map-placement-card__header">
             <div>
@@ -205,6 +209,42 @@ Mapa de activos | Tenorio3G
                 </select>
             </div>
 
+            <div class="plant-map-visibility">
+                <label for="modoVisualizacionMapa">
+                    Visualizacion
+                </label>
+
+                <select id="modoVisualizacionMapa">
+                    <option value="all">
+                        Vista normal
+                    </option>
+
+                    <option value="search">
+                        Solo busqueda
+                    </option>
+                </select>
+            </div>
+
+            <div class="plant-map-edit">
+                <button
+                    type="button"
+                    id="editarMapa"
+                    aria-controls="panelPosicionamientoMapa"
+                    aria-expanded="false"
+                >
+                    Editar mapa
+                </button>
+            </div>
+
+        </div>
+
+        <div
+            id="estadoVisualizacionMapa"
+            class="plant-map-view-status"
+            role="status"
+            aria-live="polite"
+        >
+            Mostrando todos los activos del filtro actual.
         </div>
 
         <div class="plant-map-viewport">
