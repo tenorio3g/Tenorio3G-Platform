@@ -9,3 +9,5 @@ class PlaceAssetOnMapCommand:
     category: str
     x: float
     y: float
+    layer_code: str = "electrical"
+    plan_code: str = "ground_floor"

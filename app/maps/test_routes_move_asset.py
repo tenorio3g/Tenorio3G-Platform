@@ -81,6 +81,8 @@ def test_should_move_asset_on_map() -> None:
         ),
         "location": {
             "asset_code": "ASSET-001",
+            "layer_code": "electrical",
+            "plan_code": "ground_floor",
             "name": "Tablero principal",
             "category": "tableros",
             "x": 72.4,

@@ -3,11 +3,20 @@
 const LOCATIONS_API_URL =
     "/maps/api/locations";
 
+const LAYERS_API_URL =
+    "/maps/api/layers";
+
+const PLANS_API_URL =
+    "/maps/api/plans";
+
 const AVAILABLE_ASSETS_API_URL =
     "/maps/api/available-assets";
 
 const mapa =
     document.getElementById("mapa");
+
+const imagenMapa =
+    document.getElementById("imagenMapa");
 
 const mapViewport =
     mapa
@@ -43,6 +52,12 @@ const editarMapa =
 
 const modoVisualizacionMapaControl =
     document.getElementById("modoVisualizacionMapa");
+
+const mapLayerSelector =
+    document.getElementById("mapLayerSelector");
+
+const mapPlanSelector =
+    document.getElementById("mapPlanSelector");
 
 const estadoVisualizacionMapa =
     document.getElementById("estadoVisualizacionMapa");
@@ -85,6 +100,8 @@ const camera = {
 
 let filtroCategoria = "todos";
 let ubicaciones = [];
+let capaActiva = null;
+let planoActivo = null;
 
 let posicionPendiente = null;
 let marcadorProvisional = null;
@@ -187,6 +204,186 @@ function establecerModoEdicionMapa(activo) {
             "aria-expanded",
             String(modoEdicionMapa)
         );
+    }
+}
+
+
+async function cargarPlanos() {
+    if (!mapPlanSelector) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            PLANS_API_URL
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Plans API respondio con ${response.status}`
+            );
+        }
+
+        const plans =
+            await response.json();
+
+        mapPlanSelector.replaceChildren();
+
+        if (plans.length === 0) {
+            planoActivo = null;
+
+            const option =
+                document.createElement("option");
+
+            option.value = "";
+            option.textContent =
+                "Sin planos disponibles";
+
+            mapPlanSelector.appendChild(
+                option
+            );
+
+            mapPlanSelector.disabled = true;
+            return;
+        }
+
+        plans.forEach(
+            plan => {
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    plan.code;
+
+                option.textContent =
+                    plan.name;
+
+                mapPlanSelector.appendChild(
+                    option
+                );
+            }
+        );
+
+        mapPlanSelector.disabled = false;
+
+        planoActivo =
+            plans[0].code;
+
+        mapPlanSelector.value =
+            planoActivo;
+
+    } catch (error) {
+        console.error(
+            "Error cargando planos:",
+            error
+        );
+
+        planoActivo = null;
+
+        mapPlanSelector.replaceChildren();
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+        option.textContent =
+            "Error cargando planos";
+
+        mapPlanSelector.appendChild(
+            option
+        );
+
+        mapPlanSelector.disabled = true;
+    }
+}
+
+
+async function cargarCapas() {
+    if (!mapLayerSelector) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            LAYERS_API_URL
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Layers API respondio con ${response.status}`
+            );
+        }
+
+        const layers =
+            await response.json();
+
+        mapLayerSelector.replaceChildren();
+
+        if (layers.length === 0) {
+            capaActiva = null;
+
+            const option =
+                document.createElement("option");
+
+            option.value = "";
+            option.textContent =
+                "Sin capas disponibles";
+
+            mapLayerSelector.appendChild(
+                option
+            );
+
+            mapLayerSelector.disabled = true;
+            return;
+        }
+
+        layers.forEach(
+            layer => {
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    layer.code;
+
+                option.textContent =
+                    layer.name;
+
+                mapLayerSelector.appendChild(
+                    option
+                );
+            }
+        );
+
+        mapLayerSelector.disabled = false;
+
+        capaActiva =
+            layers[0].code;
+
+        mapLayerSelector.value =
+            capaActiva;
+
+    } catch (error) {
+        console.error(
+            "Error cargando capas:",
+            error
+        );
+
+        capaActiva = null;
+
+        mapLayerSelector.replaceChildren();
+
+        const option =
+            document.createElement("option");
+
+        option.value = "";
+        option.textContent =
+            "Error cargando capas";
+
+        mapLayerSelector.appendChild(
+            option
+        );
+
+        mapLayerSelector.disabled = true;
     }
 }
 
@@ -302,13 +499,25 @@ async function cargarActivosDisponibles() {
 
 
 function obtenerUbicacionesFiltradas() {
-    if (filtroCategoria === "todos") {
-        return ubicaciones;
-    }
-
     return ubicaciones.filter(
-        location =>
-            location.category === filtroCategoria
+        location => {
+            const perteneceAPlano =
+                location.plan_code === planoActivo;
+
+            const perteneceACapa =
+                location.layer_code === capaActiva;
+
+            const perteneceACategoria =
+                filtroCategoria === "todos"
+                || location.category
+                    === filtroCategoria;
+
+            return (
+                perteneceAPlano
+                && perteneceACapa
+                && perteneceACategoria
+            );
+        }
     );
 }
 
@@ -322,8 +531,10 @@ function obtenerUbicacionesVisibles() {
 
         return ubicaciones.filter(
             location =>
-                location.asset_code
-                === codigoActivoBusqueda
+                location.plan_code === planoActivo
+                && location.layer_code === capaActiva
+                && location.asset_code
+                    === codigoActivoBusqueda
         );
     }
 
@@ -736,7 +947,41 @@ function seleccionarResultadoBusqueda(location) {
     codigoActivoBusqueda =
         location.asset_code;
 
-    if (modoVisualizacionMapa === "search") {
+    const cambioDePlano =
+        location.plan_code
+        && location.plan_code !== planoActivo;
+
+    const cambioDeCapa =
+        location.layer_code
+        && location.layer_code !== capaActiva;
+
+    if (cambioDePlano) {
+        planoActivo = location.plan_code;
+
+        if (mapPlanSelector) {
+            mapPlanSelector.value = planoActivo;
+        }
+
+        actualizarImagenPlano(
+            planoActivo
+        );
+
+        restablecerCamaraMapa();
+    }
+
+    if (cambioDeCapa) {
+        capaActiva = location.layer_code;
+
+        if (mapLayerSelector) {
+            mapLayerSelector.value = capaActiva;
+        }
+    }
+
+    if (
+        modoVisualizacionMapa === "search"
+        || cambioDePlano
+        || cambioDeCapa
+    ) {
         renderPuntos(
             obtenerUbicacionesVisibles()
         );
@@ -924,6 +1169,104 @@ function zoomMapa(factor) {
     );
 
     aplicarCamara();
+}
+
+
+function obtenerImagenPlano(planCode) {
+    if (!imagenMapa) {
+        return null;
+    }
+
+    const imagenesPorPlano = {
+        ground_floor:
+            imagenMapa.dataset.planGroundFloor,
+        upper_floor:
+            imagenMapa.dataset.planUpperFloor,
+        roof:
+            imagenMapa.dataset.planRoof,
+    };
+
+    return (
+        imagenesPorPlano[planCode]
+        || imagenMapa.dataset.planGroundFloor
+        || null
+    );
+}
+
+
+function actualizarImagenPlano(planCode) {
+    if (!imagenMapa) {
+        return;
+    }
+
+    const imageUrl =
+        obtenerImagenPlano(planCode);
+
+    if (!imageUrl) {
+        return;
+    }
+
+    imagenMapa.src = imageUrl;
+    imagenMapa.alt =
+        `Plano ${planCode || "sin seleccionar"}`;
+}
+
+
+if (imagenMapa) {
+    imagenMapa.addEventListener(
+        "error",
+        () => {
+            const fallbackUrl =
+                imagenMapa.dataset.planGroundFloor;
+
+            if (
+                fallbackUrl
+                && imagenMapa.src !== fallbackUrl
+            ) {
+                imagenMapa.src = fallbackUrl;
+            }
+        }
+    );
+}
+
+
+function cambiarPlanoMapa(planCode) {
+    planoActivo =
+        planCode || null;
+
+    codigoActivoBusqueda = null;
+
+    limpiarResultadosBusqueda();
+    limpiarEnfoqueBusqueda();
+
+    actualizarImagenPlano(
+        planoActivo
+    );
+
+    restablecerCamaraMapa();
+
+    renderPuntos(
+        obtenerUbicacionesVisibles()
+    );
+
+    actualizarEstadoVisualizacionMapa();
+}
+
+
+function cambiarCapaMapa(layerCode) {
+    capaActiva =
+        layerCode || null;
+
+    codigoActivoBusqueda = null;
+
+    limpiarResultadosBusqueda();
+    limpiarEnfoqueBusqueda();
+
+    renderPuntos(
+        obtenerUbicacionesVisibles()
+    );
+
+    actualizarEstadoVisualizacionMapa();
 }
 
 
@@ -1299,6 +1642,10 @@ async function guardarPosicionSeleccionada() {
                         assetCode,
                     category:
                         categoriaPosicion.value,
+                    layer_code:
+                        capaActiva,
+                    plan_code:
+                        planoActivo,
                     x:
                         posicionPendiente.x,
                     y:
@@ -1461,6 +1808,30 @@ if (mapViewport) {
 }
 
 
+if (mapPlanSelector) {
+    mapPlanSelector.addEventListener(
+        "change",
+        () => {
+            cambiarPlanoMapa(
+                mapPlanSelector.value
+            );
+        }
+    );
+}
+
+
+if (mapLayerSelector) {
+    mapLayerSelector.addEventListener(
+        "change",
+        () => {
+            cambiarCapaMapa(
+                mapLayerSelector.value
+            );
+        }
+    );
+}
+
+
 if (modoVisualizacionMapaControl) {
     modoVisualizacionMapaControl.addEventListener(
         "change",
@@ -1560,7 +1931,14 @@ if (activoDisponible) {
 }
 
 
+async function inicializarMapa() {
+    await cargarPlanos();
+    await cargarCapas();
+    await cargarUbicaciones();
+    await cargarActivosDisponibles();
+}
+
+
 aplicarCamara();
 
-cargarUbicaciones();
-cargarActivosDisponibles();
+inicializarMapa();

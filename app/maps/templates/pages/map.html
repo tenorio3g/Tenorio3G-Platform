@@ -182,6 +182,30 @@ Mapa de activos | Tenorio3G
                 </div>
             </div>
 
+            <div class="plant-map-layer">
+                <label for="mapPlanSelector">
+                    Plano
+                </label>
+
+                <select id="mapPlanSelector">
+                    <option value="">
+                        Cargando planos...
+                    </option>
+                </select>
+            </div>
+
+            <div class="plant-map-layer">
+                <label for="mapLayerSelector">
+                    Capa
+                </label>
+
+                <select id="mapLayerSelector">
+                    <option value="">
+                        Cargando capas...
+                    </option>
+                </select>
+            </div>
+
             <div class="plant-map-filter">
                 <label for="filtroCategoria">
                     Categoria
@@ -294,6 +318,18 @@ Mapa de activos | Tenorio3G
                     ) }}"
                     alt="Plano de la planta"
                     id="imagenMapa"
+                    data-plan-ground-floor="{{ url_for(
+                        'maps.static',
+                        filename='images/mapa.jpg'
+                    ) }}"
+                    data-plan-upper-floor="{{ url_for(
+                        'maps.static',
+                        filename='images/upper_floor.jpg'
+                    ) }}"
+                    data-plan-roof="{{ url_for(
+                        'maps.static',
+                        filename='images/roof.jpg'
+                    ) }}"
                 >
 
                 <div id="popup" class="map-popup">

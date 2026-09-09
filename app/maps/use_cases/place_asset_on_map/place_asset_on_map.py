@@ -6,8 +6,14 @@ from app.domains.assets.repositories.asset_repository import (
 from app.maps.models.map_location import (
     MapLocation,
 )
+from app.maps.repositories.map_layer_repository import (
+    MapLayerRepository,
+)
 from app.maps.repositories.map_location_repository import (
     MapLocationRepository,
+)
+from app.maps.repositories.map_plan_repository import (
+    MapPlanRepository,
 )
 
 from .command import PlaceAssetOnMapCommand
@@ -19,10 +25,18 @@ class PlaceAssetOnMap:
         self,
         asset_repository: AssetRepository,
         map_location_repository: MapLocationRepository,
+        map_layer_repository: MapLayerRepository,
+        map_plan_repository: MapPlanRepository,
     ) -> None:
         self._asset_repository = asset_repository
         self._map_location_repository = (
             map_location_repository
+        )
+        self._map_layer_repository = (
+            map_layer_repository
+        )
+        self._map_plan_repository = (
+            map_plan_repository
         )
 
     def execute(
@@ -69,6 +83,52 @@ class PlaceAssetOnMap:
                 ),
             )
 
+        layer = (
+            self._map_layer_repository
+            .find_by_code(
+                command.layer_code
+            )
+        )
+
+        if layer is None:
+            return PlaceAssetOnMapResult(
+                success=False,
+                message=(
+                    "No existe la capa indicada."
+                ),
+            )
+
+        if not layer.is_active:
+            return PlaceAssetOnMapResult(
+                success=False,
+                message=(
+                    "La capa indicada no esta activa."
+                ),
+            )
+
+        plan = (
+            self._map_plan_repository
+            .find_by_code(
+                command.plan_code
+            )
+        )
+
+        if plan is None:
+            return PlaceAssetOnMapResult(
+                success=False,
+                message=(
+                    "No existe el plano indicado."
+                ),
+            )
+
+        if not plan.is_active:
+            return PlaceAssetOnMapResult(
+                success=False,
+                message=(
+                    "El plano indicado no esta activo."
+                ),
+            )
+
         if not self._coordinates_are_valid(
             command.x,
             command.y,
@@ -87,6 +147,8 @@ class PlaceAssetOnMap:
             category=category,
             x=command.x,
             y=command.y,
+            layer_code=command.layer_code,
+            plan_code=command.plan_code,
         )
 
         self._map_location_repository.save(

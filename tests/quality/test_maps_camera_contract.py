@@ -1415,3 +1415,221 @@ def test_visualization_status_should_have_dedicated_styles():
     )
 
     assert ".plant-map-view-status" in css
+
+
+def test_map_template_should_expose_layer_selector() -> None:
+    template = Path(
+        "app/maps/templates/pages/map.html"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="mapLayerSelector"' in template
+    assert '<label for="mapLayerSelector">' in template
+    assert "Capa" in template
+
+
+def test_map_javascript_should_load_layers_from_api() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'const LAYERS_API_URL =' in script
+    assert '"/maps/api/layers"' in script
+    assert 'document.getElementById("mapLayerSelector")' in script
+    assert "async function cargarCapas()" in script
+    assert "fetch(" in script
+    assert "LAYERS_API_URL" in script
+    assert "cargarCapas();" in script
+
+
+def test_map_javascript_should_filter_locations_by_active_layer() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert "location.layer_code === capaActiva" in script
+    assert "function cambiarCapaMapa(" in script
+    assert "mapLayerSelector.addEventListener(" in script
+    assert "await cargarCapas();" in script
+    assert "await cargarUbicaciones();" in script
+    assert "async function inicializarMapa()" in script
+
+
+def test_map_search_should_activate_result_layer() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert "location.layer_code" in script
+    assert "capaActiva = location.layer_code;" in script
+    assert "mapLayerSelector.value = capaActiva;" in script
+
+    function_start = script.index(
+        "function seleccionarResultadoBusqueda(location)"
+    )
+
+    function_end = script.index(
+        "function mostrarResultadosBusqueda",
+        function_start,
+    )
+
+    function_body = script[
+        function_start:function_end
+    ]
+
+    assert (
+        "capaActiva = location.layer_code;"
+        in function_body
+    )
+
+    assert (
+        "mapLayerSelector.value = capaActiva;"
+        in function_body
+    )
+def test_map_template_should_expose_plan_selector() -> None:
+    template = Path(
+        "app/maps/templates/pages/map.html"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="mapPlanSelector"' in template
+    assert '<label for="mapPlanSelector">' in template
+    assert "Plano" in template
+
+
+def test_map_javascript_should_load_plans_from_api() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'const PLANS_API_URL =' in script
+    assert '"/maps/api/plans"' in script
+    assert 'document.getElementById("mapPlanSelector")' in script
+    assert "async function cargarPlanos()" in script
+    assert "PLANS_API_URL" in script
+    assert "await cargarPlanos();" in script
+
+
+def test_map_javascript_should_filter_locations_by_active_plan() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert "location.plan_code === planoActivo" in script
+    assert "function cambiarPlanoMapa(" in script
+    assert "mapPlanSelector.addEventListener(" in script
+    assert "await cargarPlanos();" in script
+    assert "await cargarUbicaciones();" in script
+
+
+def test_map_template_should_expose_plan_image_urls() -> None:
+    template = Path(
+        "app/maps/templates/pages/map.html"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="imagenMapa"' in template
+    assert "data-plan-ground-floor=" in template
+    assert "data-plan-upper-floor=" in template
+    assert "data-plan-roof=" in template
+    assert "images/mapa.jpg" in template
+    assert "images/upper_floor.jpg" in template
+    assert "images/roof.jpg" in template
+
+
+def test_map_javascript_should_switch_image_with_plan() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    assert 'document.getElementById("imagenMapa")' in script
+    assert "function obtenerImagenPlano(" in script
+    assert "function actualizarImagenPlano(" in script
+    assert "imagenMapa.dataset.planGroundFloor" in script
+    assert "imagenMapa.dataset.planUpperFloor" in script
+    assert "imagenMapa.dataset.planRoof" in script
+
+    start = script.index(
+        "function cambiarPlanoMapa("
+    )
+
+    end = script.index(
+        "function cambiarCapaMapa(",
+        start,
+    )
+
+    function_body = script[start:end]
+
+    assert "actualizarImagenPlano(" in function_body
+    assert "restablecerCamaraMapa();" in function_body
+
+
+def test_map_search_should_activate_result_plan_and_image() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    start = script.index(
+        "function seleccionarResultadoBusqueda(location)"
+    )
+
+    end = script.index(
+        "function mostrarResultadosBusqueda",
+        start,
+    )
+
+    function_body = script[start:end]
+
+    assert "location.plan_code" in function_body
+    assert "planoActivo = location.plan_code;" in function_body
+    assert "mapPlanSelector.value = planoActivo;" in function_body
+    assert "actualizarImagenPlano(" in function_body
+    assert "restablecerCamaraMapa();" in function_body
+
+def test_new_map_location_should_send_active_plan_and_layer() -> None:
+    script = Path(
+        "app/maps/static/js/map.js"
+    ).read_text(
+        encoding="utf-8"
+    )
+
+    function_start = script.index(
+        "async function guardarPosicionSeleccionada()"
+    )
+
+    function_end = script.index(
+        "function actualizarEstadoPosicion(",
+        function_start,
+    )
+
+    function_body = script[
+        function_start:function_end
+    ]
+
+    post_start = function_body.index(
+        'method: "POST"'
+    )
+
+    post_body = function_body[post_start:]
+
+    assert "plan_code:" in post_body
+    assert "planoActivo" in post_body
+    assert "layer_code:" in post_body
+    assert "capaActiva" in post_body

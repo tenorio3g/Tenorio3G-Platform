@@ -70,6 +70,12 @@ class SQLiteMapLocationRepository(
                 existing.category = (
                     location.category
                 )
+                existing.layer_code = (
+                    location.layer_code
+                )
+                existing.plan_code = (
+                    location.plan_code
+                )
                 existing.x = location.x
                 existing.y = location.y
 

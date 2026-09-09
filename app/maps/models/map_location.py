@@ -7,11 +7,6 @@ from app.foundation.database import Base
 
 
 class MapLocation(Base):
-    """
-    Modelo persistente que representa la posicion de un activo
-    dentro del mapa industrial.
-    """
-
     __tablename__ = "map_locations"
 
     id: Mapped[int] = mapped_column(
@@ -25,6 +20,18 @@ class MapLocation(Base):
         unique=True,
         nullable=False,
         index=True,
+    )
+
+    layer_code: Mapped[str] = mapped_column(
+        String(80),
+        nullable=False,
+        default="electrical",
+    )
+
+    plan_code: Mapped[str] = mapped_column(
+        String(80),
+        nullable=False,
+        default="ground_floor",
     )
 
     name: Mapped[str] = mapped_column(
@@ -48,6 +55,42 @@ class MapLocation(Base):
         nullable=False,
     )
 
+    def __init__(
+        self,
+        asset_code: str,
+        name: str,
+        x: float,
+        y: float,
+        category: str = "default",
+        layer_code: str = "electrical",
+        plan_code: str = "ground_floor",
+    ) -> None:
+        clean_layer_code = str(
+            layer_code
+        ).strip().lower()
+
+        clean_plan_code = str(
+            plan_code
+        ).strip().lower()
+
+        if not clean_layer_code:
+            raise ValueError(
+                "El codigo de la capa es obligatorio."
+            )
+
+        if not clean_plan_code:
+            raise ValueError(
+                "El codigo del plano es obligatorio."
+            )
+
+        self.asset_code = asset_code
+        self.layer_code = clean_layer_code
+        self.plan_code = clean_plan_code
+        self.name = name
+        self.category = category
+        self.x = x
+        self.y = y
+
     def move_to(
         self,
         x: float,
@@ -58,8 +101,7 @@ class MapLocation(Base):
             y,
         ):
             raise ValueError(
-                "Las coordenadas deben estar "
-                "entre 0 y 100."
+                "Las coordenadas deben estar entre 0 y 100."
             )
 
         self.x = x
@@ -72,14 +114,17 @@ class MapLocation(Base):
     ) -> bool:
         return (
             0.0 <= x <= 100.0
-            and
-            0.0 <= y <= 100.0
+            and 0.0 <= y <= 100.0
         )
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self,
+    ) -> str:
         return (
             "MapLocation("
             f"asset_code='{self.asset_code}', "
+            f"layer_code='{self.layer_code}', "
+            f"plan_code='{self.plan_code}', "
             f"name='{self.name}', "
             f"x={self.x}, "
             f"y={self.y})"

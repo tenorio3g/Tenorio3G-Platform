@@ -16,6 +16,8 @@ class MapLocationPresenter:
         return [
             {
                 "asset_code": location.asset_code,
+                "layer_code": location.layer_code,
+                "plan_code": location.plan_code,
                 "name": location.name,
                 "category": location.category,
                 "x": location.x,

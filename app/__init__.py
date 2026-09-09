@@ -27,6 +27,11 @@ from app.domains.assets.bootstrap.assets_container import (
     load_demo_assets,
 )
 
+from app.maps.bootstrap import (
+    ensure_default_map_layers,
+    ensure_default_map_plans,
+)
+
 
 def create_app(config_class=Config) -> Flask:
     """
@@ -64,6 +69,8 @@ def _initialize_persistence() -> None:
 
     initialize_database()
 
+    ensure_default_map_layers.execute()
+    ensure_default_map_plans.execute()
     load_demo_physical_locations()
     load_demo_assets()
 

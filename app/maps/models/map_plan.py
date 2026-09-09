@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from sqlalchemy import Boolean, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.foundation.database import Base
+
+
+class MapPlan(Base):
+    """
+    Modelo persistente que representa un plano fisico
+    disponible dentro del mapa industrial.
+
+    Ejemplos:
+    - Planta Baja
+    - Planta Alta
+    - Techo
+    """
+
+    __tablename__ = "map_plans"
+
+    code: Mapped[str] = mapped_column(
+        String(80),
+        primary_key=True,
+    )
+
+    name: Mapped[str] = mapped_column(
+        String(120),
+        nullable=False,
+    )
+
+    order: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+    )
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+    )
+
+    def __init__(
+        self,
+        code: str,
+        name: str,
+        order: int = 0,
+        is_active: bool = True,
+    ) -> None:
+        clean_code = str(code).strip().lower()
+        clean_name = str(name).strip()
+
+        if not clean_code:
+            raise ValueError(
+                "El codigo del plano es obligatorio."
+            )
+
+        if not clean_name:
+            raise ValueError(
+                "El nombre del plano es obligatorio."
+            )
+
+        if type(order) is not int:
+            raise ValueError(
+                "El orden del plano debe ser entero."
+            )
+
+        if order < 0:
+            raise ValueError(
+                "El orden del plano no puede ser negativo."
+            )
+
+        if type(is_active) is not bool:
+            raise ValueError(
+                "El estado activo del plano debe ser booleano."
+            )
+
+        self.code = clean_code
+        self.name = clean_name
+        self.order = order
+        self.is_active = is_active
+
+    def __repr__(self) -> str:
+        return (
+            "MapPlan("
+            f"code='{self.code}', "
+            f"name='{self.name}', "
+            f"order={self.order}, "
+            f"is_active={self.is_active})"
+        )

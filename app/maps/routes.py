@@ -14,6 +14,8 @@ from app.domains.assets.use_cases.find_all_assets.query import (
 
 from app.maps.bootstrap import (
     find_all_map_locations,
+    list_active_map_layers,
+    list_active_map_plans,
     move_asset_on_map,
     place_asset_on_map,
 )
@@ -41,6 +43,46 @@ def index():
     return render_template(
         "pages/map.html",
     )
+
+
+@maps.get("/api/layers")
+def api_layers():
+    """
+    Devuelve las capas activas del mapa.
+    """
+
+    result = list_active_map_layers.execute()
+
+    payload = [
+        {
+            "code": layer.code,
+            "name": layer.name,
+            "order": layer.order,
+        }
+        for layer in result.layers
+    ]
+
+    return jsonify(payload)
+
+
+@maps.get("/api/plans")
+def api_plans():
+    """
+    Devuelve los planos activos del mapa.
+    """
+
+    result = list_active_map_plans.execute()
+
+    payload = [
+        {
+            "code": plan.code,
+            "name": plan.name,
+            "order": plan.order,
+        }
+        for plan in result.plans
+    ]
+
+    return jsonify(payload)
 
 
 @maps.get("/api/locations")
@@ -122,6 +164,14 @@ def api_place_asset():
             category=data["category"],
             x=float(data["x"]),
             y=float(data["y"]),
+            layer_code=data.get(
+                "layer_code",
+                "electrical",
+            ),
+            plan_code=data.get(
+                "plan_code",
+                "ground_floor",
+            ),
         )
     except (
         KeyError,

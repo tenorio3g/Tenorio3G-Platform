@@ -120,6 +120,14 @@ from app.domains.locations.models import (
 # Maps
 # ==========================================================
 
+from app.maps.models.map_layer import (
+    MapLayer,
+)
+
+from app.maps.models.map_plan import (
+    MapPlan,
+)
+
 from app.maps.models.map_location import (
     MapLocation,
 )
@@ -149,5 +157,7 @@ __all__ = [
     "WorkSessionModel",
     "TimelineEventModel",
     "PhysicalLocationModel",
+    "MapLayer",
+    "MapPlan",
     "MapLocation",
 ]
