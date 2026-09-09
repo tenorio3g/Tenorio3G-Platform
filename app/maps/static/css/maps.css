@@ -48,6 +48,7 @@
 }
 
 .plant-map-search,
+.plant-map-layer,
 .plant-map-filter,
 .plant-map-visibility {
     display: flex;
@@ -56,6 +57,7 @@
 }
 
 .plant-map-search label,
+.plant-map-layer label,
 .plant-map-filter label,
 .plant-map-visibility label {
     font-size: 0.8rem;
@@ -68,6 +70,7 @@
 }
 
 .plant-map-search input,
+.plant-map-layer select,
 .plant-map-filter select,
 .plant-map-visibility select {
     width: 100%;

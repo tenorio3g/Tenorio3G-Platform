@@ -1127,6 +1127,8 @@ function buscarEquipo() {
         return;
     }
 
+    cerrarPopup();
+
     const texto =
         campo.value
             .toLowerCase()

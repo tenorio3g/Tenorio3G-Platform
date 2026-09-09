@@ -363,6 +363,16 @@ function verMas(codigo) {
 }
 
 
+/**
+ * Cierra el popup activo y elimina su referencia.
+ */
+function cerrarPopup() {
+    popup.style.display = "none";
+
+    marcadorPopupActual = null;
+}
+
+
 const botonCerrar =
     document.getElementById("cerrarPopup");
 
@@ -372,7 +382,7 @@ if (botonCerrar) {
         "click",
         () => {
 
-            popup.style.display = "none";
+            cerrarPopup();
 
         }
     );

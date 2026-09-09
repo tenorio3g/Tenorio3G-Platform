@@ -1633,3 +1633,64 @@ def test_new_map_location_should_send_active_plan_and_layer() -> None:
     assert "planoActivo" in post_body
     assert "layer_code:" in post_body
     assert "capaActiva" in post_body
+
+
+def test_map_layer_selectors_should_share_toolbar_control_style():
+    css = MAP_CSS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    assert (
+        ".plant-map-search,\n"
+        ".plant-map-layer,\n"
+        ".plant-map-filter,\n"
+        ".plant-map-visibility {"
+    ) in css
+
+    assert (
+        ".plant-map-search label,\n"
+        ".plant-map-layer label,\n"
+        ".plant-map-filter label,\n"
+        ".plant-map-visibility label {"
+    ) in css
+
+    assert ".plant-map-layer select" in css
+
+
+def test_new_map_search_should_close_previous_popup():
+    source = MAP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function buscarEquipo()"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    search_source = source[start:end]
+
+    assert "cerrarPopup()" in search_source
+
+
+def test_close_map_popup_should_clear_active_marker_reference():
+    source = POPUP_JS_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    start = source.index(
+        "function cerrarPopup()"
+    )
+
+    end = source.index(
+        "\n}\n",
+        start,
+    ) + 3
+
+    close_source = source[start:end]
+
+    assert 'popup.style.display = "none"' in close_source
+    assert "marcadorPopupActual = null" in close_source
