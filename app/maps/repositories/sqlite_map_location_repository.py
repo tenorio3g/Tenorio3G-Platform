@@ -64,6 +64,8 @@ class SQLiteMapLocationRepository(
 
             if existing is None:
                 session.add(location)
+                session.commit()
+                session.refresh(location)
 
             else:
                 existing.name = location.name
@@ -79,7 +81,7 @@ class SQLiteMapLocationRepository(
                 existing.x = location.x
                 existing.y = location.y
 
-            session.commit()
+                session.commit()
 
     def delete(
         self,

@@ -250,3 +250,52 @@ def test_should_update_existing_plan_code(
     assert saved.y == 25.0
 
     engine.dispose()
+
+
+def test_saved_location_should_remain_readable_after_commit(
+    tmp_path,
+) -> None:
+    database_path = (
+        tmp_path
+        / "maps_expire_on_commit.db"
+    )
+
+    engine = create_engine(
+        f"sqlite:///{database_path}"
+    )
+
+    ProductionLikeSessionLocal = sessionmaker(
+        bind=engine,
+        autoflush=False,
+        autocommit=False,
+    )
+
+    Base.metadata.create_all(
+        bind=engine
+    )
+
+    repository = SQLiteMapLocationRepository(
+        ProductionLikeSessionLocal
+    )
+
+    location = MapLocation(
+        asset_code="HVAC-ROOF-001",
+        name="Equipo HVAC techo",
+        category="aires",
+        x=26.6,
+        y=61.0,
+        layer_code="hvac",
+        plan_code="roof",
+    )
+
+    repository.save(location)
+
+    assert location.asset_code == "HVAC-ROOF-001"
+    assert location.name == "Equipo HVAC techo"
+    assert location.category == "aires"
+    assert location.layer_code == "hvac"
+    assert location.plan_code == "roof"
+    assert location.x == 26.6
+    assert location.y == 61.0
+
+    engine.dispose()
