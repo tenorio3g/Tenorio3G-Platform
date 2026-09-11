@@ -4,6 +4,7 @@ from .user_container import (
     get_user,
     list_users,
     password_hasher,
+    reset_user_password,
     update_user,
     user_repository,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "get_user",
     "list_users",
     "password_hasher",
+    "reset_user_password",
     "update_user",
     "delete_user",
 ]

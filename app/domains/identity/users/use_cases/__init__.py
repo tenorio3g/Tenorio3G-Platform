@@ -42,3 +42,9 @@ __all__ = [
     "DeleteUserCommand",
     "DeleteUserResult",
 ]
+
+from .reset_user_password import (
+    ResetUserPassword,
+    ResetUserPasswordCommand,
+    ResetUserPasswordResult,
+)

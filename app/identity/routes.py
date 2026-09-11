@@ -71,12 +71,14 @@ from app.domains.identity.users.bootstrap import (
     get_user,
     list_users,
     password_hasher,
+    reset_user_password,
     update_user,
 )
 
 from app.domains.identity.users.use_cases import (
     CreateUserCommand,
     GetUserQuery,
+    ResetUserPasswordCommand,
     UpdateUserCommand,
 )
 
@@ -535,6 +537,78 @@ def edit_user_route(username):
         people=people_result.people,
         roles=roles_result.roles,
     )
+
+@identity.route(
+    "/usuarios/<string:username>/restablecer-contrasena",
+    methods=["GET", "POST"],
+)
+@permission_required("users.manage")
+def reset_user_password_route(username):
+
+    user_result = get_user.execute(
+        GetUserQuery(
+            username=username,
+        )
+    )
+
+    user = user_result.user
+
+    if user is None:
+        return (
+            "Usuario no encontrado",
+            404,
+        )
+
+    error = None
+
+    if request.method == "POST":
+
+        password = request.form.get(
+            "password",
+            "",
+        )
+
+        password_confirmation = request.form.get(
+            "password_confirmation",
+            "",
+        )
+
+        if not password:
+            error = "La nueva contrase?a es obligatoria."
+
+        elif password != password_confirmation:
+            error = "Las contrase?as no coinciden."
+
+        else:
+            password_hash = password_hasher.hash(
+                password
+            )
+
+            result = reset_user_password.execute(
+                ResetUserPasswordCommand(
+                    username=user.username,
+                    password_hash=password_hash,
+                )
+            )
+
+            if result.success:
+                return redirect(
+                    url_for(
+                        "identity.users_index"
+                    )
+                )
+
+            error = (
+                "No fue posible restablecer "
+                "la contrase?a."
+            )
+
+    return render_template(
+        "pages/users/reset_password.html",
+        user=user,
+        error=error,
+    )
+
 
 @identity.route(
     "/usuarios/<string:username>/estado",

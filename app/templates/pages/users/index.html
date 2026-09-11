@@ -52,6 +52,16 @@
                                 Editar
                             </a>
 
+                            <a
+                                class="btn"
+                                href="{{ url_for(
+                                    'identity.reset_user_password_route',
+                                    username=user.username
+                                ) }}"
+                            >
+                                Restablecer contrase?a
+                            </a>
+
                             <form
                                 method="post"
                                 action="{{ url_for(

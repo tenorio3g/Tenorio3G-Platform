@@ -19,6 +19,7 @@ from app.domains.identity.users.use_cases import (
     DeleteUser,
     GetUser,
     ListUsers,
+    ResetUserPassword,
     UpdateUser,
 )
 
@@ -49,6 +50,10 @@ update_user = UpdateUser(
     user_repository,
     person_repository,
     role_repository,
+)
+
+reset_user_password = ResetUserPassword(
+    user_repository
 )
 
 delete_user = DeleteUser(
