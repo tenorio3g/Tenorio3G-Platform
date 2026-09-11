@@ -1,4 +1,7 @@
-from flask import Flask
+from flask import (
+    Flask,
+    render_template,
+)
 
 from config.config import Config
 
@@ -55,6 +58,7 @@ def create_app(config_class=Config) -> Flask:
     _initialize_persistence()
     _validate_foundation_registry()
     _register_blueprints(app)
+    _register_error_handlers(app)
 
     return app
 
@@ -109,3 +113,21 @@ def _register_blueprints(app: Flask) -> None:
 
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
+
+def _register_error_handlers(app: Flask) -> None:
+    """
+    Registra las paginas de error globales de Tenorio3G.
+    """
+
+    def access_denied(error):
+        return (
+            render_template(
+                "pages/errors/403.html"
+            ),
+            403,
+        )
+
+    app.register_error_handler(
+        403,
+        access_denied,
+    )

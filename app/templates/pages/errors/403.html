@@ -1,0 +1,105 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Acceso restringido | Tenorio3G Platform
+{% endblock %}
+
+
+{% block content %}
+
+<section class="asset-form-page">
+
+    <div class="asset-section-heading">
+
+        <div>
+
+            <p class="asset-section-heading__eyebrow">
+                Seguridad y permisos
+            </p>
+
+            <h1>
+                Acceso restringido
+            </h1>
+
+            <p>
+                Tu perfil actual no tiene permisos
+                para acceder a esta seccion.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Tenorio3G Platform
+                </p>
+
+                <h2>
+                    Permiso requerido
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="asset-workspace-card__body">
+
+            <p>
+                Esta funcion esta protegida de acuerdo
+                con el rol y los permisos asignados
+                a tu cuenta.
+            </p>
+
+            <p>
+                Si necesitas consultar o modificar
+                esta informacion, comunicate con tu
+                supervisor o con un administrador
+                de Tenorio3G.
+            </p>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="
+                    if (history.length > 1) {
+                        history.back();
+                    } else {
+                        window.location.href =
+                            '{{ url_for(
+                                'core.dashboard'
+                            ) }}';
+                    }
+                "
+            >
+                Regresar
+            </button>
+
+            <a
+                class="btn btn-primary"
+                href="{{ url_for(
+                    'core.dashboard'
+                ) }}"
+            >
+                Ir al Panel
+            </a>
+
+        </div>
+
+    </article>
+
+</section>
+
+{% endblock %}
