@@ -26,6 +26,7 @@ class WorkOrderSummaryItemViewModel:
 
     technician_label: str
     technician_names: list[str]
+    technician_codes: list[str]
 
     created_at: str
 

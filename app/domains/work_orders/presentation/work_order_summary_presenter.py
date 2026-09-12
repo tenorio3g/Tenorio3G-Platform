@@ -148,6 +148,11 @@ class WorkOrderSummaryPresenter:
                         for person in technicians
                     ],
 
+                    technician_codes=[
+                        person.code
+                        for person in technicians
+                    ],
+
                     created_at=(
                         work_order.created_at.strftime(
                             "%d/%m/%Y %H:%M"

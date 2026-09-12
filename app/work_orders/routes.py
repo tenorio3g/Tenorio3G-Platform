@@ -44,6 +44,12 @@ from app.domains.work_orders.presentation import (
     WorkOrderSummaryPresenter,    WorkOrderDetailPresenter,
 )
 
+from app.domains.work_orders.presentation.work_order_summary_view_model import WorkOrderSummaryViewModel
+
+from app.work_orders.work_order_queue import (
+    filter_items_by_scope,
+)
+
 from app.domains.work_orders.use_cases import (
     ApproveWorkOrderCommand,
     AssignWorkOrderCommand,
@@ -337,6 +343,15 @@ def index():
         .upper()
     )
 
+    selected_scope = (
+        request.args.get(
+            "scope",
+            "ALL",
+        )
+        .strip()
+        .upper()
+    )
+
     search_text = (
         request.args.get(
             "q",
@@ -349,9 +364,21 @@ def index():
         search_text.casefold()
     )
 
+    scoped_items = filter_items_by_scope(
+        items=orders.items,
+        scope=selected_scope,
+        person_code=session.get(
+            "person_code"
+        ),
+    )
+
+    scoped_orders = WorkOrderSummaryViewModel(
+        items=scoped_items
+    )
+
     filtered_items = []
 
-    for item in orders.items:
+    for item in scoped_items:
 
         matches_filter = True
 
@@ -424,9 +451,10 @@ def index():
 
     return render_template(
         "pages/work_orders_index.html",
-        orders=orders,
+        orders=scoped_orders,
         filtered_items=filtered_items,
         selected_filter=selected_filter,
+        selected_scope=selected_scope,
         search_text=search_text,
     )
 

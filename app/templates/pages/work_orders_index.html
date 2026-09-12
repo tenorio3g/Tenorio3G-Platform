@@ -52,7 +52,8 @@
             href="{{ url_for(
                 'work_orders.index',
                 filter='ALL',
-                q=search_text
+                q=search_text,
+                scope=selected_scope
             ) }}"
             class="work-orders-kpi"
         >
@@ -64,7 +65,8 @@
             href="{{ url_for(
                 'work_orders.index',
                 filter='ACTIVE',
-                q=search_text
+                q=search_text,
+                scope=selected_scope
             ) }}"
             class="work-orders-kpi"
         >
@@ -76,7 +78,8 @@
             href="{{ url_for(
                 'work_orders.index',
                 filter='FINISHED',
-                q=search_text
+                q=search_text,
+                scope=selected_scope
             ) }}"
             class="work-orders-kpi"
         >
@@ -88,7 +91,8 @@
             href="{{ url_for(
                 'work_orders.index',
                 filter='CANCELLED',
-                q=search_text
+                q=search_text,
+                scope=selected_scope
             ) }}"
             class="work-orders-kpi"
         >
@@ -116,7 +120,8 @@
                 href="{{ url_for(
                     'work_orders.index',
                     filter=code,
-                    q=search_text
+                    q=search_text,
+                    scope=selected_scope
                 ) }}"
                 class="work-orders-status-filter"
             >
@@ -131,6 +136,35 @@
     </div>
 
 
+    <div class="work-orders-status-filters">
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                scope='ALL',
+                filter=selected_filter,
+                q=search_text
+            ) }}"
+            class="work-orders-status-filter"
+        >
+            Todas las órdenes
+        </a>
+
+        <a
+            href="{{ url_for(
+                'work_orders.index',
+                scope='MINE',
+                filter=selected_filter,
+                q=search_text
+            ) }}"
+            class="work-orders-status-filter"
+        >
+            Mis órdenes
+        </a>
+
+    </div>
+
+
     <form
         method="get"
         action="{{ url_for('work_orders.index') }}"
@@ -141,6 +175,12 @@
             type="hidden"
             name="filter"
             value="{{ selected_filter }}"
+        >
+
+        <input
+            type="hidden"
+            name="scope"
+            value="{{ selected_scope }}"
         >
 
         <input
@@ -163,7 +203,8 @@
                 class="btn"
                 href="{{ url_for(
                     'work_orders.index',
-                    filter=selected_filter
+                    filter=selected_filter,
+                    scope=selected_scope
                 ) }}"
             >
                 Limpiar

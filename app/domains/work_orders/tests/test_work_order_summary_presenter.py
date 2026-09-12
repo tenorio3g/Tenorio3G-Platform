@@ -284,3 +284,39 @@ def test_should_classify_approved_as_active():
         item.technician_label
         == "Realizando"
     )
+def test_should_present_active_technician_codes():
+
+    summary = create_summary(
+        WorkOrderStatus.IN_PROGRESS
+    )
+
+    technician = type(
+        "Technician",
+        (),
+        {
+            "code": "TECH-001",
+            "name": "Tecnico Uno",
+        },
+    )()
+
+    summary.active_technicians.append(
+        technician
+    )
+
+    result = ListWorkOrderSummariesResult(
+        items=[
+            summary
+        ]
+    )
+
+    view_model = (
+        WorkOrderSummaryPresenter.present(
+            result
+        )
+    )
+
+    item = view_model.items[0]
+
+    assert item.technician_codes == [
+        "TECH-001"
+    ]
