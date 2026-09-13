@@ -96,6 +96,17 @@ from app.domains.work_orders.activities.use_cases import (
     CompleteWorkOrderActivityCommand,
     StartWorkOrderActivityCommand,
 )
+from app.domains.identity.authentication import (
+    login_required,
+)
+
+from app.domains.work_orders.work_sessions.bootstrap import (
+    start_work_session,
+)
+
+from app.domains.work_orders.work_sessions.use_cases import (
+    StartWorkSessionCommand,
+)
 
 from app.domains.work_orders.materials.bootstrap import (
     list_work_order_spare_parts,
@@ -1183,6 +1194,55 @@ def create_work_order_activity_route(
         )
     )
 
+
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/trabajo/iniciar"
+)
+@login_required
+def start_work_session_route(
+    numero: str,
+    activity_code: str,
+):
+
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    if not person_code:
+        return (
+            "Usuario autenticado sin persona asociada",
+            400,
+        )
+
+    now = datetime.now()
+
+    try:
+        start_work_session.execute(
+            StartWorkSessionCommand(
+                work_order_code=numero,
+                activity_code=activity_code,
+                person_code=person_code,
+                started_at=now,
+                created_at=now,
+                created_by_person_code=person_code,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
 
 @work_orders.post(
     "/ordenes/<numero>/actividades/<activity_code>/iniciar"

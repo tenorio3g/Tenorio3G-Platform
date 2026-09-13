@@ -65,6 +65,10 @@ from app.domains.assets.preventive_maintenance.bootstrap import (
 from app.domains.work_orders.activities.bootstrap import (
     work_order_activity_repository,
 )
+
+from app.domains.work_orders.work_sessions.bootstrap import (
+    work_session_repository,
+)
 @pytest.fixture
 def app():
     app = create_app()
@@ -544,6 +548,12 @@ def work_orders_test_db(
 
     monkeypatch.setattr(
         technician_assignment_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    monkeypatch.setattr(
+        work_session_repository,
         "_session_factory",
         TestSessionLocal,
     )

@@ -913,3 +913,210 @@ def test_should_reject_invalid_spare_part_unit_cost_from_web(
     )
 
     assert "abc" in html
+
+
+# ============================================================
+# WORK-ORDER-EXECUTION-002B
+# Web integration: iniciar trabajo
+# ============================================================
+
+
+def test_should_redirect_unauthenticated_start_work_session_to_login(
+    client,
+):
+    response = client.post(
+        (
+            "/ordenes/WO-WSWEB-001/"
+            "actividades/WO-WSWEB-001-ACT-001/"
+            "trabajo/iniciar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    assert "/login" in response.headers["Location"]
+
+
+def test_should_start_work_session_from_web(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+    people_test_db,
+):
+    from app.domains.identity.people.entities import Person
+
+    from app.domains.work_orders.work_sessions.bootstrap import (
+        work_session_repository,
+    )
+
+    work_order_code = "WO-WSWEB-001"
+    activity_code = "WO-WSWEB-001-ACT-001"
+
+    people_test_db.save(
+        Person(
+            code="TEST-001",
+            name="Técnico de prueba",
+        )
+    )
+
+    work_order = create_web_work_order(
+        code=work_order_code,
+    )
+
+    work_order.approve()
+    work_order.assign()
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    activity = WorkOrderActivity(
+        code=activity_code,
+        work_order_code=work_order_code,
+        title="Inspección desde web",
+        responsible_person_code="TEST-001",
+        estimated_minutes=30,
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            f"actividades/{activity_code}/"
+            "trabajo/iniciar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    sessions = (
+        work_session_repository.list_by_work_order(
+            work_order_code
+        )
+    )
+
+    assert len(sessions) == 1
+
+    session = sessions[0]
+
+    assert session.code == "WO-WSWEB-001-WS-001"
+
+    assert session.work_order_code == work_order_code
+
+    assert session.activity_code == activity_code
+
+    assert session.person_code == "TEST-001"
+
+    assert session.created_by_person_code == "TEST-001"
+
+    assert session.ended_at is None
+
+    persisted_activity = (
+        work_order_activities_test_db.get_by_code(
+            activity_code
+        )
+    )
+
+    assert (
+        persisted_activity.status
+        == ActivityStatus.IN_PROGRESS
+    )
+
+    assert persisted_activity.started_at is not None
+
+    persisted_order = (
+        work_orders_test_db.get_by_code(
+            work_order_code
+        )
+    )
+
+    assert (
+        persisted_order.status
+        == WorkOrderStatus.IN_PROGRESS
+    )
+
+
+def test_should_reject_start_work_session_for_non_responsible_person(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+    people_test_db,
+):
+    from app.domains.identity.people.entities import Person
+
+    from app.domains.work_orders.work_sessions.bootstrap import (
+        work_session_repository,
+    )
+
+    work_order_code = "WO-WSWEB-002"
+    activity_code = "WO-WSWEB-002-ACT-001"
+
+    people_test_db.save(
+        Person(
+            code="TEST-001",
+            name="Técnico autenticado",
+        )
+    )
+
+    work_order = create_web_work_order(
+        code=work_order_code,
+    )
+
+    work_order.approve()
+    work_order.assign()
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    activity = WorkOrderActivity(
+        code=activity_code,
+        work_order_code=work_order_code,
+        title="Actividad de otro técnico",
+        responsible_person_code="TECH-OTHER",
+        estimated_minutes=30,
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            f"actividades/{activity_code}/"
+            "trabajo/iniciar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+
+    assert (
+        b"person is not responsible for activity"
+        in response.data
+    )
+
+    sessions = (
+        work_session_repository.list_by_work_order(
+            work_order_code
+        )
+    )
+
+    assert sessions == []
+
+    persisted_activity = (
+        work_order_activities_test_db.get_by_code(
+            activity_code
+        )
+    )
+
+    assert (
+        persisted_activity.status
+        == ActivityStatus.PENDING
+    )

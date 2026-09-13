@@ -847,7 +847,7 @@ Orden {{ orden.code }}
                                     <form
                                         method="post"
                                         action="{{ url_for(
-                                            'work_orders.start_work_order_activity_route',
+                                            'work_orders.start_work_session_route',
                                             numero=orden.code,
                                             activity_code=activity.code
                                         ) }}"
@@ -856,7 +856,7 @@ Orden {{ orden.code }}
                                             type="submit"
                                             class="button button-primary"
                                         >
-                                            Iniciar actividad
+                                            Iniciar trabajo
                                         </button>
                                     </form>
 
