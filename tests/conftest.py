@@ -505,6 +505,10 @@ def work_orders_test_db(
         timeline_event_repository,
     )
 
+    from app.domains.work_orders.technicians.bootstrap import (
+        technician_assignment_repository,
+    )
+
     database_path = (
         tmp_path
         / "work_orders_test.db"
@@ -534,6 +538,12 @@ def work_orders_test_db(
 
     monkeypatch.setattr(
         work_order_summary_technician_repository,
+        "_session_factory",
+        TestSessionLocal,
+    )
+
+    monkeypatch.setattr(
+        technician_assignment_repository,
         "_session_factory",
         TestSessionLocal,
     )

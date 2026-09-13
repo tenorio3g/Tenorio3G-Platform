@@ -31,14 +31,6 @@ from app.domains.work_orders.repositories import (
     InMemoryWorkOrderRepository,
 )
 
-from app.domains.work_orders.technicians.entities import (
-    WorkOrderTechnicianAssignment,
-)
-
-from app.domains.work_orders.technicians.repositories.in_memory_work_order_technician_assignment_repository import (
-    InMemoryWorkOrderTechnicianAssignmentRepository,
-)
-
 
 def create_work_order(
     code="WO-001",
@@ -76,9 +68,7 @@ def create_person(
     )
 
 
-def build_use_case(
-    assign_default_technician=True,
-):
+def build_use_case():
 
     activity_repository = (
         InMemoryWorkOrderActivityRepository()
@@ -92,30 +82,10 @@ def build_use_case(
         InMemoryPersonRepository()
     )
 
-    technician_assignment_repository = (
-        InMemoryWorkOrderTechnicianAssignmentRepository()
-    )
-
-    if assign_default_technician:
-        technician_assignment_repository.save(
-            WorkOrderTechnicianAssignment(
-                work_order_code="WO-001",
-                person_code="55464",
-                assigned_at=datetime(
-                    2026,
-                    9,
-                    12,
-                    16,
-                    0,
-                ),
-            )
-        )
-
     use_case = CreateWorkOrderActivity(
         activity_repository,
         work_order_repository,
         person_repository,
-        technician_assignment_repository,
     )
 
     return (
@@ -124,6 +94,7 @@ def build_use_case(
         person_repository,
         use_case,
     )
+
 
 def create_command(
     work_order_code="WO-001",
@@ -430,36 +401,6 @@ def test_should_reject_inactive_responsible_person():
     with pytest.raises(
         ValueError,
         match="responsible person is inactive",
-    ):
-        use_case.execute(
-            create_command()
-        )
-
-def test_should_reject_responsible_person_not_assigned_to_work_order():
-
-    (
-        _,
-        work_order_repository,
-        person_repository,
-        use_case,
-    ) = build_use_case(
-        assign_default_technician=False
-    )
-
-    work_order_repository.save(
-        create_work_order()
-    )
-
-    person_repository.save(
-        create_person()
-    )
-
-    with pytest.raises(
-        ValueError,
-        match=(
-            "responsible person is not assigned "
-            "to work order"
-        ),
     ):
         use_case.execute(
             create_command()

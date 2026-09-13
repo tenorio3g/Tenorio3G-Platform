@@ -1109,10 +1109,24 @@ def create_work_order_activity_route(
         detail_result.supervisor,
     )
 
+    technicians_result = (
+        list_work_order_technicians.execute(
+            ListWorkOrderTechniciansQuery(
+                work_order_code=numero,
+            )
+        )
+    )
+
+    technicians = (
+        WorkOrderTechniciansPresenter.present(
+            technicians_result
+        )
+    )
     if request.method == "GET":
         return render_template(
             "pages/create_work_order_activity_v2.html",
             orden=orden,
+            technicians=technicians,
         )
 
     estimated_minutes_raw = (
@@ -1132,10 +1146,6 @@ def create_work_order_activity_route(
     try:
         create_work_order_activity.execute(
             CreateWorkOrderActivityCommand(
-                code=request.form.get(
-                    "code",
-                    "",
-                ),
                 work_order_code=numero,
                 title=request.form.get(
                     "title",
@@ -1161,6 +1171,7 @@ def create_work_order_activity_route(
         return render_template(
             "pages/create_work_order_activity_v2.html",
             orden=orden,
+            technicians=technicians,
             error=str(exc),
             data=request.form,
         )

@@ -383,6 +383,243 @@ def test_should_unassign_technician_from_web(
         "55464",
     ) is False
 
+def test_should_render_create_activity_form_with_assigned_technician(
+    authenticated_client,
+    work_orders_test_db,
+):
+
+    from app.domains.work_orders.technicians.bootstrap import (
+        technician_assignment_repository,
+    )
+
+    work_order_code = "WO-ACTFORM-001"
+
+    work_orders_test_db.save(
+        create_web_work_order(
+            work_order_code
+        )
+    )
+
+    technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code=work_order_code,
+            person_code="55464",
+            assigned_at=datetime(
+                2026,
+                9,
+                12,
+                16,
+                0,
+            ),
+        )
+    )
+
+    response = authenticated_client.get(
+        f"/ordenes/{work_order_code}/actividades/nueva"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert (
+        'name="responsible_person_code"'
+        in html
+    )
+
+    assert "<select" in html
+
+    assert 'value="55464"' in html
+
+    assert "Crear actividad" in html
+
+    assert (
+        'name="code"'
+        not in html
+    )
+
+
+def test_should_render_create_activity_form_without_assigned_technicians(
+    authenticated_client,
+    work_orders_test_db,
+):
+
+    work_order_code = "WO-ACTFORM-002"
+
+    work_orders_test_db.save(
+        create_web_work_order(
+            work_order_code
+        )
+    )
+
+    response = authenticated_client.get(
+        f"/ordenes/{work_order_code}/actividades/nueva"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert (
+        "Esta orden no tiene técnicos asignados."
+        in html
+    )
+
+    assert (
+        'name="responsible_person_code"'
+        not in html
+    )
+
+    assert (
+        ">Crear actividad<"
+        not in html
+    )
+
+
+def test_should_preserve_activity_responsible_when_post_validation_fails(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+):
+
+    from app.domains.work_orders.technicians.bootstrap import (
+        technician_assignment_repository,
+    )
+
+    work_order_code = "WO-ACTFORM-003"
+
+    work_orders_test_db.save(
+        create_web_work_order(
+            work_order_code
+        )
+    )
+
+    technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code=work_order_code,
+            person_code="55464",
+            assigned_at=datetime(
+                2026,
+                9,
+                12,
+                16,
+                0,
+            ),
+        )
+    )
+
+    response = authenticated_client.post(
+        f"/ordenes/{work_order_code}/actividades/nueva",
+        data={
+            "title": "",
+            "responsible_person_code": "55464",
+            "description": "Prueba de validación",
+            "estimated_minutes": "30",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert (
+        'value="55464"'
+        in html
+    )
+
+    assert "selected" in html
+
+    assert (
+        'name="code"'
+        not in html
+    )
+
+
+def test_should_create_activity_from_web_with_automatic_code(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+):
+
+    from app.domains.work_orders.technicians.bootstrap import (
+        technician_assignment_repository,
+    )
+
+    work_order_code = "WO-ACTWEB-001"
+
+    work_orders_test_db.save(
+        create_web_work_order(
+            work_order_code
+        )
+    )
+
+    technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code=work_order_code,
+            person_code="55464",
+            assigned_at=datetime(
+                2026,
+                9,
+                12,
+                16,
+                0,
+            ),
+        )
+    )
+
+    response = authenticated_client.post(
+        f"/ordenes/{work_order_code}/actividades/nueva",
+        data={
+            "title": "Inspección visual",
+            "responsible_person_code": "55464",
+            "description": (
+                "Actividad creada desde interfaz web."
+            ),
+            "estimated_minutes": "30",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    expected_code = (
+        f"{work_order_code}-ACT-001"
+    )
+
+    persisted = (
+        work_order_activities_test_db.get_by_code(
+            expected_code
+        )
+    )
+
+    assert persisted is not None
+
+    assert (
+        persisted.code
+        == expected_code
+    )
+
+    assert (
+        persisted.work_order_code
+        == work_order_code
+    )
+
+    assert (
+        persisted.responsible_person_code
+        == "55464"
+    )
+
+    assert (
+        persisted.title
+        == "Inspección visual"
+    )
 
 def test_should_start_activity_from_web(
     authenticated_client,

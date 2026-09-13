@@ -44,20 +44,15 @@ Nueva actividad - {{ orden.code }}
 
                 <div class="form-grid">
 
-                    <div class="form-field">
+                    <div class="form-field form-field-full">
 
-                        <label for="code">
-                            Código
-                        </label>
+                        <p class="asset-workspace-card__eyebrow">
+                            Código de actividad
+                        </p>
 
-                        <input
-                            id="code"
-                            name="code"
-                            type="text"
-                            required
-                            value="{{ data.get('code', '') if data else '' }}"
-                            placeholder="Ej. ACT-001"
-                        >
+                        <p>
+                            Se generará automáticamente al crear la actividad.
+                        </p>
 
                     </div>
 
@@ -84,14 +79,47 @@ Nueva actividad - {{ orden.code }}
                             Responsable
                         </label>
 
-                        <input
-                            id="responsible_person_code"
-                            name="responsible_person_code"
-                            type="text"
-                            required
-                            value="{{ data.get('responsible_person_code', '') if data else '' }}"
-                            placeholder="Ej. 55464"
-                        >
+                        {% if technicians.has_items %}
+
+                            <select
+                                id="responsible_person_code"
+                                name="responsible_person_code"
+                                required
+                            >
+
+                                <option value="">
+                                    Seleccione un técnico
+                                </option>
+
+                                {% for technician in technicians.items %}
+
+                                    <option
+                                        value="{{ technician.person_code }}"
+                                        {% if data
+                                            and data.get(
+                                                'responsible_person_code'
+                                            ) == technician.person_code
+                                        %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ technician.name }}
+                                        · {{ technician.position }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        {% else %}
+
+                            <div class="form-alert form-alert-error">
+                                Esta orden no tiene técnicos asignados.
+                                Asigne al menos un técnico antes de crear
+                                una actividad.
+                            </div>
+
+                        {% endif %}
 
                     </div>
 
@@ -130,12 +158,16 @@ Nueva actividad - {{ orden.code }}
 
                 <div class="form-actions">
 
-                    <button
-                        type="submit"
-                        class="button button-primary"
-                    >
-                        Crear actividad
-                    </button>
+                    {% if technicians.has_items %}
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Crear actividad
+                        </button>
+
+                    {% endif %}
 
                     <a
                         class="button button-secondary"
