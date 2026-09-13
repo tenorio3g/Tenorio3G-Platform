@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -85,6 +85,7 @@ def create_activity(
     *,
     code: str = "ACT-001",
     work_order_code: str = "WO-001",
+    responsible_person_code: str = "TECH-001",
     status: ActivityStatus = ActivityStatus.PENDING,
 ) -> WorkOrderActivity:
 
@@ -121,7 +122,9 @@ def create_activity(
         code=code,
         work_order_code=work_order_code,
         title="Actividad de prueba",
-        responsible_person_code="TECH-001",
+        responsible_person_code=(
+            responsible_person_code
+        ),
         description="",
         estimated_minutes=60,
         status=status,
@@ -138,9 +141,39 @@ def create_person(
 
     return Person(
         code=code,
-        name="Técnico de prueba",
-        position="Técnico",
+        name="Tecnico de prueba",
+        position="Tecnico",
         is_active=active,
+    )
+
+
+def create_stored_session(
+    *,
+    code: str,
+    work_order_code: str = "WO-001",
+    activity_code: str = "ACT-OLD",
+    person_code: str = "TECH-OTHER",
+    active: bool = False,
+) -> WorkSession:
+
+    started_at = NOW - timedelta(hours=2)
+
+    ended_at = (
+        None
+        if active
+        else started_at + timedelta(minutes=30)
+    )
+
+    return WorkSession(
+        code=code,
+        work_order_code=work_order_code,
+        activity_code=activity_code,
+        person_code=person_code,
+        started_at=started_at,
+        ended_at=ended_at,
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=started_at,
+        created_by_person_code=person_code,
     )
 
 
@@ -206,20 +239,18 @@ def create_use_case():
 
 def create_command(
     *,
-    code: str = "WS-001",
     work_order_code: str = "WO-001",
     activity_code: str = "ACT-001",
     person_code: str = "TECH-001",
 ) -> StartWorkSessionCommand:
 
     return StartWorkSessionCommand(
-        code=code,
         work_order_code=work_order_code,
         activity_code=activity_code,
         person_code=person_code,
         started_at=NOW,
         created_at=NOW,
-        created_by_person_code="TECH-001",
+        created_by_person_code=person_code,
     )
 
 
@@ -282,7 +313,7 @@ def test_should_start_work_session_from_assigned_work_order():
 
     session = result.work_session
 
-    assert session.code == "WS-001"
+    assert session.code == "WO-001-WS-001"
     assert session.work_order_code == "WO-001"
     assert session.activity_code == "ACT-001"
     assert session.person_code == "TECH-001"
@@ -299,7 +330,6 @@ def test_should_start_work_session_from_assigned_work_order():
     )
 
     assert work_order is not None
-
     assert (
         work_order.status
         == WorkOrderStatus.IN_PROGRESS
@@ -310,17 +340,15 @@ def test_should_start_work_session_from_assigned_work_order():
     )
 
     assert activity is not None
-
     assert (
         activity.status
         == ActivityStatus.IN_PROGRESS
     )
-
     assert activity.started_at == NOW
 
     stored_session = (
         work_session_repository.get_by_code(
-            "WS-001"
+            "WO-001-WS-001"
         )
     )
 
@@ -355,7 +383,6 @@ def test_should_start_session_when_work_order_already_in_progress():
     )
 
     assert work_order is not None
-
     assert (
         work_order.status
         == WorkOrderStatus.IN_PROGRESS
@@ -379,12 +406,16 @@ def test_should_start_session_for_activity_already_in_progress():
         ),
     )
 
-    original_started_at = (
-        activity_repository
-        .get_by_code(
+    activity_before = (
+        activity_repository.get_by_code(
             "ACT-001"
         )
-        .started_at
+    )
+
+    assert activity_before is not None
+
+    original_started_at = (
+        activity_before.started_at
     )
 
     result = use_case.execute(
@@ -398,14 +429,13 @@ def test_should_start_session_for_activity_already_in_progress():
     )
 
     assert activity is not None
-
     assert (
         activity.started_at
         == original_started_at
     )
 
 
-def test_should_allow_person_not_assigned_to_work_order():
+def test_should_reject_person_not_responsible_for_activity():
 
     (
         use_case,
@@ -421,15 +451,154 @@ def test_should_allow_person_not_assigned_to_work_order():
         )
     )
 
+    with pytest.raises(
+        ValueError,
+        match=(
+            "person is not responsible "
+            "for activity"
+        ),
+    ):
+        use_case.execute(
+            create_command(
+                person_code="TECH-002",
+            )
+        )
+
+
+def test_should_generate_next_work_session_code():
+
+    (
+        use_case,
+        _,
+        _,
+        _,
+        work_session_repository,
+    ) = prepare_valid_context()
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WO-001-WS-001",
+        )
+    )
+
+    result = use_case.execute(
+        create_command()
+    )
+
+    assert (
+        result.work_session.code
+        == "WO-001-WS-002"
+    )
+
+
+def test_should_generate_code_after_highest_sequence():
+
+    (
+        use_case,
+        _,
+        _,
+        _,
+        work_session_repository,
+    ) = prepare_valid_context()
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WO-001-WS-001",
+        )
+    )
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WO-001-WS-003",
+        )
+    )
+
+    result = use_case.execute(
+        create_command()
+    )
+
+    assert (
+        result.work_session.code
+        == "WO-001-WS-004"
+    )
+
+
+def test_should_ignore_legacy_work_session_codes():
+
+    (
+        use_case,
+        _,
+        _,
+        _,
+        work_session_repository,
+    ) = prepare_valid_context()
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WS-AUTO-999",
+        )
+    )
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WO-001-OTHER-999",
+        )
+    )
+
+    result = use_case.execute(
+        create_command()
+    )
+
+    assert (
+        result.work_session.code
+        == "WO-001-WS-001"
+    )
+
+
+def test_should_keep_sequence_independent_per_work_order():
+
+    (
+        use_case,
+        work_order_repository,
+        activity_repository,
+        person_repository,
+        work_session_repository,
+    ) = create_use_case()
+
+    work_order_repository.save(
+        create_work_order(
+            code="WO-002",
+        )
+    )
+
+    activity_repository.save(
+        create_activity(
+            code="ACT-002",
+            work_order_code="WO-002",
+        )
+    )
+
+    person_repository.save(
+        create_person()
+    )
+
+    work_session_repository.save(
+        create_stored_session(
+            code="WO-001-WS-009",
+            work_order_code="WO-001",
+        )
+    )
+
     result = use_case.execute(
         create_command(
-            person_code="TECH-002",
+            work_order_code="WO-002",
+            activity_code="ACT-002",
         )
     )
 
     assert (
-        result.work_session.person_code
-        == "TECH-002"
+        result.work_session.code
+        == "WO-002-WS-001"
     )
 
 
@@ -663,61 +832,4 @@ def test_should_reject_completed_activity():
     ):
         use_case.execute(
             create_command()
-        )
-
-
-def test_should_reject_duplicate_work_session_code():
-
-    (
-        use_case,
-        _,
-        _,
-        _,
-        work_session_repository,
-    ) = prepare_valid_context()
-
-    work_session_repository.save(
-        WorkSession(
-            code="WS-001",
-            work_order_code="WO-OLD",
-            activity_code="ACT-OLD",
-            person_code="TECH-OTHER",
-            started_at=datetime(
-                2026,
-                8,
-                25,
-                7,
-                0,
-            ),
-            ended_at=datetime(
-                2026,
-                8,
-                25,
-                8,
-                0,
-            ),
-            source=(
-                WorkSessionSource.AUTOMATIC
-            ),
-            created_at=datetime(
-                2026,
-                8,
-                25,
-                7,
-                0,
-            ),
-            created_by_person_code=(
-                "TECH-OTHER"
-            ),
-        )
-    )
-
-    with pytest.raises(
-        ValueError,
-        match="work session code already exists",
-    ):
-        use_case.execute(
-            create_command(
-                code="WS-001",
-            )
         )

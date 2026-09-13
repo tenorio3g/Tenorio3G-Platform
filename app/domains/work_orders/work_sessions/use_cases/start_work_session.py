@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+import re
 
 from app.domains.identity.people.repositories import (
     PersonRepository,
@@ -36,7 +37,6 @@ from app.domains.work_orders.work_sessions.value_objects import (
 
 @dataclass(frozen=True)
 class StartWorkSessionCommand:
-    code: str
     work_order_code: str
     activity_code: str
     person_code: str
@@ -145,15 +145,13 @@ class StartWorkSession:
                 "person is not active"
             )
 
-        existing_session = (
-            self._work_session_repository.get_by_code(
-                command.code
-            )
-        )
-
-        if existing_session is not None:
+        if (
+            person.code
+            != activity.responsible_person_code
+        ):
             raise ValueError(
-                "work session code already exists"
+                "person is not responsible "
+                "for activity"
             )
 
         active_session = (
@@ -168,6 +166,12 @@ class StartWorkSession:
                 "person already has an "
                 "active work session"
             )
+
+        work_session_code = (
+            self._generate_next_work_session_code(
+                work_order.code
+            )
+        )
 
         if (
             work_order.status
@@ -192,7 +196,7 @@ class StartWorkSession:
             )
 
         work_session = WorkSession(
-            code=command.code,
+            code=work_session_code,
             work_order_code=work_order.code,
             activity_code=activity.code,
             person_code=person.code,
@@ -212,4 +216,54 @@ class StartWorkSession:
 
         return StartWorkSessionResult(
             work_session=work_session
+        )
+
+    def _generate_next_work_session_code(
+        self,
+        work_order_code: str,
+    ) -> str:
+
+        normalized_work_order_code = str(
+            work_order_code
+        ).strip().upper()
+
+        sessions = (
+            self._work_session_repository
+            .list_by_work_order(
+                normalized_work_order_code
+            )
+        )
+
+        pattern = re.compile(
+            rf"^{re.escape(normalized_work_order_code)}"
+            r"-WS-(\d+)$"
+        )
+
+        highest_sequence = 0
+
+        for session in sessions:
+
+            match = pattern.match(
+                session.code
+            )
+
+            if match is None:
+                continue
+
+            sequence = int(
+                match.group(1)
+            )
+
+            highest_sequence = max(
+                highest_sequence,
+                sequence,
+            )
+
+        next_sequence = (
+            highest_sequence + 1
+        )
+
+        return (
+            f"{normalized_work_order_code}"
+            f"-WS-{next_sequence:03d}"
         )

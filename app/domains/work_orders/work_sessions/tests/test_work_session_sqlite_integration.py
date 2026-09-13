@@ -234,7 +234,6 @@ def test_should_execute_complete_automatic_work_session_flow(
     start_result = (
         start_work_session.execute(
             StartWorkSessionCommand(
-                code="WS-AUTO-001",
                 work_order_code="WO-001",
                 activity_code="ACT-001",
                 person_code="TECH-001",
@@ -289,7 +288,7 @@ def test_should_execute_complete_automatic_work_session_flow(
     persisted_started_session = (
         repositories["work_session"]
         .get_by_code(
-            "WS-AUTO-001"
+            "WO-001-WS-001"
         )
     )
 
@@ -313,7 +312,7 @@ def test_should_execute_complete_automatic_work_session_flow(
 
     end_work_session.execute(
         EndWorkSessionCommand(
-            code="WS-AUTO-001",
+            code="WO-001-WS-001",
             ended_at=ended_at,
             actor_person_code="TECH-001",
         )
@@ -322,7 +321,7 @@ def test_should_execute_complete_automatic_work_session_flow(
     persisted_ended_session = (
         repositories["work_session"]
         .get_by_code(
-            "WS-AUTO-001"
+            "WO-001-WS-001"
         )
     )
 
