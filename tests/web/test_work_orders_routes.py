@@ -28,6 +28,11 @@ from app.domains.work_orders.bootstrap.work_order_container import (
 )
 def create_web_work_order(
     code,
+    asset_code="S2-480-ES09-T269",
+    requester_person_code="55464",
+    supervisor_person_code="12",
+    requester_name=None,
+    requester_phone=None,
 ):
 
     return WorkOrder(
@@ -36,9 +41,11 @@ def create_web_work_order(
         description="Prueba.",
         work_type="PREVENTIVE",
         priority="HIGH",
-        asset_code="S2-480-ES09-T269",
-        requester_person_code="55464",
-        supervisor_person_code="12",
+        asset_code=asset_code,
+        requester_person_code=requester_person_code,
+        supervisor_person_code=supervisor_person_code,
+        requester_name=requester_name,
+        requester_phone=requester_phone,
         created_at=datetime(
             2026,
             8,
@@ -1119,4 +1126,279 @@ def test_should_reject_start_work_session_for_non_responsible_person(
     assert (
         persisted_activity.status
         == ActivityStatus.PENDING
+    )
+
+
+# ============================================================
+# WORK-ORDER-EXECUTION-002C
+# Web integration: detener trabajo
+# ============================================================
+
+
+def test_should_redirect_unauthenticated_end_work_session_to_login(
+    client,
+):
+    response = client.post(
+        (
+            "/ordenes/WO-WSWEB-003/"
+            "actividades/WO-WSWEB-003-ACT-001/"
+            "trabajo/detener"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    assert "/login" in response.headers["Location"]
+
+
+def test_should_end_work_session_from_web(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+    people_test_db,
+):
+    from app.domains.identity.people.entities import Person
+
+    from app.domains.work_orders.work_sessions.bootstrap import (
+        work_session_repository,
+    )
+
+    work_order_code = "WO-WSWEB-003"
+    activity_code = "WO-WSWEB-003-ACT-001"
+
+    people_test_db.save(
+        Person(
+            code="TEST-001",
+            name="Técnico de prueba",
+        )
+    )
+
+    work_order = create_web_work_order(
+        code=work_order_code,
+        asset_code=None,
+        requester_person_code=None,
+        supervisor_person_code=None,
+        requester_name="Solicitante de prueba",
+        requester_phone="8990000000",
+    )
+
+    work_order.approve()
+    work_order.assign()
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    activity = WorkOrderActivity(
+        code=activity_code,
+        work_order_code=work_order_code,
+        title="Trabajo que será detenido",
+        responsible_person_code="TEST-001",
+        estimated_minutes=30,
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    start_response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            f"actividades/{activity_code}/"
+            "trabajo/iniciar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert start_response.status_code == 302
+
+    active_session = (
+        work_session_repository.get_active_by_person(
+            "TEST-001"
+        )
+    )
+
+    assert active_session is not None
+    assert active_session.ended_at is None
+
+    persisted_before_detail = (
+        work_orders_test_db.get_by_code(
+            work_order_code
+        )
+    )
+
+    assert persisted_before_detail is not None
+
+    detail_response = authenticated_client.get(
+        f"/ordenes/{work_order_code}"
+    )
+
+    assert detail_response.status_code == 200
+    assert "Detener trabajo" in detail_response.get_data(
+        as_text=True
+    )
+
+    response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            f"actividades/{activity_code}/"
+            "trabajo/detener"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+
+    persisted_session = (
+        work_session_repository.get_by_code(
+            active_session.code
+        )
+    )
+
+    assert persisted_session is not None
+    assert persisted_session.ended_at is not None
+
+    assert (
+        work_session_repository.get_active_by_person(
+            "TEST-001"
+        )
+        is None
+    )
+
+    persisted_activity = (
+        work_order_activities_test_db.get_by_code(
+            activity_code
+        )
+    )
+
+    assert (
+        persisted_activity.status
+        == ActivityStatus.IN_PROGRESS
+    )
+
+    persisted_order = (
+        work_orders_test_db.get_by_code(
+            work_order_code
+        )
+    )
+
+    assert (
+        persisted_order.status
+        == WorkOrderStatus.IN_PROGRESS
+    )
+
+    detail_response = authenticated_client.get(
+        f"/ordenes/{work_order_code}"
+    )
+
+    assert detail_response.status_code == 200
+
+    html = detail_response.get_data(
+        as_text=True
+    )
+
+    assert "Iniciar trabajo" in html
+    assert "Finalizar actividad" in html
+    assert "Detener trabajo" not in html
+
+
+def test_should_reject_end_work_session_for_wrong_activity(
+    authenticated_client,
+    work_orders_test_db,
+    work_order_activities_test_db,
+    people_test_db,
+):
+    from app.domains.identity.people.entities import Person
+
+    from app.domains.work_orders.work_sessions.bootstrap import (
+        work_session_repository,
+    )
+
+    work_order_code = "WO-WSWEB-004"
+    activity_code = "WO-WSWEB-004-ACT-001"
+
+    people_test_db.save(
+        Person(
+            code="TEST-001",
+            name="Técnico de prueba",
+        )
+    )
+
+    work_order = create_web_work_order(
+        code=work_order_code,
+    )
+
+    work_order.approve()
+    work_order.assign()
+
+    work_orders_test_db.save(
+        work_order
+    )
+
+    activity = WorkOrderActivity(
+        code=activity_code,
+        work_order_code=work_order_code,
+        title="Actividad activa",
+        responsible_person_code="TEST-001",
+        estimated_minutes=30,
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    start_response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            f"actividades/{activity_code}/"
+            "trabajo/iniciar"
+        ),
+        follow_redirects=False,
+    )
+
+    assert start_response.status_code == 302
+
+    response = authenticated_client.post(
+        (
+            f"/ordenes/{work_order_code}/"
+            "actividades/WO-WSWEB-004-ACT-999/"
+            "trabajo/detener"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+
+    assert (
+        b"active work session does not belong to activity"
+        in response.data
+    )
+
+    active_session = (
+        work_session_repository.get_active_by_person(
+            "TEST-001"
+        )
+    )
+
+    assert active_session is not None
+    assert active_session.ended_at is None
+
+
+def test_should_reject_end_when_no_active_work_session(
+    authenticated_client,
+):
+    response = authenticated_client.post(
+        (
+            "/ordenes/WO-WSWEB-005/"
+            "actividades/WO-WSWEB-005-ACT-001/"
+            "trabajo/detener"
+        ),
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+
+    assert (
+        b"active work session not found"
+        in response.data
     )

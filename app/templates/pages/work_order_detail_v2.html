@@ -842,46 +842,92 @@ Orden {{ orden.code }}
 
                             {% if activity.status == "PENDING" %}
 
-                                <div class="work-order-activity-item__actions">
+                                {% if not active_work_session %}
 
-                                    <form
-                                        method="post"
-                                        action="{{ url_for(
-                                            'work_orders.start_work_session_route',
-                                            numero=orden.code,
-                                            activity_code=activity.code
-                                        ) }}"
-                                    >
-                                        <button
-                                            type="submit"
-                                            class="button button-primary"
+                                    <div class="work-order-activity-item__actions">
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'work_orders.start_work_session_route',
+                                                numero=orden.code,
+                                                activity_code=activity.code
+                                            ) }}"
                                         >
-                                            Iniciar trabajo
-                                        </button>
-                                    </form>
+                                            <button
+                                                type="submit"
+                                                class="button button-primary"
+                                            >
+                                                Iniciar trabajo
+                                            </button>
+                                        </form>
 
-                                </div>
+                                    </div>
+
+                                {% endif %}
 
 
                             {% elif activity.status == "IN_PROGRESS" %}
 
                                 <div class="work-order-activity-item__actions">
 
-                                    <form
-                                        method="post"
-                                        action="{{ url_for(
-                                            'work_orders.complete_work_order_activity_route',
-                                            numero=orden.code,
-                                            activity_code=activity.code
-                                        ) }}"
-                                    >
-                                        <button
-                                            type="submit"
-                                            class="button button-primary"
+                                    {% if
+                                        active_work_session
+                                        and active_work_session.work_order_code == orden.code
+                                        and active_work_session.activity_code == activity.code
+                                    %}
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'work_orders.end_work_session_route',
+                                                numero=orden.code,
+                                                activity_code=activity.code
+                                            ) }}"
                                         >
-                                            Finalizar actividad
-                                        </button>
-                                    </form>
+                                            <button
+                                                type="submit"
+                                                class="button button-primary"
+                                            >
+                                                Detener trabajo
+                                            </button>
+                                        </form>
+
+                                    {% elif not active_work_session %}
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'work_orders.start_work_session_route',
+                                                numero=orden.code,
+                                                activity_code=activity.code
+                                            ) }}"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="button button-primary"
+                                            >
+                                                Iniciar trabajo
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for(
+                                                'work_orders.complete_work_order_activity_route',
+                                                numero=orden.code,
+                                                activity_code=activity.code
+                                            ) }}"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="button button-primary"
+                                            >
+                                                Finalizar actividad
+                                            </button>
+                                        </form>
+
+                                    {% endif %}
 
                                 </div>
 

@@ -101,10 +101,13 @@ from app.domains.identity.authentication import (
 )
 
 from app.domains.work_orders.work_sessions.bootstrap import (
+    end_work_session,
     start_work_session,
+    work_session_repository,
 )
 
 from app.domains.work_orders.work_sessions.use_cases import (
+    EndWorkSessionCommand,
     StartWorkSessionCommand,
 )
 
@@ -576,6 +579,21 @@ def detalle(numero):
     )
     
 
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    active_work_session = None
+
+    if person_code:
+        active_work_session = (
+            work_session_repository.get_active_by_person(
+                person_code
+            )
+        )
     return render_template(
         "pages/work_order_detail_v2.html",
         orden=orden,
@@ -585,6 +603,7 @@ def detalle(numero):
         tools=tools,
         evidence=evidence,
         timeline=timeline,
+        active_work_session=active_work_session,
     )
 
 # =====================================================
@@ -1228,6 +1247,74 @@ def start_work_session_route(
                 started_at=now,
                 created_at=now,
                 created_by_person_code=person_code,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/trabajo/detener"
+)
+@login_required
+def end_work_session_route(
+    numero: str,
+    activity_code: str,
+):
+
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    if not person_code:
+        return (
+            "Usuario autenticado sin persona asociada",
+            400,
+        )
+
+    active_work_session = (
+        work_session_repository.get_active_by_person(
+            person_code
+        )
+    )
+
+    if active_work_session is None:
+        return (
+            "active work session not found",
+            400,
+        )
+
+    if active_work_session.work_order_code != numero:
+        return (
+            "active work session does not belong to work order",
+            400,
+        )
+
+    if active_work_session.activity_code != activity_code:
+        return (
+            "active work session does not belong to activity",
+            400,
+        )
+
+    try:
+        end_work_session.execute(
+            EndWorkSessionCommand(
+                code=active_work_session.code,
+                ended_at=datetime.now(),
+                actor_person_code=person_code,
             )
         )
 
