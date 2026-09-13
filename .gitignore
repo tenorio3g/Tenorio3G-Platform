@@ -37,3 +37,7 @@ storage/photos/*
 # Evidencias cargadas en órdenes de trabajo
 storage/work_orders/evidence/*
 !storage/work_orders/evidence/.gitkeep
+
+# Respaldos locales de desarrollo
+*.bak
+*.bak-*
