@@ -33,7 +33,9 @@ from app.domains.work_orders.work_sessions.repositories import (
 from app.domains.work_orders.work_sessions.value_objects import (
     WorkSessionSource,
 )
-
+from app.domains.work_orders.technicians.repositories import (
+    WorkOrderTechnicianAssignmentRepository,
+)
 
 @dataclass(frozen=True)
 class StartWorkSessionCommand:
@@ -58,6 +60,9 @@ class StartWorkSession:
         activity_repository: WorkOrderActivityRepository,
         person_repository: PersonRepository,
         work_session_repository: WorkSessionRepository,
+        technician_assignment_repository: (
+            WorkOrderTechnicianAssignmentRepository
+        ),
     ):
         self._work_order_repository = (
             work_order_repository
@@ -73,6 +78,10 @@ class StartWorkSession:
 
         self._work_session_repository = (
             work_session_repository
+        )
+
+        self._technician_assignment_repository = (
+            technician_assignment_repository
         )
 
     def execute(
@@ -145,13 +154,23 @@ class StartWorkSession:
                 "person is not active"
             )
 
-        if (
-            person.code
-            != activity.responsible_person_code
-        ):
+        assignments = (
+            self._technician_assignment_repository
+            .list_by_work_order(
+                work_order.code
+            )
+        )
+
+        is_assigned_to_work_order = any(
+            assignment.is_active
+            and assignment.person_code == person.code
+            for assignment in assignments
+        )
+
+        if not is_assigned_to_work_order:
             raise ValueError(
-                "person is not responsible "
-                "for activity"
+                "person is not assigned "
+                "to work order"
             )
 
         active_session = (

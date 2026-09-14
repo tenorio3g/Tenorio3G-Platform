@@ -133,7 +133,39 @@ class WorkOrderActivity:
 
         self.started_at = started_at
 
+    def hold(
+        self,
+    ) -> None:
 
+        if (
+            self.status
+            != ActivityStatus.IN_PROGRESS
+        ):
+            raise ValueError(
+                "activity cannot be held from current status"
+            )
+
+        self.status = (
+            ActivityStatus.ON_HOLD
+        )
+
+
+    def resume(
+        self,
+    ) -> None:
+
+        if (
+            self.status
+            != ActivityStatus.ON_HOLD
+        ):
+            raise ValueError(
+                "activity cannot be resumed from current status"
+            )
+
+        self.status = (
+            ActivityStatus.IN_PROGRESS
+        )
+        
     def complete(
         self,
         completed_at: datetime,

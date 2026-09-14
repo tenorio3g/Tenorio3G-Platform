@@ -1,3 +1,5 @@
+﻿from datetime import datetime
+
 from app.domains.identity.people.entities import (
     Person,
 )
@@ -8,6 +10,18 @@ from app.domains.identity.people.repositories import (
 
 from app.domains.work_orders.activities.entities import (
     WorkOrderActivity,
+)
+
+from app.domains.work_orders.activities.holds.entities import (
+    ActivityHold,
+)
+
+from app.domains.work_orders.activities.holds.repositories import (
+    InMemoryActivityHoldRepository,
+)
+
+from app.domains.work_orders.activities.holds.value_objects import (
+    ActivityHoldReason,
 )
 
 from app.domains.work_orders.activities.repositories import (
@@ -30,14 +44,20 @@ def build_use_case():
         InMemoryPersonRepository()
     )
 
+    hold_repository = (
+        InMemoryActivityHoldRepository()
+    )
+
     use_case = ListWorkOrderActivities(
         activity_repository,
         person_repository,
+        hold_repository,
     )
 
     return (
         activity_repository,
         person_repository,
+        hold_repository,
         use_case,
     )
 
@@ -63,6 +83,7 @@ def test_should_list_work_order_activities():
     (
         activity_repository,
         person_repository,
+        _,
         use_case,
     ) = build_use_case()
 
@@ -103,12 +124,15 @@ def test_should_list_work_order_activities():
         == "Fortunato"
     )
 
+    assert item.active_hold is None
+
 
 def test_should_list_multiple_activities():
 
     (
         activity_repository,
         person_repository,
+        _,
         use_case,
     ) = build_use_case()
 
@@ -159,7 +183,7 @@ def test_should_list_multiple_activities():
 
 def test_should_return_empty_list():
 
-    _, _, use_case = build_use_case()
+    _, _, _, use_case = build_use_case()
 
     result = use_case.execute(
         ListWorkOrderActivitiesQuery(
@@ -174,6 +198,7 @@ def test_should_ignore_missing_responsible_person():
 
     (
         activity_repository,
+        _,
         _,
         use_case,
     ) = build_use_case()
@@ -192,3 +217,136 @@ def test_should_ignore_missing_responsible_person():
     )
 
     assert result.items == []
+
+
+def test_should_include_active_hold():
+
+    (
+        activity_repository,
+        person_repository,
+        hold_repository,
+        use_case,
+    ) = build_use_case()
+
+    person_repository.save(
+        Person(
+            code="55464",
+            name="Fortunato",
+        )
+    )
+
+    activity = create_activity(
+        "ACT-001",
+        "55464",
+    )
+
+    activity_repository.save(
+        activity
+    )
+
+    hold = ActivityHold(
+        code="AH-001",
+        activity_code="ACT-001",
+        reason=ActivityHoldReason.PENDING_MATERIAL,
+        observations="Esperando material",
+        held_at=datetime(
+            2026,
+            9,
+            14,
+            10,
+            30,
+        ),
+        held_by_person_code="55464",
+    )
+
+    hold_repository.save(
+        hold
+    )
+
+    result = use_case.execute(
+        ListWorkOrderActivitiesQuery(
+            work_order_code="WO-001"
+        )
+    )
+
+    item = result.items[0]
+
+    assert item.active_hold is not None
+    assert item.active_hold.code == "AH-001"
+
+    assert (
+        item.active_hold.reason
+        == ActivityHoldReason.PENDING_MATERIAL
+    )
+
+    assert (
+        item.active_hold.observations
+        == "Esperando material"
+    )
+
+    assert (
+        item.active_hold.held_by_person_code
+        == "55464"
+    )
+
+
+def test_should_not_include_resumed_hold_as_active():
+
+    (
+        activity_repository,
+        person_repository,
+        hold_repository,
+        use_case,
+    ) = build_use_case()
+
+    person_repository.save(
+        Person(
+            code="55464",
+            name="Fortunato",
+        )
+    )
+
+    activity_repository.save(
+        create_activity(
+            "ACT-001",
+            "55464",
+        )
+    )
+
+    hold = ActivityHold(
+        code="AH-001",
+        activity_code="ACT-001",
+        reason=ActivityHoldReason.PENDING_MATERIAL,
+        observations="Esperando material",
+        held_at=datetime(
+            2026,
+            9,
+            14,
+            10,
+            30,
+        ),
+        held_by_person_code="55464",
+        resumed_at=datetime(
+            2026,
+            9,
+            14,
+            11,
+            0,
+        ),
+        resumed_by_person_code="55464",
+    )
+
+    hold_repository.save(
+        hold
+    )
+
+    result = use_case.execute(
+        ListWorkOrderActivitiesQuery(
+            work_order_code="WO-001"
+        )
+    )
+
+    assert (
+        result.items[0].active_hold
+        is None
+    )

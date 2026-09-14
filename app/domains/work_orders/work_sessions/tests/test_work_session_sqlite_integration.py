@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 import pytest
 
@@ -66,6 +66,14 @@ from app.domains.work_orders.work_sessions.value_objects import (
     WorkSessionSource,
 )
 
+from app.domains.work_orders.technicians.entities import (
+    WorkOrderTechnicianAssignment,
+)
+
+from app.domains.work_orders.technicians.repositories import (
+    SQLiteWorkOrderTechnicianAssignmentRepository,
+)
+
 
 @pytest.fixture
 def repositories(tmp_path):
@@ -120,12 +128,21 @@ def repositories(tmp_path):
         )
     )
 
+    technician_assignment_repository = (
+        SQLiteWorkOrderTechnicianAssignmentRepository(
+            session_factory
+        )
+    )
+
     yield {
         "person": person_repository,
         "work_order": work_order_repository,
         "activity": activity_repository,
         "work_session": work_session_repository,
         "audit": audit_repository,
+        "technician_assignment": (
+            technician_assignment_repository
+        ),
     }
 
     Base.metadata.drop_all(
@@ -198,6 +215,20 @@ def prepare_base_data(
         create_activity()
     )
 
+    repositories["technician_assignment"].save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-001",
+            person_code="TECH-001",
+            assigned_at=datetime(
+                2026,
+                8,
+                26,
+                6,
+                45,
+            ),
+        )
+    )
+
 
 def test_should_execute_complete_automatic_work_session_flow(
     repositories,
@@ -213,6 +244,7 @@ def test_should_execute_complete_automatic_work_session_flow(
             repositories["activity"],
             repositories["person"],
             repositories["work_session"],
+            repositories["technician_assignment"],
         )
     )
 
@@ -595,3 +627,4 @@ def test_should_execute_complete_manual_work_session_audit_flow(
         correction_audit.reason
         == "Correccion de horario."
     )
+

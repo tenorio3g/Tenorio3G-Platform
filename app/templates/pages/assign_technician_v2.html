@@ -40,33 +40,78 @@ Asignar técnico - {{ orden.code }}
 
             {% endif %}
 
-            <form method="post">
+            {% if people %}
 
-                <div class="form-field">
+                <form method="post">
 
-                    <label for="person_code">
-                        Código del técnico
-                    </label>
+                    <div class="form-field">
 
-                    <input
-                        id="person_code"
-                        name="person_code"
-                        type="text"
-                        required
-                        value="{{ person_code|default('') }}"
-                        placeholder="Ej. 55464"
-                    >
+                        <label for="person_code">
+                            Técnico
+                        </label>
 
+                        <select
+                            id="person_code"
+                            name="person_code"
+                            required
+                        >
+
+                            <option value="">
+                                Seleccione un técnico...
+                            </option>
+
+                            {% for person in people %}
+
+                                <option
+                                    value="{{ person.code }}"
+                                    {% if person_code == person.code %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ person.name }}
+                                    — {{ person.code }}
+                                    {% if person.position %}
+                                        — {{ person.position }}
+                                    {% endif %}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Asignar técnico
+                        </button>
+
+                        <a
+                            class="button button-secondary"
+                            href="{{ url_for(
+                                'work_orders.detalle',
+                                numero=orden.code
+                            ) }}"
+                        >
+                            Cancelar
+                        </a>
+
+                    </div>
+
+                </form>
+
+            {% else %}
+
+                <div class="form-alert">
+                    No hay personas activas disponibles
+                    para asignar a esta orden.
                 </div>
 
                 <div class="form-actions">
-
-                    <button
-                        type="submit"
-                        class="button button-primary"
-                    >
-                        Asignar técnico
-                    </button>
 
                     <a
                         class="button button-secondary"
@@ -75,14 +120,12 @@ Asignar técnico - {{ orden.code }}
                             numero=orden.code
                         ) }}"
                     >
-                        Cancelar
+                        Volver a la orden
                     </a>
 
                 </div>
 
-                
-
-            </form>
+            {% endif %}
 
         </div>
 

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -14,6 +14,11 @@ class WorkOrderActivityItemViewModel:
     actual_minutes: int | None
     started_at: str | None
     completed_at: str | None
+    hold_reason: str | None = None
+    hold_reason_label: str | None = None
+    hold_observations: str | None = None
+    held_at: str | None = None
+    held_by_person_code: str | None = None
 
 
 @dataclass(frozen=True)

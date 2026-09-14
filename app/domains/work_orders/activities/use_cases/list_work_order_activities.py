@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 
 from app.domains.identity.people.entities import (
     Person,
@@ -12,6 +12,14 @@ from app.domains.work_orders.activities.entities import (
     WorkOrderActivity,
 )
 
+from app.domains.work_orders.activities.holds.entities import (
+    ActivityHold,
+)
+
+from app.domains.work_orders.activities.holds.repositories import (
+    ActivityHoldRepository,
+)
+
 from app.domains.work_orders.activities.repositories import (
     WorkOrderActivityRepository,
 )
@@ -21,6 +29,7 @@ from app.domains.work_orders.activities.repositories import (
 class WorkOrderActivityItem:
     activity: WorkOrderActivity
     responsible_person: Person
+    active_hold: ActivityHold | None = None
 
 
 @dataclass(frozen=True)
@@ -39,6 +48,7 @@ class ListWorkOrderActivities:
         self,
         activity_repository: WorkOrderActivityRepository,
         person_repository: PersonRepository,
+        hold_repository: ActivityHoldRepository,
     ):
         self._activity_repository = (
             activity_repository
@@ -46,6 +56,10 @@ class ListWorkOrderActivities:
 
         self._person_repository = (
             person_repository
+        )
+
+        self._hold_repository = (
+            hold_repository
         )
 
     def execute(
@@ -74,13 +88,21 @@ class ListWorkOrderActivities:
             if person is None:
                 continue
 
+            active_hold = (
+                self._hold_repository
+                .get_active_by_activity(
+                    activity.code
+                )
+            )
+
             items.append(
                 WorkOrderActivityItem(
                     activity=activity,
                     responsible_person=person,
+                    active_hold=active_hold,
                 )
             )
 
         return ListWorkOrderActivitiesResult(
             items=items
-        )   
+        )

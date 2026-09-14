@@ -26,9 +26,12 @@ from app.domains.work_orders.work_sessions.use_cases import (
     AddManualWorkSession,
     CorrectManualWorkSession,
     EndWorkSession,
+    GetWorkSessionSummary,
     StartWorkSession,
 )
-
+from app.domains.work_orders.technicians.bootstrap import (
+    technician_assignment_repository,
+)
 
 work_session_repository = (
     SQLiteWorkSessionRepository(
@@ -49,11 +52,19 @@ start_work_session = (
         work_order_activity_repository,
         person_repository,
         work_session_repository,
+        technician_assignment_repository,
     )
 )
 
 end_work_session = (
     EndWorkSession(
+        work_session_repository,
+        person_repository,
+    )
+)
+
+get_work_session_summary = (
+    GetWorkSessionSummary(
         work_session_repository,
         person_repository,
     )

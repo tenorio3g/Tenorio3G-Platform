@@ -1,5 +1,6 @@
-from pathlib import Path
+﻿from pathlib import Path
 from tempfile import NamedTemporaryFile
+from uuid import uuid4
 
 from flask import (
     render_template,
@@ -83,18 +84,26 @@ from app.domains.work_orders.activities.bootstrap import (
     list_work_order_activities,
     create_work_order_activity,
     complete_work_order_activity,
-    start_work_order_activity,
+        hold_work_order_activity,
+    resume_work_order_activity,
+start_work_order_activity,
 )
 
 from app.domains.work_orders.activities.presentation import (
     WorkOrderActivitiesPresenter,
 )
 
+
+from app.domains.work_orders.activities.holds.value_objects import (
+    ActivityHoldReason,
+)
 from app.domains.work_orders.activities.use_cases import (
     ListWorkOrderActivitiesQuery,
     CreateWorkOrderActivityCommand,
     CompleteWorkOrderActivityCommand,
-    StartWorkOrderActivityCommand,
+        HoldWorkOrderActivityCommand,
+    ResumeWorkOrderActivityCommand,
+StartWorkOrderActivityCommand,
 )
 from app.domains.identity.authentication import (
     login_required,
@@ -102,12 +111,18 @@ from app.domains.identity.authentication import (
 
 from app.domains.work_orders.work_sessions.bootstrap import (
     end_work_session,
+    get_work_session_summary,
     start_work_session,
     work_session_repository,
 )
 
+from app.domains.work_orders.work_sessions.presentation import (
+    WorkSessionSummaryPresenter,
+)
+
 from app.domains.work_orders.work_sessions.use_cases import (
     EndWorkSessionCommand,
+    GetWorkSessionSummaryQuery,
     StartWorkSessionCommand,
 )
 
@@ -579,6 +594,20 @@ def detalle(numero):
     )
     
 
+    work_session_summary_result = (
+        get_work_session_summary.execute(
+            GetWorkSessionSummaryQuery(
+                work_order_code=numero,
+            )
+        )
+    )
+
+    work_session_summary = (
+        WorkSessionSummaryPresenter.present(
+            work_session_summary_result
+        )
+    )
+
     person_code = str(
         session.get(
             "person_code",
@@ -604,10 +633,11 @@ def detalle(numero):
         evidence=evidence,
         timeline=timeline,
         active_work_session=active_work_session,
+        work_session_summary=work_session_summary,
     )
 
 # =====================================================
-# Asignar Técnico
+# Asignar TÃ©cnico
 # =====================================================
 
 @work_orders.route(
@@ -640,15 +670,78 @@ def asignar_tecnico(
         detail_result.supervisor,
     )
 
+    # =================================================
+    # Personas disponibles
+    # =================================================
+
+    people_result = list_people.execute()
+
+    # =================================================
+    # TÃ©cnicos ya asignados a esta orden
+    # =================================================
+
+    technicians_result = (
+        list_work_order_technicians.execute(
+            ListWorkOrderTechniciansQuery(
+                work_order_code=numero,
+            )
+        )
+    )
+
+    assigned_technicians = (
+        WorkOrderTechniciansPresenter.present(
+            technicians_result
+        )
+    )
+
+    assigned_person_codes = {
+        str(technician.person_code).strip().upper()
+        for technician in assigned_technicians.items
+    }
+
+    # =================================================
+    # Filtrar personas disponibles
+    #
+    # - solamente personas activas
+    # - excluir personas ya asignadas
+    # =================================================
+
+    available_people = [
+        person
+        for person in people_result.people
+        if (
+            person.is_active
+            and str(person.code).strip().upper()
+            not in assigned_person_codes
+        )
+    ]
+
+    available_people.sort(
+        key=lambda person: person.name.lower()
+    )
+
+    # =================================================
+    # GET
+    # =================================================
+
     if request.method == "GET":
         return render_template(
             "pages/assign_technician_v2.html",
             orden=orden,
+            people=available_people,
         )
 
-    person_code = request.form.get(
-        "person_code",
-        "",
+    # =================================================
+    # POST
+    # =================================================
+
+    person_code = (
+        request.form.get(
+            "person_code",
+            "",
+        )
+        .strip()
+        .upper()
     )
 
     try:
@@ -664,6 +757,7 @@ def asignar_tecnico(
         return render_template(
             "pages/assign_technician_v2.html",
             orden=orden,
+            people=available_people,
             error=str(exc),
             person_code=person_code,
         )
@@ -1391,6 +1485,149 @@ def complete_work_order_activity_route(
     )
 
 
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/espera"
+)
+@login_required
+def hold_work_order_activity_route(
+    numero: str,
+    activity_code: str,
+):
+
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    if not person_code:
+        return (
+            "Usuario autenticado sin persona asociada",
+            400,
+        )
+
+    try:
+        activity_sessions = (
+            work_session_repository
+            .list_by_activity(
+                activity_code
+            )
+        )
+
+        has_active_session = any(
+            work_session.ended_at is None
+            for work_session in activity_sessions
+        )
+
+        if has_active_session:
+            raise ValueError(
+                "Detenga primero el trabajo activo "
+                "antes de poner la actividad en espera."
+            )
+
+        reason_raw = str(
+            request.form.get(
+                "reason",
+                "",
+            )
+        ).strip().upper()
+
+        if not reason_raw:
+            raise ValueError(
+                "El motivo de espera es obligatorio."
+            )
+
+        try:
+            reason = ActivityHoldReason(
+                reason_raw
+            )
+        except ValueError as exc:
+            raise ValueError(
+                "El motivo de espera no es válido."
+            ) from exc
+
+        observations = str(
+            request.form.get(
+                "observations",
+                "",
+            )
+        ).strip()
+
+        hold_code = (
+            "AH-"
+            + uuid4().hex[:12].upper()
+        )
+
+        hold_work_order_activity.execute(
+            HoldWorkOrderActivityCommand(
+                code=activity_code,
+                hold_code=hold_code,
+                reason=reason,
+                observations=observations,
+                held_at=datetime.now(),
+                held_by_person_code=person_code,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
+
+@work_orders.post(
+    "/ordenes/<numero>/actividades/<activity_code>/reanudar"
+)
+@login_required
+def resume_work_order_activity_route(
+    numero: str,
+    activity_code: str,
+):
+
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    if not person_code:
+        return (
+            "Usuario autenticado sin persona asociada",
+            400,
+        )
+
+    try:
+        resume_work_order_activity.execute(
+            ResumeWorkOrderActivityCommand(
+                code=activity_code,
+                resumed_at=datetime.now(),
+                resumed_by_person_code=person_code,
+            )
+        )
+
+    except ValueError as exc:
+        return (
+            str(exc),
+            400,
+        )
+
+    return redirect(
+        url_for(
+            "work_orders.detalle",
+            numero=numero,
+        )
+    )
+
 @work_orders.route(
     "/ordenes/<numero>/refacciones/nueva",
     methods=["GET", "POST"],
@@ -1721,7 +1958,7 @@ def create_work_order_evidence_route(
             evidence_types=list(
                 EvidenceType
             ),
-            error="Tipo de evidencia inválido.",
+            error="Tipo de evidencia invÃ¡lido.",
             data=request.form,
         )
 

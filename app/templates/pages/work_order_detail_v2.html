@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %}
+﻿{% extends "layouts/base.html" %}
 
 {% block title %}
 Orden {{ orden.code }}
@@ -9,210 +9,290 @@ Orden {{ orden.code }}
 <div class="container">
 
     <!-- =====================================================
-         WORK ORDER HEADER
+         WORK ORDER HEADER V2
          ===================================================== -->
 
-    <div class="work-order-page-heading">
+    <section class="work-order-hero">
 
-        <div>
+        <div class="work-order-hero__main">
 
-            <p class="page-eyebrow">
-                Orden de trabajo
-            </p>
-            <div style="margin: 16px 0; padding: 12px; border: 1px solid #ccc;">
-                <strong>Timeline:</strong>
-                {{ timeline.total }} eventos
+            <div class="work-order-hero__icon">
+                <span>▣</span>
             </div>
 
-            <div class="work-order-page-heading__title-row">
+            <div class="work-order-hero__identity">
 
-                <h1>
-                    {{ orden.code }}
-                </h1>
+                <p class="page-eyebrow">
+                    Orden de trabajo
+                </p>
 
-                <span
-                    class="
-                        work-order-status-badge
-                        work-order-status-badge--{{ orden.status|lower }}
-                    "
-                >
-                    {{ orden.status }}
-                </span>
+                <div class="work-order-hero__title-row">
+
+                    <h1>
+                        {{ orden.code }}
+                    </h1>
+
+                    <span
+                        class="
+                            work-order-status-badge
+                            work-order-status-badge--{{ orden.status|lower }}
+                        "
+                    >
+                        {{ orden.status }}
+                    </span>
+
+                </div>
+
+                <p class="work-order-hero__subtitle">
+                    {{ orden.title }}
+                </p>
 
             </div>
 
-            <p class="work-order-page-heading__subtitle">
-                {{ orden.title }}
-            </p>
+
+            <div class="work-order-hero__actions">
+
+                {% if orden.status == "CREATED" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.approve_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--primary"
+                        >
+                            Autorizar
+                        </button>
+                    </form>
+
+                {% elif orden.status == "APPROVED" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.assign_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--primary"
+                        >
+                            Asignar
+                        </button>
+                    </form>
+
+                {% elif orden.status == "ASSIGNED" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.start_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--primary"
+                        >
+                            Iniciar
+                        </button>
+                    </form>
+
+                {% elif orden.status == "IN_PROGRESS" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.hold_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--warning"
+                        >
+                            Pausar
+                        </button>
+                    </form>
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.complete_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--success"
+                        >
+                            Completar
+                        </button>
+                    </form>
+
+                {% elif orden.status == "ON_HOLD" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.resume_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--primary"
+                        >
+                            Reanudar
+                        </button>
+                    </form>
+
+                {% elif orden.status == "COMPLETED" %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.close_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--primary"
+                        >
+                            Cerrar
+                        </button>
+                    </form>
+
+                {% endif %}
+
+
+                {% if orden.status in [
+                    "CREATED",
+                    "APPROVED",
+                    "ASSIGNED",
+                    "IN_PROGRESS",
+                    "ON_HOLD"
+                ] %}
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'work_orders.cancel_work_order_route',
+                            numero=orden.code
+                        ) }}"
+                        onsubmit="
+                            return confirm(
+                                '¿Deseas cancelar esta orden?'
+                            );
+                        "
+                    >
+                        <button
+                            type="submit"
+                            class="work-order-action work-order-action--danger"
+                        >
+                            Cancelar
+                        </button>
+                    </form>
+
+                {% endif %}
+
+            </div>
 
         </div>
 
-    </div>
+
+        <div class="work-order-hero__details">
+
+            <div class="work-order-hero__information">
+
+                <div class="work-order-hero__meta">
+
+                    <div>
+                        <span>Tipo</span>
+                        <strong>{{ orden.work_type }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Prioridad</span>
+                        <strong>{{ orden.priority }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Creada</span>
+                        <strong>{{ orden.created_at }}</strong>
+                    </div>
+
+                </div>
+
+                <div class="work-order-hero__description">
+
+                    <span>Descripción</span>
+
+                    <p>
+                        {{ orden.description or "Sin descripción." }}
+                    </p>
+
+                </div>
+
+            </div>
 
 
-    <!-- =====================================================
-         WORK ORDER ACTIONS
-         ===================================================== -->
+            <div class="work-order-hero__progress">
 
-    <div class="work-order-actions-bar">
+                <div class="work-order-hero__progress-top">
 
-        {% if orden.status == "CREATED" %}
+                    <span>Avance de la orden</span>
 
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.approve_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Autorizar
-                </button>
-            </form>
+                    <strong>
+                        {{ activities.progress_percent }}%
+                    </strong>
 
+                </div>
 
-        {% elif orden.status == "APPROVED" %}
+                <div class="work-order-hero__progress-track">
 
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.assign_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Asignar
-                </button>
-            </form>
+                    <div
+                        class="work-order-hero__progress-value"
+                        style="--progress-width: {{ activities.progress_percent }}%;"
+                    ></div>
 
+                </div>
 
-        {% elif orden.status == "ASSIGNED" %}
+                <div class="work-order-hero__stats">
 
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.start_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Iniciar
-                </button>
-            </form>
+                    <div>
+                        <strong>{{ activities.total }}</strong>
+                        <span>Total</span>
+                    </div>
 
+                    <div>
+                        <strong>{{ activities.completed }}</strong>
+                        <span>Finalizadas</span>
+                    </div>
 
-        {% elif orden.status == "IN_PROGRESS" %}
+                    <div>
+                        <strong>
+                            {{
+                                activities.total
+                                - activities.completed
+                            }}
+                        </strong>
+                        <span>Pendientes</span>
+                    </div>
 
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.hold_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-secondary"
-                >
-                    Pausar
-                </button>
-            </form>
+                </div>
 
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.complete_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Completar
-                </button>
-            </form>
+            </div>
 
+        </div>
 
-        {% elif orden.status == "ON_HOLD" %}
-
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.resume_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Reanudar
-                </button>
-            </form>
-
-
-        {% elif orden.status == "COMPLETED" %}
-
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.close_work_order_route',
-                    numero=orden.code
-                ) }}"
-            >
-                <button
-                    type="submit"
-                    class="button button-primary"
-                >
-                    Cerrar
-                </button>
-            </form>
-
-        {% endif %}
-
-
-        {% if orden.status in [
-            "CREATED",
-            "APPROVED",
-            "ASSIGNED",
-            "IN_PROGRESS",
-            "ON_HOLD"
-        ] %}
-
-            <form
-                method="post"
-                action="{{ url_for(
-                    'work_orders.cancel_work_order_route',
-                    numero=orden.code
-                ) }}"
-                onsubmit="
-                    return confirm(
-                        '¿Deseas cancelar esta orden?'
-                    );
-                "
-            >
-                <button
-                    type="submit"
-                    class="button button-secondary"
-                >
-                    Cancelar
-                </button>
-            </form>
-
-        {% endif %}
-
-    </div>
-
+    </section>
 
     <!-- =====================================================
          WORK ORDER GRID
@@ -623,81 +703,7 @@ Orden {{ orden.code }}
 
             <div class="asset-workspace-card__body">
 
-
-                <!-- ACTIVITY SUMMARY -->
-
-                <div class="work-order-activities-summary">
-
-                    <div class="work-order-activities-progress">
-
-                        <div class="work-order-activities-progress__top">
-
-                            <span>
-                                Avance de la orden
-                            </span>
-
-                            <strong>
-                                {{ activities.progress_percent }}%
-                            </strong>
-
-                        </div>
-
-                        <div class="work-order-activities-progress__track">
-
-                            <div
-                                class="work-order-activities-progress__value"
-                                style="--progress-width: {{ activities.progress_percent }}%;"
-                            ></div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="work-order-activities-stats">
-
-                        <div>
-
-                            <strong>
-                                {{ activities.total }}
-                            </strong>
-
-                            <span>
-                                Total
-                            </span>
-
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                {{ activities.completed }}
-                            </strong>
-
-                            <span>
-                                Finalizadas
-                            </span>
-
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                {{
-                                    activities.total
-                                    - activities.completed
-                                }}
-                            </strong>
-
-                            <span>
-                                Pendientes
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
+                
 
 
                 <!-- ACTIVITY ITEMS -->
@@ -838,8 +844,239 @@ Orden {{ orden.code }}
                                 </div>
 
                             </div>
+                            {% set activity_work_sessions =
+                                work_session_summary.by_activity.get(
+                                    activity.code
+                                )
+                            %}
 
 
+                            {% if activity_work_sessions %}
+
+                                <div class="work-order-work-sessions">
+
+                                    <div class="work-order-work-sessions__header">
+
+                                        <div>
+
+                                            <span class="work-order-work-sessions__eyebrow">
+                                                Tiempo de trabajo
+                                            </span>
+
+                                            <h5>
+                                                Sesiones registradas
+                                            </h5>
+
+                                        </div>
+
+
+                                        {% if activity_work_sessions.has_active_session %}
+
+                                            <span class="
+                                                work-order-work-session-status
+                                                work-order-work-session-status--active
+                                            ">
+                                                En curso
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div class="work-order-work-sessions__summary">
+
+                                        <div class="work-order-work-session-stat">
+
+                                            <span>
+                                                Tiempo cerrado
+                                            </span>
+
+                                            <strong>
+                                                {{ activity_work_sessions.total_duration_label }}
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="work-order-work-session-stat">
+
+                                            <span>
+                                                Sesiones cerradas
+                                            </span>
+
+                                            <strong>
+                                                {{ activity_work_sessions.closed_session_count }}
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div class="work-order-work-session-stat">
+
+                                            <span>
+                                                Técnicos
+                                            </span>
+
+                                            <strong>
+                                                {{ activity_work_sessions.technicians|length }}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {% if activity_work_sessions.technicians %}
+
+                                        <div class="work-order-work-sessions__section">
+
+                                            <span class="work-order-work-sessions__section-title">
+                                                Tiempo por técnico
+                                            </span>
+
+
+                                            <div class="work-order-work-session-technicians">
+
+                                                {% for technician in activity_work_sessions.technicians %}
+
+                                                    <div class="work-order-work-session-technician">
+
+                                                        <div>
+
+                                                            <strong>
+                                                                {{ technician.person_name }}
+                                                            </strong>
+
+                                                            <span>
+                                                                {{ technician.person_code }}
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <div class="work-order-work-session-technician__time">
+
+                                                            <strong>
+                                                                {{ technician.total_duration_label }}
+                                                            </strong>
+
+                                                            {% if technician.has_active_session %}
+
+                                                                <span class="
+                                                                    work-order-work-session-status
+                                                                    work-order-work-session-status--active
+                                                                ">
+                                                                    En curso
+                                                                </span>
+
+                                                            {% endif %}
+
+                                                        </div>
+
+                                                    </div>
+
+                                                {% endfor %}
+
+                                            </div>
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    {% if activity_work_sessions.sessions %}
+
+                                        <div class="work-order-work-sessions__section">
+
+                                            <span class="work-order-work-sessions__section-title">
+                                                Historial de sesiones
+                                            </span>
+
+
+                                            <div class="work-order-work-session-list">
+
+                                                {% for work_session in activity_work_sessions.sessions %}
+
+                                                    <div class="
+                                                        work-order-work-session-item
+
+                                                        {% if work_session.is_active %}
+                                                            work-order-work-session-item--active
+                                                        {% endif %}
+                                                    ">
+
+                                                        <div class="work-order-work-session-item__person">
+
+                                                            <strong>
+                                                                {{ work_session.person_name }}
+                                                            </strong>
+
+                                                            <span>
+                                                                {{ work_session.person_code }}
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <div class="work-order-work-session-item__period">
+
+                                                            <span>
+                                                                {{ work_session.started_at }}
+                                                            </span>
+
+                                                            <span>
+                                                                →
+                                                            </span>
+
+                                                            <span>
+
+                                                                {% if work_session.ended_at %}
+                                                                    {{ work_session.ended_at }}
+                                                                {% else %}
+                                                                    En curso
+                                                                {% endif %}
+
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <div class="work-order-work-session-item__duration">
+
+                                                            {% if work_session.is_active %}
+
+                                                                <span class="
+                                                                    work-order-work-session-status
+                                                                    work-order-work-session-status--active
+                                                                ">
+                                                                    {{ work_session.duration_label }}
+                                                                </span>
+
+                                                            {% else %}
+
+                                                                <strong>
+                                                                    {{ work_session.duration_label }}
+                                                                </strong>
+
+                                                            {% endif %}
+
+                                                        </div>
+
+                                                    </div>
+
+                                                {% endfor %}
+
+                                            </div>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endif %}
+                            
                             {% if activity.status == "PENDING" %}
 
                                 {% if not active_work_session %}
@@ -856,7 +1093,7 @@ Orden {{ orden.code }}
                                         >
                                             <button
                                                 type="submit"
-                                                class="button button-primary"
+                                                class="button button-work-start"
                                             >
                                                 Iniciar trabajo
                                             </button>
@@ -887,7 +1124,7 @@ Orden {{ orden.code }}
                                         >
                                             <button
                                                 type="submit"
-                                                class="button button-primary"
+                                                class="button button-work-stop"
                                             >
                                                 Detener trabajo
                                             </button>
@@ -905,7 +1142,7 @@ Orden {{ orden.code }}
                                         >
                                             <button
                                                 type="submit"
-                                                class="button button-primary"
+                                                class="button button-work-start"
                                             >
                                                 Iniciar trabajo
                                             </button>
@@ -921,18 +1158,157 @@ Orden {{ orden.code }}
                                         >
                                             <button
                                                 type="submit"
-                                                class="button button-primary"
+                                                class="button button-activity-complete"
                                             >
                                                 Finalizar actividad
                                             </button>
                                         </form>
 
+                                        <details class="activity-hold-control">
+
+                                            <summary class="button button-activity-hold">
+                                                Poner en espera
+                                            </summary>
+
+                                            <form
+                                                method="post"
+                                                class="activity-hold-form"
+                                                action="{{ url_for(
+                                                    'work_orders.hold_work_order_activity_route',
+                                                    numero=orden.code,
+                                                    activity_code=activity.code
+                                                ) }}"
+                                            >
+
+                                                <label>
+                                                    Motivo de espera
+
+                                                    <select
+                                                        name="reason"
+                                                        required
+                                                    >
+                                                        <option value="">
+                                                            Seleccione un motivo
+                                                        </option>
+
+                                                        <option value="PENDING_MATERIAL">
+                                                            Material pendiente
+                                                        </option>
+
+                                                        <option value="PENDING_SPARE_PART">
+                                                            Refacción pendiente
+                                                        </option>
+
+                                                        <option value="PENDING_PROVIDER">
+                                                            Proveedor pendiente
+                                                        </option>
+
+                                                        <option value="PENDING_AUTHORIZATION">
+                                                            Autorización pendiente
+                                                        </option>
+
+                                                        <option value="EQUIPMENT_IN_USE">
+                                                            Equipo en uso
+                                                        </option>
+
+                                                        <option value="OTHER">
+                                                            Otro
+                                                        </option>
+                                                    </select>
+                                                </label>
+
+                                                <label>
+                                                    Observaciones
+
+                                                    <textarea
+                                                        name="observations"
+                                                        rows="3"
+                                                        placeholder="Ej. Se solicitó el material y se espera su llegada."
+                                                    ></textarea>
+                                                </label>
+
+                                                <button
+                                                    type="submit"
+                                                    class="button button-activity-hold-confirm"
+                                                >
+                                                    Confirmar espera
+                                                </button>
+
+                                            </form>
+
+                                        </details>
+
                                     {% endif %}
 
                                 </div>
 
-                            {% endif %}
 
+                            {% elif activity.status == "ON_HOLD" %}
+
+                                <div class="activity-hold-info">
+
+                                    <div class="activity-hold-info__header">
+
+                                        <strong>
+                                            En espera
+                                        </strong>
+
+                                        {% if activity.hold_reason_label %}
+                                            <span>
+                                                {{ activity.hold_reason_label }}
+                                            </span>
+                                        {% endif %}
+
+                                    </div>
+
+                                    {% if activity.hold_observations %}
+
+                                        <p class="activity-hold-info__observations">
+                                            {{ activity.hold_observations }}
+                                        </p>
+
+                                    {% endif %}
+
+                                    <div class="activity-hold-info__meta">
+
+                                        {% if activity.held_at %}
+                                            <span>
+                                                Desde: {{ activity.held_at }}
+                                            </span>
+                                        {% endif %}
+
+                                        {% if activity.held_by_person_code %}
+                                            <span>
+                                                Registrado por:
+                                                {{ activity.held_by_person_code }}
+                                            </span>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                                <div class="work-order-activity-item__actions">
+
+                                    <form
+                                        method="post"
+                                        action="{{ url_for(
+                                            'work_orders.resume_work_order_activity_route',
+                                            numero=orden.code,
+                                            activity_code=activity.code
+                                        ) }}"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="button button-activity-resume"
+                                        >
+                                            Reanudar actividad
+                                        </button>
+                                    </form>
+
+                                </div>
+
+                            {% endif %}
                         </article>
 
                     {% endfor %}

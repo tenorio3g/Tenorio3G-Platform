@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from app.domains.identity.people.entities import (
     Person,
@@ -6,6 +6,14 @@ from app.domains.identity.people.entities import (
 
 from app.domains.work_orders.activities.entities import (
     WorkOrderActivity,
+)
+
+from app.domains.work_orders.activities.holds.entities import (
+    ActivityHold,
+)
+
+from app.domains.work_orders.activities.holds.value_objects import (
+    ActivityHoldReason,
 )
 
 from app.domains.work_orders.activities.presentation import (
@@ -81,6 +89,12 @@ def test_should_present_activity():
     assert item.estimated_minutes == 30
     assert item.actual_minutes is None
 
+    assert item.hold_reason is None
+    assert item.hold_reason_label is None
+    assert item.hold_observations is None
+    assert item.held_at is None
+    assert item.held_by_person_code is None
+
 
 def test_should_present_activity_lifecycle():
 
@@ -132,6 +146,86 @@ def test_should_present_activity_lifecycle():
     )
 
     assert presented.actual_minutes == 45
+
+
+def test_should_present_activity_on_hold():
+
+    item = create_item()
+
+    item.activity.start(
+        datetime(
+            2026,
+            9,
+            14,
+            10,
+            0,
+        )
+    )
+
+    item.activity.hold()
+
+    hold = ActivityHold(
+        code="AH-001",
+        activity_code="ACT-001",
+        reason=ActivityHoldReason.PENDING_MATERIAL,
+        observations="Esperando llegada de material.",
+        held_at=datetime(
+            2026,
+            9,
+            14,
+            10,
+            30,
+        ),
+        held_by_person_code="55464",
+    )
+
+    item = WorkOrderActivityItem(
+        activity=item.activity,
+        responsible_person=(
+            item.responsible_person
+        ),
+        active_hold=hold,
+    )
+
+    result = ListWorkOrderActivitiesResult(
+        items=[item]
+    )
+
+    view_model = (
+        WorkOrderActivitiesPresenter.present(
+            result
+        )
+    )
+
+    presented = view_model.items[0]
+
+    assert presented.status == "ON_HOLD"
+    assert presented.status_label == "En espera"
+
+    assert (
+        presented.hold_reason
+        == "PENDING_MATERIAL"
+    )
+
+    assert (
+        presented.hold_reason_label
+        == "Material pendiente"
+    )
+
+    assert (
+        presented.hold_observations
+        == "Esperando llegada de material."
+    )
+
+    assert (
+        presented.held_at
+        == "14/09/2026 10:30"
+    )
+
+    assert (
+        presented.held_by_person_code
+        == "55464"
+    )
 
 
 def test_should_calculate_progress():

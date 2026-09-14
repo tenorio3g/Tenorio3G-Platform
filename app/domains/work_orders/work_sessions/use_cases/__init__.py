@@ -22,6 +22,12 @@ from .correct_manual_work_session import (
     CorrectManualWorkSessionResult,
 )
 
+from .get_work_session_summary import (
+    GetWorkSessionSummary,
+    GetWorkSessionSummaryQuery,
+    GetWorkSessionSummaryResult,
+    WorkSessionSummaryItem,
+)
 
 __all__ = [
     "StartWorkSession",
@@ -39,4 +45,8 @@ __all__ = [
     "CorrectManualWorkSession",
     "CorrectManualWorkSessionCommand",
     "CorrectManualWorkSessionResult",
-]
+
+    "GetWorkSessionSummary",
+    "GetWorkSessionSummaryQuery",
+    "GetWorkSessionSummaryResult",
+    "WorkSessionSummaryItem",]

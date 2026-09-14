@@ -1,4 +1,4 @@
-"""
+﻿"""
 Registro central de modelos ORM de Tenorio3G.
 
 La finalidad de este m?dulo es asegurar que todos los modelos
@@ -75,6 +75,10 @@ from app.domains.work_orders.activities.models.work_order_activity_model import 
     WorkOrderActivityModel,
 )
 
+from app.domains.work_orders.activities.holds.models.activity_hold_model import (
+    ActivityHoldModel,
+)
+
 from app.domains.work_orders.evidence.models.work_order_evidence_model import (
     WorkOrderEvidenceModel,
 )
@@ -149,6 +153,7 @@ __all__ = [
     "UserModel",
     "WorkOrderModel",
     "WorkOrderActivityModel",
+    "ActivityHoldModel",
     "WorkOrderEvidenceModel",
     "WorkOrderSparePartUsageModel",
     "WorkOrderTechnicianAssignmentModel",

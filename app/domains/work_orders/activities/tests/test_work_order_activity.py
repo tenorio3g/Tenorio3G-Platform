@@ -336,3 +336,192 @@ def test_actual_minutes_should_be_none_until_completed():
         activity.actual_minutes
         is None
     )
+
+# ============================================================
+# ACTIVITY HOLD / RESUME TESTS
+# ============================================================
+
+
+def test_should_hold_activity():
+
+    activity = create_activity()
+
+    started_at = datetime(
+        2026,
+        9,
+        14,
+        10,
+        0,
+    )
+
+    activity.start(
+        started_at
+    )
+
+    activity.hold()
+
+    assert (
+        activity.status
+        == ActivityStatus.ON_HOLD
+    )
+
+    assert (
+        activity.started_at
+        == started_at
+    )
+
+    assert activity.completed_at is None
+
+
+def test_should_not_hold_pending_activity():
+
+    activity = create_activity()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "activity cannot be held "
+            "from current status"
+        ),
+    ):
+        activity.hold()
+
+
+def test_should_not_hold_completed_activity():
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            14,
+            10,
+            0,
+        )
+    )
+
+    activity.complete(
+        datetime(
+            2026,
+            9,
+            14,
+            11,
+            0,
+        )
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "activity cannot be held "
+            "from current status"
+        ),
+    ):
+        activity.hold()
+
+
+def test_should_resume_activity():
+
+    activity = create_activity()
+
+    started_at = datetime(
+        2026,
+        9,
+        14,
+        10,
+        0,
+    )
+
+    activity.start(
+        started_at
+    )
+
+    activity.hold()
+
+    activity.resume()
+
+    assert (
+        activity.status
+        == ActivityStatus.IN_PROGRESS
+    )
+
+    assert (
+        activity.started_at
+        == started_at
+    )
+
+    assert activity.completed_at is None
+
+
+def test_should_not_resume_pending_activity():
+
+    activity = create_activity()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "activity cannot be resumed "
+            "from current status"
+        ),
+    ):
+        activity.resume()
+
+
+def test_should_not_resume_in_progress_activity():
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            14,
+            10,
+            0,
+        )
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "activity cannot be resumed "
+            "from current status"
+        ),
+    ):
+        activity.resume()
+
+
+def test_should_not_complete_activity_on_hold():
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            14,
+            10,
+            0,
+        )
+    )
+
+    activity.hold()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "activity cannot be completed "
+            "from current status"
+        ),
+    ):
+        activity.complete(
+            datetime(
+                2026,
+                9,
+                14,
+                11,
+                0,
+            )
+        )
+

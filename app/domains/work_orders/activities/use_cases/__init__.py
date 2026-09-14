@@ -22,6 +22,17 @@ from .complete_work_order_activity import (
     CompleteWorkOrderActivityCommand,
     CompleteWorkOrderActivityResult,
 )
+from .hold_work_order_activity import (
+    HoldWorkOrderActivity,
+    HoldWorkOrderActivityCommand,
+    HoldWorkOrderActivityResult,
+)
+
+from .resume_work_order_activity import (
+    ResumeWorkOrderActivity,
+    ResumeWorkOrderActivityCommand,
+    ResumeWorkOrderActivityResult,
+)
 __all__ = [
     "CreateWorkOrderActivity",
     "CreateWorkOrderActivityCommand",
@@ -36,4 +47,10 @@ __all__ = [
     "CompleteWorkOrderActivity",
     "CompleteWorkOrderActivityCommand",
     "CompleteWorkOrderActivityResult",
+    "HoldWorkOrderActivity",
+    "HoldWorkOrderActivityCommand",
+    "HoldWorkOrderActivityResult",
+    "ResumeWorkOrderActivity",
+    "ResumeWorkOrderActivityCommand",
+    "ResumeWorkOrderActivityResult",
 ]

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+﻿from datetime import datetime, timedelta
 
 import pytest
 
@@ -33,7 +33,13 @@ from app.domains.work_orders.activities.repositories import (
 from app.domains.work_orders.activities.value_objects import (
     ActivityStatus,
 )
+from app.domains.work_orders.technicians.entities import (
+    WorkOrderTechnicianAssignment,
+)
 
+from app.domains.work_orders.technicians.repositories import (
+    InMemoryWorkOrderTechnicianAssignmentRepository,
+)
 from app.domains.work_orders.work_sessions.entities import (
     WorkSession,
 )
@@ -213,6 +219,10 @@ def create_use_case():
         InMemoryWorkSessionRepository()
     )
 
+    technician_assignment_repository = (
+        InMemoryWorkOrderTechnicianAssignmentRepository()
+    )
+
     use_case = StartWorkSession(
         work_order_repository=(
             work_order_repository
@@ -226,6 +236,9 @@ def create_use_case():
         work_session_repository=(
             work_session_repository
         ),
+        technician_assignment_repository=(
+            technician_assignment_repository
+        ),
     )
 
     return (
@@ -235,8 +248,6 @@ def create_use_case():
         person_repository,
         work_session_repository,
     )
-
-
 def create_command(
     *,
     work_order_code: str = "WO-001",
@@ -288,6 +299,14 @@ def prepare_valid_context(
         create_person()
     )
 
+    use_case._technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-001",
+            person_code="TECH-001",
+            assigned_at=NOW - timedelta(minutes=30),
+        )
+    )
+
     return (
         use_case,
         work_order_repository,
@@ -295,8 +314,6 @@ def prepare_valid_context(
         person_repository,
         work_session_repository,
     )
-
-
 def test_should_start_work_session_from_assigned_work_order():
 
     (
@@ -435,7 +452,42 @@ def test_should_start_session_for_activity_already_in_progress():
     )
 
 
-def test_should_reject_person_not_responsible_for_activity():
+def test_should_allow_assigned_person_not_responsible_for_activity():
+
+    (
+        use_case,
+        _,
+        _,
+        person_repository,
+        _,
+    ) = prepare_valid_context()
+
+    person_repository.save(
+        create_person(
+            code="TECH-002",
+        )
+    )
+
+    use_case._technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-001",
+            person_code="TECH-002",
+            assigned_at=NOW - timedelta(minutes=20),
+        )
+    )
+
+    result = use_case.execute(
+        create_command(
+            person_code="TECH-002",
+        )
+    )
+
+    assert result.work_session.person_code == "TECH-002"
+    assert result.work_session.activity_code == "ACT-001"
+    assert result.work_session.is_active is True
+
+
+def test_should_reject_person_not_assigned_to_work_order():
 
     (
         use_case,
@@ -454,8 +506,52 @@ def test_should_reject_person_not_responsible_for_activity():
     with pytest.raises(
         ValueError,
         match=(
-            "person is not responsible "
-            "for activity"
+            "person is not assigned "
+            "to work order"
+        ),
+    ):
+        use_case.execute(
+            create_command(
+                person_code="TECH-002",
+            )
+        )
+
+
+def test_should_reject_person_with_inactive_assignment():
+
+    (
+        use_case,
+        _,
+        _,
+        person_repository,
+        _,
+    ) = prepare_valid_context()
+
+    person_repository.save(
+        create_person(
+            code="TECH-002",
+        )
+    )
+
+    assignment = WorkOrderTechnicianAssignment(
+        work_order_code="WO-001",
+        person_code="TECH-002",
+        assigned_at=NOW - timedelta(minutes=30),
+    )
+
+    use_case._technician_assignment_repository.save(
+        assignment
+    )
+
+    assignment.unassign(
+        NOW - timedelta(minutes=10)
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "person is not assigned "
+            "to work order"
         ),
     ):
         use_case.execute(
@@ -580,6 +676,14 @@ def test_should_keep_sequence_independent_per_work_order():
 
     person_repository.save(
         create_person()
+    )
+
+    use_case._technician_assignment_repository.save(
+        WorkOrderTechnicianAssignment(
+            work_order_code="WO-002",
+            person_code="TECH-001",
+            assigned_at=NOW - timedelta(minutes=30),
+        )
     )
 
     work_session_repository.save(
@@ -833,3 +937,7 @@ def test_should_reject_completed_activity():
         use_case.execute(
             create_command()
         )
+
+
+
+
