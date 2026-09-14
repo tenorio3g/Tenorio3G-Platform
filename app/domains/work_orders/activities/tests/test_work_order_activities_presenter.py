@@ -185,6 +185,9 @@ def test_should_present_activity_on_hold():
             item.responsible_person
         ),
         active_hold=hold,
+        held_by_person=(
+            item.responsible_person
+        ),
     )
 
     result = ListWorkOrderActivitiesResult(
@@ -225,6 +228,11 @@ def test_should_present_activity_on_hold():
     assert (
         presented.held_by_person_code
         == "55464"
+    )
+
+    assert (
+        presented.held_by_person_name
+        == "Fortunato"
     )
 
 

@@ -30,6 +30,7 @@ class WorkOrderActivityItem:
     activity: WorkOrderActivity
     responsible_person: Person
     active_hold: ActivityHold | None = None
+    held_by_person: Person | None = None
 
 
 @dataclass(frozen=True)
@@ -95,11 +96,22 @@ class ListWorkOrderActivities:
                 )
             )
 
+            held_by_person = None
+
+            if active_hold is not None:
+                held_by_person = (
+                    self._person_repository
+                    .get_by_code(
+                        active_hold.held_by_person_code
+                    )
+                )
+
             items.append(
                 WorkOrderActivityItem(
                     activity=activity,
                     responsible_person=person,
                     active_hold=active_hold,
+                    held_by_person=held_by_person,
                 )
             )
 

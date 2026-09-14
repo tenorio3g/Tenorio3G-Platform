@@ -1280,7 +1280,7 @@ Orden {{ orden.code }}
                                         {% if activity.held_by_person_code %}
                                             <span>
                                                 Registrado por:
-                                                {{ activity.held_by_person_code }}
+                                                {{ activity.held_by_person_name or activity.held_by_person_code }}
                                             </span>
                                         {% endif %}
 

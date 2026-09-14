@@ -289,6 +289,18 @@ def test_should_include_active_hold():
         == "55464"
     )
 
+    assert item.held_by_person is not None
+
+    assert (
+        item.held_by_person.code
+        == "55464"
+    )
+
+    assert (
+        item.held_by_person.name
+        == "Fortunato"
+    )
+
 
 def test_should_not_include_resumed_hold_as_active():
 
@@ -350,3 +362,57 @@ def test_should_not_include_resumed_hold_as_active():
         result.items[0].active_hold
         is None
     )
+
+
+def test_should_keep_activity_when_hold_person_is_missing():
+
+    (
+        activity_repository,
+        person_repository,
+        hold_repository,
+        use_case,
+    ) = build_use_case()
+
+    person_repository.save(
+        Person(
+            code="55464",
+            name="Fortunato",
+        )
+    )
+
+    activity_repository.save(
+        create_activity(
+            "ACT-001",
+            "55464",
+        )
+    )
+
+    hold_repository.save(
+        ActivityHold(
+            code="AH-001",
+            activity_code="ACT-001",
+            reason=ActivityHoldReason.PENDING_MATERIAL,
+            observations="Esperando material",
+            held_at=datetime(
+                2026,
+                9,
+                14,
+                10,
+                30,
+            ),
+            held_by_person_code="99999",
+        )
+    )
+
+    result = use_case.execute(
+        ListWorkOrderActivitiesQuery(
+            work_order_code="WO-001"
+        )
+    )
+
+    assert len(result.items) == 1
+
+    item = result.items[0]
+
+    assert item.active_hold is not None
+    assert item.held_by_person is None

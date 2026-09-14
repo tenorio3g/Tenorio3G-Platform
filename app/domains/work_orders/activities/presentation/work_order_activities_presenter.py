@@ -120,6 +120,11 @@ class WorkOrderActivitiesPresenter:
                         if active_hold
                         else None
                     ),
+                    held_by_person_name=(
+                        item.held_by_person.name
+                        if item.held_by_person
+                        else None
+                    ),
                 )
             )
 

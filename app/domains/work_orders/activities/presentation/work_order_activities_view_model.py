@@ -19,6 +19,7 @@ class WorkOrderActivityItemViewModel:
     hold_observations: str | None = None
     held_at: str | None = None
     held_by_person_code: str | None = None
+    held_by_person_name: str | None = None
 
 
 @dataclass(frozen=True)
