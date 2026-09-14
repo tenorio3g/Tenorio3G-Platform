@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 from datetime import datetime
 import re
 
@@ -136,6 +136,15 @@ class StartWorkSession:
             raise ValueError(
                 "cannot start work session "
                 "for completed activity"
+            )
+
+        if (
+            activity.status
+            == ActivityStatus.ON_HOLD
+        ):
+            raise ValueError(
+                "cannot start work session "
+                "for activity on hold"
             )
 
         person = (

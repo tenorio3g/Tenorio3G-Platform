@@ -98,7 +98,10 @@ def create_activity(
     started_at = None
     completed_at = None
 
-    if status == ActivityStatus.IN_PROGRESS:
+    if status in (
+        ActivityStatus.IN_PROGRESS,
+        ActivityStatus.ON_HOLD,
+    ):
         started_at = datetime(
             2026,
             8,
@@ -941,3 +944,32 @@ def test_should_reject_completed_activity():
 
 
 
+
+
+def test_should_reject_on_hold_activity():
+
+    (
+        use_case,
+        _,
+        _,
+        _,
+        _,
+    ) = prepare_valid_context(
+        work_order_status=(
+            WorkOrderStatus.IN_PROGRESS
+        ),
+        activity_status=(
+            ActivityStatus.ON_HOLD
+        ),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "cannot start work session "
+            "for activity on hold"
+        ),
+    ):
+        use_case.execute(
+            create_command()
+        )
