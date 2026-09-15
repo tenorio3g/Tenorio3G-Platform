@@ -1309,6 +1309,94 @@ Orden {{ orden.code }}
                                 </div>
 
                             {% endif %}
+
+                            {% if activity.hold_history %}
+
+                                <details class="activity-hold-history">
+
+                                    <summary class="activity-hold-history__summary">
+                                        Historial de esperas
+                                        <span class="activity-hold-history__count">
+                                            {{ activity.hold_history|length }}
+                                        </span>
+                                    </summary>
+
+                                    <div class="activity-hold-history__list">
+
+                                        {% for hold in activity.hold_history %}
+
+                                            <article class="
+                                                activity-hold-history__item
+                                                {% if hold.is_active %}
+                                                    is-active
+                                                {% endif %}
+                                            ">
+
+                                                <div class="activity-hold-history__header">
+
+                                                    <strong>
+                                                        {{ hold.reason_label }}
+                                                    </strong>
+
+                                                    {% if hold.is_active %}
+                                                        <span class="activity-hold-history__active">
+                                                            En espera actualmente
+                                                        </span>
+                                                    {% endif %}
+
+                                                </div>
+
+                                                {% if hold.observations %}
+                                                    <p class="activity-hold-history__observations">
+                                                        {{ hold.observations }}
+                                                    </p>
+                                                {% endif %}
+
+                                                <div class="activity-hold-history__meta">
+
+                                                    <span>
+                                                        En espera:
+                                                        {{ hold.held_at }}
+                                                    </span>
+
+                                                    <span>
+                                                        Registrado por:
+                                                        {{ hold.held_by_person_name or hold.held_by_person_code }}
+                                                    </span>
+
+                                                    {% if hold.resumed_at %}
+
+                                                        <span>
+                                                            Reanudada:
+                                                            {{ hold.resumed_at }}
+                                                        </span>
+
+                                                        {% if hold.resumed_by_person_code %}
+                                                            <span>
+                                                                Reanudada por:
+                                                                {{ hold.resumed_by_person_name or hold.resumed_by_person_code }}
+                                                            </span>
+                                                        {% endif %}
+
+                                                        <span>
+                                                            Duración:
+                                                            {{ hold.duration_minutes }} min
+                                                        </span>
+
+                                                    {% endif %}
+
+                                                </div>
+
+                                            </article>
+
+                                        {% endfor %}
+
+                                    </div>
+
+                                </details>
+
+                            {% endif %}
+
                         </article>
 
                     {% endfor %}

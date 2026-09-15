@@ -1,4 +1,4 @@
-﻿from dataclasses import dataclass
+﻿from dataclasses import dataclass, field
 
 from app.domains.identity.people.entities import (
     Person,
@@ -26,11 +26,21 @@ from app.domains.work_orders.activities.repositories import (
 
 
 @dataclass(frozen=True)
+class ActivityHoldHistoryItem:
+    hold: ActivityHold
+    held_by_person: Person | None
+    resumed_by_person: Person | None
+
+
+@dataclass(frozen=True)
 class WorkOrderActivityItem:
     activity: WorkOrderActivity
     responsible_person: Person
     active_hold: ActivityHold | None = None
     held_by_person: Person | None = None
+    hold_history: list[ActivityHoldHistoryItem] = field(
+        default_factory=list
+    )
 
 
 @dataclass(frozen=True)
@@ -106,12 +116,53 @@ class ListWorkOrderActivities:
                     )
                 )
 
+            holds = (
+                self._hold_repository
+                .list_by_activity(
+                    activity.code
+                )
+            )
+
+            hold_history = []
+
+            for hold in holds:
+
+                history_held_by_person = (
+                    self._person_repository
+                    .get_by_code(
+                        hold.held_by_person_code
+                    )
+                )
+
+                history_resumed_by_person = None
+
+                if hold.resumed_by_person_code is not None:
+                    history_resumed_by_person = (
+                        self._person_repository
+                        .get_by_code(
+                            hold.resumed_by_person_code
+                        )
+                    )
+
+                hold_history.append(
+                    ActivityHoldHistoryItem(
+                        hold=hold,
+                        held_by_person=(
+                            history_held_by_person
+                        ),
+                        resumed_by_person=(
+                            history_resumed_by_person
+                        ),
+                    )
+                )
+
             items.append(
                 WorkOrderActivityItem(
                     activity=activity,
                     responsible_person=person,
                     active_hold=active_hold,
                     held_by_person=held_by_person,
+                    hold_history=hold_history,
                 )
             )
 

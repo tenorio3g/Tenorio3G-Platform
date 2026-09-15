@@ -25,6 +25,10 @@ from app.domains.work_orders.activities.use_cases import (
     WorkOrderActivityItem,
 )
 
+from app.domains.work_orders.activities.use_cases.list_work_order_activities import (
+    ActivityHoldHistoryItem,
+)
+
 
 def create_item(
     code="ACT-001",
@@ -230,6 +234,7 @@ def test_should_present_activity_on_hold():
         == "55464"
     )
 
+    
     assert (
         presented.held_by_person_name
         == "Fortunato"
@@ -300,3 +305,138 @@ def test_empty_activities_should_have_zero_progress():
     assert view_model.total == 0
     assert view_model.completed == 0
     assert view_model.progress_percent == 0
+
+
+def test_should_present_activity_hold_history():
+
+    item = create_item()
+
+    held_by_person = Person(
+        code="TECH-001",
+        name="Técnico Uno",
+    )
+
+    resumed_by_person = Person(
+        code="TECH-002",
+        name="Técnico Dos",
+    )
+
+    first_hold = ActivityHold(
+        code="AH-001",
+        activity_code="ACT-001",
+        reason=(
+            ActivityHoldReason.PENDING_MATERIAL
+        ),
+        observations="Esperando material",
+        held_at=datetime(
+            2026,
+            9,
+            14,
+            10,
+            0,
+        ),
+        held_by_person_code="TECH-001",
+        resumed_at=datetime(
+            2026,
+            9,
+            14,
+            10,
+            30,
+        ),
+        resumed_by_person_code="TECH-002",
+    )
+
+    second_hold = ActivityHold(
+        code="AH-002",
+        activity_code="ACT-001",
+        reason=(
+            ActivityHoldReason.EQUIPMENT_IN_USE
+        ),
+        observations="Área sin liberar",
+        held_at=datetime(
+            2026,
+            9,
+            14,
+            11,
+            0,
+        ),
+        held_by_person_code="TECH-001",
+    )
+
+    item = WorkOrderActivityItem(
+        activity=item.activity,
+        responsible_person=(
+            item.responsible_person
+        ),
+        hold_history=[
+            ActivityHoldHistoryItem(
+                hold=first_hold,
+                held_by_person=held_by_person,
+                resumed_by_person=(
+                    resumed_by_person
+                ),
+            ),
+            ActivityHoldHistoryItem(
+                hold=second_hold,
+                held_by_person=held_by_person,
+                resumed_by_person=None,
+            ),
+        ],
+    )
+
+    result = ListWorkOrderActivitiesResult(
+        items=[item]
+    )
+
+    view_model = (
+        WorkOrderActivitiesPresenter.present(
+            result
+        )
+    )
+
+    presented = view_model.items[0]
+
+    assert len(presented.hold_history) == 2
+
+    first = presented.hold_history[0]
+
+    assert first.code == "AH-001"
+    assert first.reason == "PENDING_MATERIAL"
+    assert (
+        first.reason_label
+        == "Material pendiente"
+    )
+    assert (
+        first.observations
+        == "Esperando material"
+    )
+    assert (
+        first.held_at
+        == "14/09/2026 10:00"
+    )
+    assert (
+        first.held_by_person_name
+        == "Técnico Uno"
+    )
+    assert (
+        first.resumed_at
+        == "14/09/2026 10:30"
+    )
+    assert (
+        first.resumed_by_person_name
+        == "Técnico Dos"
+    )
+    assert first.duration_minutes == 30
+    assert first.is_active is False
+
+    second = presented.hold_history[1]
+
+    assert second.code == "AH-002"
+    assert (
+        second.reason_label
+        == "Equipo en uso"
+    )
+    assert second.resumed_at is None
+    assert second.resumed_by_person_name is None
+    assert second.duration_minutes is None
+    assert second.is_active is True

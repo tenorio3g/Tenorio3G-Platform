@@ -11,6 +11,7 @@ from app.domains.work_orders.activities.value_objects import (
 )
 
 from .work_order_activities_view_model import (
+    ActivityHoldHistoryItemViewModel,
     WorkOrderActivitiesViewModel,
     WorkOrderActivityItemViewModel,
 )
@@ -57,7 +58,66 @@ class WorkOrderActivitiesPresenter:
         for item in result.items:
 
             active_hold = item.active_hold
+            hold_history = []
 
+            for history_item in item.hold_history:
+
+                hold = history_item.hold
+
+                duration_minutes = None
+
+                if hold.resumed_at is not None:
+                    duration_seconds = (
+                        hold.resumed_at
+                        - hold.held_at
+                    ).total_seconds()
+
+                    duration_minutes = int(
+                        duration_seconds // 60
+                    )
+
+                hold_history.append(
+                    ActivityHoldHistoryItemViewModel(
+                        code=hold.code,
+                        reason=hold.reason.value,
+                        reason_label=(
+                            cls.HOLD_REASON_LABELS[
+                                hold.reason
+                            ]
+                        ),
+                        observations=(
+                            hold.observations
+                        ),
+                        held_at=cls._format_datetime(
+                            hold.held_at
+                        ),
+                        held_by_person_code=(
+                            hold.held_by_person_code
+                        ),
+                        held_by_person_name=(
+                            history_item.held_by_person.name
+                            if history_item.held_by_person
+                            else None
+                        ),
+                        resumed_at=(
+                            cls._format_datetime(
+                                hold.resumed_at
+                            )
+                        ),
+                        resumed_by_person_code=(
+                            hold.resumed_by_person_code
+                        ),
+                        resumed_by_person_name=(
+                            history_item.resumed_by_person.name
+                            if history_item.resumed_by_person
+                            else None
+                        ),
+                        duration_minutes=(
+                            duration_minutes
+                        ),
+                        is_active=hold.is_active,
+                    )
+                )
             items.append(
                 WorkOrderActivityItemViewModel(
                     code=item.activity.code,
@@ -125,6 +185,7 @@ class WorkOrderActivitiesPresenter:
                         if item.held_by_person
                         else None
                     ),
+                    hold_history=hold_history,
                 )
             )
 

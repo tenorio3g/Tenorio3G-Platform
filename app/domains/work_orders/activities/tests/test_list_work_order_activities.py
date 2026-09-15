@@ -416,3 +416,108 @@ def test_should_keep_activity_when_hold_person_is_missing():
 
     assert item.active_hold is not None
     assert item.held_by_person is None
+
+
+def test_should_include_activity_hold_history():
+
+    (
+        activity_repository,
+        person_repository,
+        hold_repository,
+        use_case,
+    ) = build_use_case()
+
+    person_repository.save(
+        Person(
+            code="TECH-001",
+            name="Técnico Uno",
+        )
+    )
+
+    person_repository.save(
+        Person(
+            code="TECH-002",
+            name="Técnico Dos",
+        )
+    )
+
+    activity_repository.save(
+        create_activity(
+            "ACT-001",
+            "TECH-001",
+        )
+    )
+
+    hold_repository.save(
+        ActivityHold(
+            code="AH-001",
+            activity_code="ACT-001",
+            reason=(
+                ActivityHoldReason.PENDING_MATERIAL
+            ),
+            observations="Esperando material",
+            held_at=datetime(
+                2026,
+                9,
+                14,
+                10,
+                0,
+            ),
+            held_by_person_code="TECH-001",
+            resumed_at=datetime(
+                2026,
+                9,
+                14,
+                10,
+                30,
+            ),
+            resumed_by_person_code="TECH-002",
+        )
+    )
+
+    hold_repository.save(
+        ActivityHold(
+            code="AH-002",
+            activity_code="ACT-001",
+            reason=(
+                ActivityHoldReason.EQUIPMENT_IN_USE
+            ),
+            observations="Área sin liberar",
+            held_at=datetime(
+                2026,
+                9,
+                14,
+                11,
+                0,
+            ),
+            held_by_person_code="TECH-002",
+        )
+    )
+
+    result = use_case.execute(
+        ListWorkOrderActivitiesQuery(
+            work_order_code="WO-001"
+        )
+    )
+
+    item = result.items[0]
+
+    assert len(item.hold_history) == 2
+
+    first = item.hold_history[0]
+    second = item.hold_history[1]
+
+    assert first.hold.code == "AH-001"
+
+    assert first.held_by_person is not None
+    assert first.held_by_person.name == "Técnico Uno"
+
+    assert first.resumed_by_person is not None
+    assert first.resumed_by_person.name == "Técnico Dos"
+
+    assert second.hold.code == "AH-002"
+
+    assert second.held_by_person is not None
+    assert second.held_by_person.name == "Técnico Dos"
+
+    assert second.resumed_by_person is None

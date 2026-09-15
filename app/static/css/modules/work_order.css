@@ -1840,3 +1840,114 @@
     border-color: #1d4ed8;
 }
 
+/* ==========================================================
+   TENORIO3G ACTIVITY HOLD HISTORY V1
+   ========================================================== */
+
+.activity-hold-history {
+    width: 100%;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.activity-hold-history__summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #374151;
+}
+
+.activity-hold-history__summary:hover {
+    color: #111827;
+}
+
+.activity-hold-history__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #374151;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.activity-hold-history__list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+}
+
+.activity-hold-history__item {
+    position: relative;
+    padding: 0.85rem 1rem 0.85rem 1.15rem;
+    border: 1px solid #e5e7eb;
+    border-left: 3px solid #9ca3af;
+    border-radius: 0.65rem;
+    background: #f9fafb;
+}
+
+.activity-hold-history__item.is-active {
+    border-color: #fcd34d;
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.activity-hold-history__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+}
+
+.activity-hold-history__header strong {
+    font-size: 0.8rem;
+    color: #111827;
+}
+
+.activity-hold-history__active {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: #fde68a;
+    color: #78350f;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.activity-hold-history__observations {
+    margin: 0 0 0.65rem;
+    color: #374151;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.activity-hold-history__meta {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(180px, 1fr)
+    );
+    gap: 0.35rem 1rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.72rem;
+    color: #6b7280;
+}
+
+.activity-hold-history__item.is-active
+.activity-hold-history__meta {
+    border-top-color: #fde68a;
+}

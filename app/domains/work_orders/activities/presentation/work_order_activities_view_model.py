@@ -1,4 +1,20 @@
-﻿from dataclasses import dataclass
+﻿from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True)
+class ActivityHoldHistoryItemViewModel:
+    code: str
+    reason: str
+    reason_label: str
+    observations: str
+    held_at: str
+    held_by_person_code: str
+    held_by_person_name: str | None
+    resumed_at: str | None
+    resumed_by_person_code: str | None
+    resumed_by_person_name: str | None
+    duration_minutes: int | None
+    is_active: bool
 
 
 @dataclass(frozen=True)
@@ -20,6 +36,11 @@ class WorkOrderActivityItemViewModel:
     held_at: str | None = None
     held_by_person_code: str | None = None
     held_by_person_name: str | None = None
+    hold_history: list[
+        ActivityHoldHistoryItemViewModel
+    ] = field(
+        default_factory=list
+    )
 
 
 @dataclass(frozen=True)
