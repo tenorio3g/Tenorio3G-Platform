@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from uuid import uuid4
 
@@ -1861,10 +1861,25 @@ def create_work_order_evidence_route(
         detail_result.supervisor,
     )
 
+    activities_result = (
+        list_work_order_activities.execute(
+            ListWorkOrderActivitiesQuery(
+                work_order_code=numero,
+            )
+        )
+    )
+
+    activities = (
+        WorkOrderActivitiesPresenter.present(
+            activities_result
+        )
+    )
+
     if request.method == "GET":
         return render_template(
             "pages/create_work_order_evidence_v2.html",
             orden=orden,
+            activities=activities,
             evidence_types=[
                 EvidenceType.BEFORE_PHOTO,
                 EvidenceType.AFTER_PHOTO,
@@ -1885,6 +1900,7 @@ def create_work_order_evidence_route(
         return render_template(
             "pages/create_work_order_evidence_v2.html",
             orden=orden,
+            activities=activities,
             evidence_types=list(
                 EvidenceType
             ),
@@ -1911,6 +1927,7 @@ def create_work_order_evidence_route(
         return render_template(
             "pages/create_work_order_evidence_v2.html",
             orden=orden,
+            activities=activities,
             evidence_types=list(
                 EvidenceType
             ),
@@ -1921,24 +1938,9 @@ def create_work_order_evidence_route(
             data=request.form,
         )
 
-    evidence_id = secure_filename(
-        request.form.get(
-            "evidence_id",
-            "",
-        )
+    evidence_id = (
+        f"EVID-{uuid4().hex[:8].upper()}"
     )
-
-    if not evidence_id:
-        return render_template(
-            "pages/create_work_order_evidence_v2.html",
-            orden=orden,
-            evidence_types=list(
-                EvidenceType
-            ),
-            error="El ID de evidencia es obligatorio.",
-            data=request.form,
-        )
-
     stored_file_name = (
         f"{evidence_id}__{original_name}"
     )
@@ -1955,10 +1957,11 @@ def create_work_order_evidence_route(
         return render_template(
             "pages/create_work_order_evidence_v2.html",
             orden=orden,
+            activities=activities,
             evidence_types=list(
                 EvidenceType
             ),
-            error="Tipo de evidencia invÃ¡lido.",
+            error="Tipo de evidencia inválido.",
             data=request.form,
         )
 
@@ -2035,6 +2038,7 @@ def create_work_order_evidence_route(
         return render_template(
             "pages/create_work_order_evidence_v2.html",
             orden=orden,
+            activities=activities,
             evidence_types=list(
                 EvidenceType
             ),

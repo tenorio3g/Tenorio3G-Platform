@@ -49,23 +49,6 @@ Registrar evidencia - {{ orden.code }}
 
                     <div class="form-field">
 
-                        <label for="evidence_id">
-                            ID de evidencia
-                        </label>
-
-                        <input
-                            id="evidence_id"
-                            name="evidence_id"
-                            type="text"
-                            required
-                            value="{{ data.get('evidence_id', '') if data else '' }}"
-                            placeholder="Ej. EVID-001"
-                        >
-
-                    </div>
-
-                    <div class="form-field">
-
                         <label for="title">
                             Título
                         </label>
@@ -93,12 +76,26 @@ Registrar evidencia - {{ orden.code }}
                             required
                         >
 
+                            {% set evidence_type_labels = {
+                                'BEFORE_PHOTO': 'Foto antes',
+                                'AFTER_PHOTO': 'Foto después',
+                                'MEASUREMENT': 'Medición',
+                                'DOCUMENT': 'Documento',
+                                'OTHER': 'Otro'
+                            } %}
+
                             {% for type in evidence_types %}
 
                                 <option
                                     value="{{ type.value }}"
+                                    {% if data and data.get('evidence_type') == type.value %}
+                                        selected
+                                    {% endif %}
                                 >
-                                    {{ type.value }}
+                                    {{ evidence_type_labels.get(
+                                        type.value,
+                                        type.value
+                                    ) }}
                                 </option>
 
                             {% endfor %}
@@ -113,13 +110,29 @@ Registrar evidencia - {{ orden.code }}
                             Actividad
                         </label>
 
-                        <input
+                        <select
                             id="activity_code"
                             name="activity_code"
-                            type="text"
-                            value="{{ data.get('activity_code', '') if data else '' }}"
-                            placeholder="Opcional. Ej. ACT-001"
                         >
+
+                            <option value="">
+                                Sin actividad específica
+                            </option>
+
+                            {% for activity in activities.items %}
+
+                                <option
+                                    value="{{ activity.code }}"
+                                    {% if data and data.get('activity_code') == activity.code %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ activity.code }} · {{ activity.title }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
 
                     </div>
 
