@@ -89,10 +89,27 @@ class GetDailyOperationalReport:
                 effective_intervals = []
                 session_starts = []
                 session_ends = []
+                has_active_session = False
 
                 for session in sessions:
 
                     if session.ended_at is None:
+
+                        if session.started_at < day_end:
+                            has_active_session = True
+
+                            technician_seconds.setdefault(
+                                session.person_code,
+                                0,
+                            )
+
+                            session_starts.append(
+                                max(
+                                    session.started_at,
+                                    day_start,
+                                )
+                            )
+
                         continue
 
                     effective_start = max(
@@ -199,6 +216,7 @@ class GetDailyOperationalReport:
                 if (
                     not has_effective_work
                     and not completed_during_day
+                    and not has_active_session
                 ):
                     continue
 
@@ -225,6 +243,9 @@ class GetDailyOperationalReport:
                         ),
                         elapsed_work_seconds=(
                             elapsed_work_seconds
+                        ),
+                        has_active_session=(
+                            has_active_session
                         ),
                         technicians=[
                             DailyTechnicianResult(

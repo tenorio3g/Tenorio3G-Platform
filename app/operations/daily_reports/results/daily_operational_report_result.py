@@ -18,6 +18,7 @@ class DailyActivityResult:
     last_ended_at: datetime | None
     effective_seconds: int
     elapsed_work_seconds: int
+    has_active_session: bool
     technicians: list[DailyTechnicianResult]
 
 

@@ -1134,3 +1134,483 @@ def test_should_calculate_elapsed_work_time_without_double_counting_overlaps_or_
         ].effective_seconds
         == 3600
     )
+
+def test_should_include_activity_with_active_session_without_counting_open_time():
+
+    work_order = WorkOrder(
+        code="WO-008",
+        title="Trabajo con sesi?n activa",
+        description="",
+        work_type="CORRECTIVE",
+        priority="NORMAL",
+        asset_code="ASSET-008",
+        requester_person_code="REQ-001",
+        supervisor_person_code="SUP-001",
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            13,
+            0,
+        ),
+        status=WorkOrderStatus.IN_PROGRESS,
+    )
+
+    activity = WorkOrderActivity(
+        code="ACT-008",
+        work_order_code="WO-008",
+        title="Revisi?n de tablero",
+        responsible_person_code="TECH-001",
+        status=ActivityStatus.IN_PROGRESS,
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            14,
+            20,
+        ),
+    )
+
+    active_session = WorkSession(
+        code="WS-008",
+        work_order_code="WO-008",
+        activity_code="ACT-008",
+        person_code="TECH-001",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            14,
+            20,
+        ),
+        ended_at=None,
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            14,
+            20,
+        ),
+        created_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        work_orders=[
+            work_order,
+        ],
+        activities=[
+            activity,
+        ],
+        work_sessions=[
+            active_session,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                16,
+            ),
+        )
+    )
+
+    assert report.total_work_orders == 1
+    assert report.total_activities == 1
+    assert report.in_progress_activities == 1
+
+    assert report.effective_seconds == 0
+
+    daily_activity = (
+        report
+        .work_orders[0]
+        .activities[0]
+    )
+
+    assert daily_activity.activity_code == "ACT-008"
+    assert daily_activity.status == "IN_PROGRESS"
+
+    assert daily_activity.has_active_session is True
+
+    assert daily_activity.first_started_at == datetime(
+        2026,
+        9,
+        16,
+        14,
+        20,
+    )
+
+    assert daily_activity.last_ended_at is None
+
+    assert daily_activity.effective_seconds == 0
+    assert daily_activity.elapsed_work_seconds == 0
+
+    assert len(daily_activity.technicians) == 1
+
+    technician = daily_activity.technicians[0]
+
+    assert technician.person_code == "TECH-001"
+    assert technician.effective_seconds == 0
+
+def test_should_exclude_active_session_that_starts_after_report_day():
+
+    work_order = WorkOrder(
+        code="WO-009",
+        title="Trabajo futuro",
+        description="",
+        work_type="CORRECTIVE",
+        priority="NORMAL",
+        asset_code="ASSET-009",
+        requester_person_code="REQ-001",
+        supervisor_person_code="SUP-001",
+        created_at=datetime(
+            2026,
+            9,
+            17,
+            7,
+            0,
+        ),
+        status=WorkOrderStatus.IN_PROGRESS,
+    )
+
+    activity = WorkOrderActivity(
+        code="ACT-009",
+        work_order_code="WO-009",
+        title="Trabajo del d?a siguiente",
+        responsible_person_code="TECH-001",
+        status=ActivityStatus.IN_PROGRESS,
+        started_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            0,
+        ),
+    )
+
+    active_session = WorkSession(
+        code="WS-009",
+        work_order_code="WO-009",
+        activity_code="ACT-009",
+        person_code="TECH-001",
+        started_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            0,
+        ),
+        ended_at=None,
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            0,
+        ),
+        created_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        work_orders=[
+            work_order,
+        ],
+        activities=[
+            activity,
+        ],
+        work_sessions=[
+            active_session,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                16,
+            ),
+        )
+    )
+
+    assert report.total_work_orders == 0
+    assert report.total_activities == 0
+    assert report.in_progress_activities == 0
+    assert report.effective_seconds == 0
+    assert report.work_orders == []
+
+def test_should_include_active_session_carried_over_from_previous_day():
+
+    work_order = WorkOrder(
+        code="WO-010",
+        title="Trabajo nocturno activo",
+        description="",
+        work_type="CORRECTIVE",
+        priority="NORMAL",
+        asset_code="ASSET-010",
+        requester_person_code="REQ-001",
+        supervisor_person_code="SUP-001",
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            22,
+            0,
+        ),
+        status=WorkOrderStatus.IN_PROGRESS,
+    )
+
+    activity = WorkOrderActivity(
+        code="ACT-010",
+        work_order_code="WO-010",
+        title="Mantenimiento nocturno activo",
+        responsible_person_code="TECH-001",
+        status=ActivityStatus.IN_PROGRESS,
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+    )
+
+    active_session = WorkSession(
+        code="WS-010",
+        work_order_code="WO-010",
+        activity_code="ACT-010",
+        person_code="TECH-001",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+        ended_at=None,
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+        created_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        work_orders=[
+            work_order,
+        ],
+        activities=[
+            activity,
+        ],
+        work_sessions=[
+            active_session,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                17,
+            ),
+        )
+    )
+
+    assert report.total_work_orders == 1
+    assert report.total_activities == 1
+    assert report.in_progress_activities == 1
+    assert report.effective_seconds == 0
+
+    daily_activity = (
+        report
+        .work_orders[0]
+        .activities[0]
+    )
+
+    assert daily_activity.activity_code == "ACT-010"
+    assert daily_activity.has_active_session is True
+
+    assert daily_activity.first_started_at == datetime(
+        2026,
+        9,
+        17,
+        0,
+        0,
+    )
+
+    assert daily_activity.last_ended_at is None
+
+    assert daily_activity.effective_seconds == 0
+    assert daily_activity.elapsed_work_seconds == 0
+
+    assert len(daily_activity.technicians) == 1
+
+    technician = daily_activity.technicians[0]
+
+    assert technician.person_code == "TECH-001"
+    assert technician.effective_seconds == 0
+
+def test_should_combine_closed_work_and_active_session_in_same_activity():
+
+    work_order = WorkOrder(
+        code="WO-011",
+        title="Trabajo con relevo de t?cnicos",
+        description="",
+        work_type="CORRECTIVE",
+        priority="NORMAL",
+        asset_code="ASSET-011",
+        requester_person_code="REQ-001",
+        supervisor_person_code="SUP-001",
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            7,
+            0,
+        ),
+        status=WorkOrderStatus.IN_PROGRESS,
+    )
+
+    activity = WorkOrderActivity(
+        code="ACT-011",
+        work_order_code="WO-011",
+        title="Diagn?stico y reparaci?n",
+        responsible_person_code="TECH-001",
+        status=ActivityStatus.IN_PROGRESS,
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            8,
+            0,
+        ),
+    )
+
+    closed_session = WorkSession(
+        code="WS-011-A",
+        work_order_code="WO-011",
+        activity_code="ACT-011",
+        person_code="TECH-001",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            8,
+            0,
+        ),
+        ended_at=datetime(
+            2026,
+            9,
+            16,
+            9,
+            0,
+        ),
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            8,
+            0,
+        ),
+        created_by_person_code="TECH-001",
+    )
+
+    active_session = WorkSession(
+        code="WS-011-B",
+        work_order_code="WO-011",
+        activity_code="ACT-011",
+        person_code="TECH-002",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        ),
+        ended_at=None,
+        source=WorkSessionSource.AUTOMATIC,
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        ),
+        created_by_person_code="TECH-002",
+    )
+
+    use_case = create_use_case(
+        work_orders=[
+            work_order,
+        ],
+        activities=[
+            activity,
+        ],
+        work_sessions=[
+            closed_session,
+            active_session,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                16,
+            ),
+        )
+    )
+
+    assert report.total_work_orders == 1
+    assert report.total_activities == 1
+    assert report.in_progress_activities == 1
+
+    assert report.effective_seconds == 3600
+
+    daily_activity = (
+        report
+        .work_orders[0]
+        .activities[0]
+    )
+
+    assert daily_activity.has_active_session is True
+
+    assert daily_activity.effective_seconds == 3600
+    assert daily_activity.elapsed_work_seconds == 3600
+
+    assert daily_activity.first_started_at == datetime(
+        2026,
+        9,
+        16,
+        8,
+        0,
+    )
+
+    assert daily_activity.last_ended_at == datetime(
+        2026,
+        9,
+        16,
+        9,
+        0,
+    )
+
+    assert len(daily_activity.technicians) == 2
+
+    technician_1 = daily_activity.technicians[0]
+    technician_2 = daily_activity.technicians[1]
+
+    assert technician_1.person_code == "TECH-001"
+    assert technician_1.effective_seconds == 3600
+
+    assert technician_2.person_code == "TECH-002"
+    assert technician_2.effective_seconds == 0
