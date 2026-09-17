@@ -1,6 +1,7 @@
 from .daily_operational_report_result import (
     DailyActivityResult,
     DailyOperationalReportResult,
+    DailyTechnicianResult,
     DailyWorkOrderResult,
 )
 
@@ -8,5 +9,6 @@ from .daily_operational_report_result import (
 __all__ = [
     "DailyActivityResult",
     "DailyOperationalReportResult",
+    "DailyTechnicianResult",
     "DailyWorkOrderResult",
 ]

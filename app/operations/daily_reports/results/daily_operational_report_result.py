@@ -3,6 +3,12 @@ from datetime import date, datetime
 
 
 @dataclass(frozen=True)
+class DailyTechnicianResult:
+    person_code: str
+    effective_seconds: int
+
+
+@dataclass(frozen=True)
 class DailyActivityResult:
     activity_code: str
     title: str
@@ -11,6 +17,8 @@ class DailyActivityResult:
     first_started_at: datetime | None
     last_ended_at: datetime | None
     effective_seconds: int
+    elapsed_work_seconds: int
+    technicians: list[DailyTechnicianResult]
 
 
 @dataclass(frozen=True)

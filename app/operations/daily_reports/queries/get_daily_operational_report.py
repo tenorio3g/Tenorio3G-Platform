@@ -7,6 +7,7 @@ from app.domains.work_orders.activities.value_objects import (
 from app.operations.daily_reports.results import (
     DailyActivityResult,
     DailyOperationalReportResult,
+    DailyTechnicianResult,
     DailyWorkOrderResult,
 )
 
@@ -84,6 +85,8 @@ class GetDailyOperationalReport:
                 )
 
                 effective_seconds = 0
+                technician_seconds = {}
+                effective_intervals = []
                 session_starts = []
                 session_ends = []
 
@@ -105,11 +108,32 @@ class GetDailyOperationalReport:
                     if effective_end <= effective_start:
                         continue
 
-                    effective_seconds += int(
+                    contributed_seconds = int(
                         (
                             effective_end
                             - effective_start
                         ).total_seconds()
+                    )
+
+                    effective_seconds += (
+                        contributed_seconds
+                    )
+
+                    technician_seconds[
+                        session.person_code
+                    ] = (
+                        technician_seconds.get(
+                            session.person_code,
+                            0,
+                        )
+                        + contributed_seconds
+                    )
+
+                    effective_intervals.append(
+                        (
+                            effective_start,
+                            effective_end,
+                        )
                     )
 
                     session_starts.append(
@@ -118,6 +142,47 @@ class GetDailyOperationalReport:
 
                     session_ends.append(
                         effective_end
+                    )
+
+                elapsed_work_seconds = 0
+
+                if effective_intervals:
+                    sorted_intervals = sorted(
+                        effective_intervals,
+                        key=lambda interval: interval[0],
+                    )
+
+                    current_start, current_end = (
+                        sorted_intervals[0]
+                    )
+
+                    for (
+                        interval_start,
+                        interval_end,
+                    ) in sorted_intervals[1:]:
+
+                        if interval_start <= current_end:
+                            current_end = max(
+                                current_end,
+                                interval_end,
+                            )
+                            continue
+
+                        elapsed_work_seconds += int(
+                            (
+                                current_end
+                                - current_start
+                            ).total_seconds()
+                        )
+
+                        current_start = interval_start
+                        current_end = interval_end
+
+                    elapsed_work_seconds += int(
+                        (
+                            current_end
+                            - current_start
+                        ).total_seconds()
                     )
 
                 completed_during_day = (
@@ -158,6 +223,23 @@ class GetDailyOperationalReport:
                         effective_seconds=(
                             effective_seconds
                         ),
+                        elapsed_work_seconds=(
+                            elapsed_work_seconds
+                        ),
+                        technicians=[
+                            DailyTechnicianResult(
+                                person_code=person_code,
+                                effective_seconds=(
+                                    technician_seconds[
+                                        person_code
+                                    ]
+                                ),
+                            )
+                            for person_code
+                            in sorted(
+                                technician_seconds
+                            )
+                        ],
                     )
                 )
 
