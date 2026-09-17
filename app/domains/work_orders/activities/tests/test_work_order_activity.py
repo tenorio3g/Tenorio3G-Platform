@@ -525,3 +525,78 @@ def test_should_not_complete_activity_on_hold():
             )
         )
 
+
+# ============================================================
+# ACTIVITY COMPLETION NOTES TESTS
+# ============================================================
+
+
+def test_should_default_completion_notes_to_empty():
+
+    activity = create_activity()
+
+    assert activity.completion_notes == ""
+
+
+def test_should_store_completion_notes():
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        )
+    )
+
+    activity.complete(
+        datetime(
+            2026,
+            9,
+            16,
+            11,
+            0,
+        ),
+        completion_notes=(
+            "  Se reemplazaron 27 barras LED.  "
+        ),
+    )
+
+    assert (
+        activity.completion_notes
+        == "Se reemplazaron 27 barras LED."
+    )
+
+
+def test_should_require_completion_notes():
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        )
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="completion_notes is required",
+    ):
+        activity.complete(
+            datetime(
+                2026,
+                9,
+                16,
+                11,
+                0,
+            ),
+            completion_notes="   ",
+        )
+

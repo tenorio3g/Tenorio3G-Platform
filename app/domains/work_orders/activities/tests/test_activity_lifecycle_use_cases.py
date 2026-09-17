@@ -140,6 +140,9 @@ def test_should_complete_activity():
         CompleteWorkOrderActivityCommand(
             code="ACT-001",
             completed_at=completed_at,
+            completion_notes=(
+                "Inspecci?n realizada sin anomal?as."
+            ),
         )
     )
 
@@ -187,5 +190,112 @@ def test_should_reject_complete_unknown_activity():
                     19,
                     0,
                 ),
+            )
+        )
+
+
+# ============================================================
+# ACTIVITY COMPLETION NOTES USE CASE TESTS
+# ============================================================
+
+
+def test_should_complete_activity_with_completion_notes():
+
+    repository = (
+        InMemoryWorkOrderActivityRepository()
+    )
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        )
+    )
+
+    repository.save(
+        activity
+    )
+
+    use_case = CompleteWorkOrderActivity(
+        repository
+    )
+
+    result = use_case.execute(
+        CompleteWorkOrderActivityCommand(
+            code="ACT-001",
+            completed_at=datetime(
+                2026,
+                9,
+                16,
+                11,
+                0,
+            ),
+            completion_notes=(
+                "  Se reemplazaron 27 barras LED.  "
+            ),
+        )
+    )
+
+    assert (
+        result.activity.completion_notes
+        == "Se reemplazaron 27 barras LED."
+    )
+
+    persisted = repository.get_by_code(
+        "ACT-001"
+    )
+
+    assert (
+        persisted.completion_notes
+        == "Se reemplazaron 27 barras LED."
+    )
+
+
+def test_should_reject_empty_completion_notes():
+
+    repository = (
+        InMemoryWorkOrderActivityRepository()
+    )
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        )
+    )
+
+    repository.save(
+        activity
+    )
+
+    use_case = CompleteWorkOrderActivity(
+        repository
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="completion_notes is required",
+    ):
+        use_case.execute(
+            CompleteWorkOrderActivityCommand(
+                code="ACT-001",
+                completed_at=datetime(
+                    2026,
+                    9,
+                    16,
+                    11,
+                    0,
+                ),
+                completion_notes="   ",
             )
         )

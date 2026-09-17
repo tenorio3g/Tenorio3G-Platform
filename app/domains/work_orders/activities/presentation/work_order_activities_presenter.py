@@ -151,6 +151,9 @@ class WorkOrderActivitiesPresenter:
                     completed_at=cls._format_datetime(
                         item.activity.completed_at
                     ),
+                    completion_notes=(
+                        item.activity.completion_notes
+                    ),
                     hold_reason=(
                         active_hold.reason.value
                         if active_hold

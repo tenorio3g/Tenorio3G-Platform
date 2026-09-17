@@ -1468,6 +1468,10 @@ def complete_work_order_activity_route(
             CompleteWorkOrderActivityCommand(
                 code=activity_code,
                 completed_at=datetime.now(),
+                completion_notes=request.form.get(
+                    "completion_notes",
+                    "",
+                ),
             )
         )
 

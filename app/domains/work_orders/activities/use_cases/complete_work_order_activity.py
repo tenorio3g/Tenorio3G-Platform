@@ -14,6 +14,7 @@ from app.domains.work_orders.activities.repositories import (
 class CompleteWorkOrderActivityCommand:
     code: str
     completed_at: datetime
+    completion_notes: str = ""
 
 
 @dataclass(frozen=True)
@@ -43,8 +44,18 @@ class CompleteWorkOrderActivity:
                 "activity not found"
             )
 
+        completion_notes = str(
+            command.completion_notes
+        ).strip()
+
+        if not completion_notes:
+            raise ValueError(
+                "completion_notes is required"
+            )
+
         activity.complete(
-            command.completed_at
+            command.completed_at,
+            completion_notes=completion_notes,
         )
 
         self._repository.save(

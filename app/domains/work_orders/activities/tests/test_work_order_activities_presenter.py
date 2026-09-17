@@ -121,7 +121,11 @@ def test_should_present_activity_lifecycle():
             16,
             10,
             45,
-        )
+        ),
+        completion_notes=(
+            "Se realizó la inspección y "
+            "se corrigieron las conexiones."
+        ),
     )
 
     result = ListWorkOrderActivitiesResult(
@@ -150,6 +154,10 @@ def test_should_present_activity_lifecycle():
     )
 
     assert presented.actual_minutes == 45
+    assert presented.completion_notes == (
+        "Se realizó la inspección y "
+        "se corrigieron las conexiones."
+    )
 
 
 def test_should_present_activity_on_hold():

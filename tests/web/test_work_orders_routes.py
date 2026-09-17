@@ -666,8 +666,102 @@ def test_should_start_activity_from_web(
     )
 
     assert persisted.started_at is not None
+def test_should_render_complete_activity_form(
+    authenticated_client,
+    work_order_activities_test_db,
+):
 
+    activity = WorkOrderActivity(
+        code="ACT-WEB-COMPLETE-FORM",
+        work_order_code="WO-REAL-001",
+        title="Actividad lista para finalizar",
+        responsible_person_code="55464",
+        estimated_minutes=30,
+    )
 
+    activity.start(
+        datetime.now()
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.get(
+        "/ordenes/WO-REAL-001"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "Finalizar actividad" in html
+
+    assert (
+        'name="completion_notes"'
+        in html
+    )
+
+    assert (
+        "Trabajo realizado / resultado"
+        in html
+    )
+
+    assert (
+        "Confirmar finalización"
+        in html
+    )
+def test_should_render_completion_notes_for_completed_activity(
+    authenticated_client,
+    work_order_activities_test_db,
+):
+
+    activity = WorkOrderActivity(
+        code="ACT-WEB-COMPLETED-RESULT",
+        work_order_code="WO-REAL-001",
+        title="Actividad con resultado",
+        responsible_person_code="55464",
+        estimated_minutes=30,
+    )
+
+    activity.start(
+        datetime.now()
+    )
+
+    activity.complete(
+        datetime.now(),
+        completion_notes=(
+            "Se reemplazaron 27 barras LED "
+            "y se verificó su funcionamiento."
+        ),
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.get(
+        "/ordenes/WO-REAL-001"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert (
+        "Trabajo realizado / resultado"
+        in html
+    )
+
+    assert (
+        "Se reemplazaron 27 barras LED "
+        "y se verificó su funcionamiento."
+        in html
+    )
 def test_should_complete_activity_from_web(
     authenticated_client,
     work_order_activities_test_db,
@@ -692,6 +786,12 @@ def test_should_complete_activity_from_web(
     response = authenticated_client.post(
         "/ordenes/WO-REAL-001/"
         "actividades/ACT-WEB-COMPLETE/finalizar",
+        data={
+            "completion_notes": (
+                "  Se reemplazaron las barras LED dañadas "
+                "y se verificó su funcionamiento.  "
+            ),
+        },
         follow_redirects=False,
     )
 
@@ -717,6 +817,57 @@ def test_should_complete_activity_from_web(
         persisted.actual_minutes
         is not None
     )
+
+    assert persisted.completion_notes == (
+        "Se reemplazaron las barras LED dañadas "
+        "y se verificó su funcionamiento."
+    )
+def test_should_reject_complete_activity_without_completion_notes(
+    authenticated_client,
+    work_order_activities_test_db,
+):
+
+    activity = WorkOrderActivity(
+        code="ACT-WEB-COMPLETE-NO-NOTES",
+        work_order_code="WO-REAL-001",
+        title="Actividad web sin resultado",
+        responsible_person_code="55464",
+        estimated_minutes=30,
+    )
+
+    activity.start(
+        datetime.now()
+    )
+
+    work_order_activities_test_db.save(
+        activity
+    )
+
+    response = authenticated_client.post(
+        "/ordenes/WO-REAL-001/"
+        "actividades/ACT-WEB-COMPLETE-NO-NOTES/finalizar",
+        data={
+            "completion_notes": "   ",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 400
+
+    persisted = (
+        work_order_activities_test_db.get_by_code(
+            "ACT-WEB-COMPLETE-NO-NOTES"
+        )
+    )
+
+    assert (
+        persisted.status
+        == ActivityStatus.IN_PROGRESS
+    )
+
+    assert persisted.completed_at is None
+
+    assert persisted.completion_notes == ""
 
 def test_should_render_add_spare_part_form(
     authenticated_client,
@@ -1300,6 +1451,7 @@ def test_should_end_work_session_from_web(
     assert "Iniciar trabajo" in html
     assert "Finalizar actividad" in html
     assert "Detener trabajo" not in html
+
 
 
 def test_should_reject_end_work_session_for_wrong_activity(

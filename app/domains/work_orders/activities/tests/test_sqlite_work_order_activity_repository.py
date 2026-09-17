@@ -253,3 +253,46 @@ def test_should_delete_activity():
         )
         is None
     )
+
+
+def test_should_persist_completion_notes():
+
+    repository = create_repository()
+
+    activity = create_activity()
+
+    activity.start(
+        datetime(
+            2026,
+            9,
+            16,
+            10,
+            0,
+        )
+    )
+
+    activity.complete(
+        datetime(
+            2026,
+            9,
+            16,
+            11,
+            0,
+        ),
+        completion_notes=(
+            "Se reemplazaron 27 barras LED."
+        ),
+    )
+
+    repository.save(
+        activity
+    )
+
+    persisted = repository.get_by_code(
+        "ACT-001"
+    )
+
+    assert (
+        persisted.completion_notes
+        == "Se reemplazaron 27 barras LED."
+    )

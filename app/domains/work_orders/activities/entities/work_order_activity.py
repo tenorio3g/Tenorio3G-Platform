@@ -18,6 +18,7 @@ class WorkOrderActivity:
         status=ActivityStatus.PENDING,
         started_at=None,
         completed_at=None,
+        completion_notes="",
     ):
         self.code = self._required(
             code,
@@ -91,6 +92,9 @@ class WorkOrderActivity:
 
         self.started_at = started_at
         self.completed_at = completed_at
+        self.completion_notes = str(
+            completion_notes
+        ).strip()
 
     @staticmethod
     def _required(
@@ -169,6 +173,7 @@ class WorkOrderActivity:
     def complete(
         self,
         completed_at: datetime,
+        completion_notes=None,
     ) -> None:
 
         if (
@@ -193,6 +198,21 @@ class WorkOrderActivity:
         ):
             raise ValueError(
                 "completed_at cannot be before started_at"
+            )
+
+        if completion_notes is not None:
+
+            normalized_completion_notes = str(
+                completion_notes
+            ).strip()
+
+            if not normalized_completion_notes:
+                raise ValueError(
+                    "completion_notes is required"
+                )
+
+            self.completion_notes = (
+                normalized_completion_notes
             )
 
         self.status = (

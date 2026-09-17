@@ -66,3 +66,9 @@ class WorkOrderActivityModel(Base):
         DateTime,
         nullable=True,
     )
+
+    completion_notes: Mapped[str] = mapped_column(
+        String(4000),
+        nullable=False,
+        default="",
+    )

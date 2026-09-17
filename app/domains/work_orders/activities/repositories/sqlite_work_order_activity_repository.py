@@ -65,6 +65,9 @@ class SQLiteWorkOrderActivityRepository(
                     completed_at=(
                         activity.completed_at
                     ),
+                    completion_notes=(
+                        activity.completion_notes
+                    ),
                 )
 
                 session.add(
@@ -103,6 +106,10 @@ class SQLiteWorkOrderActivityRepository(
 
                 model.completed_at = (
                     activity.completed_at
+                )
+
+                model.completion_notes = (
+                    activity.completion_notes
                 )
 
             session.commit()
@@ -211,4 +218,7 @@ class SQLiteWorkOrderActivityRepository(
             ),
             started_at=model.started_at,
             completed_at=model.completed_at,
+            completion_notes=(
+                model.completion_notes
+            ),
         )

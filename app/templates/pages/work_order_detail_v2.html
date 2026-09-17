@@ -844,6 +844,23 @@ Orden {{ orden.code }}
                                 </div>
 
                             </div>
+
+                            {% if activity.completion_notes %}
+
+                                <div class="activity-completion-info">
+
+                                    <strong>
+                                        Trabajo realizado / resultado
+                                    </strong>
+
+                                    <p>
+                                        {{ activity.completion_notes }}
+                                    </p>
+
+                                </div>
+
+                            {% endif %}
+
                             {% set activity_work_sessions =
                                 work_session_summary.by_activity.get(
                                     activity.code
@@ -1148,21 +1165,41 @@ Orden {{ orden.code }}
                                             </button>
                                         </form>
 
-                                        <form
-                                            method="post"
-                                            action="{{ url_for(
-                                                'work_orders.complete_work_order_activity_route',
-                                                numero=orden.code,
-                                                activity_code=activity.code
-                                            ) }}"
-                                        >
-                                            <button
-                                                type="submit"
-                                                class="button button-activity-complete"
-                                            >
+                                        <details class="activity-complete-control">
+
+                                            <summary class="button button-activity-complete">
                                                 Finalizar actividad
-                                            </button>
-                                        </form>
+                                            </summary>
+
+                                            <form
+                                                method="post"
+                                                class="activity-complete-form"
+                                                action="{{ url_for(
+                                                    'work_orders.complete_work_order_activity_route',
+                                                    numero=orden.code,
+                                                    activity_code=activity.code
+                                                ) }}"
+                                            >
+                                                <label>
+                                                    Trabajo realizado / resultado
+
+                                                    <textarea
+                                                        name="completion_notes"
+                                                        rows="4"
+                                                        required
+                                                        placeholder="Describa el trabajo realizado y el resultado obtenido."
+                                                    ></textarea>
+                                                </label>
+
+                                                <button
+                                                    type="submit"
+                                                    class="button button-activity-complete-confirm"
+                                                >
+                                                    Confirmar finalización
+                                                </button>
+                                            </form>
+
+                                        </details>
 
                                         <details class="activity-hold-control">
 
