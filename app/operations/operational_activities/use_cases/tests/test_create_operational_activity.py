@@ -1,8 +1,10 @@
 from datetime import datetime
+from importlib import import_module
 
 import pytest
 
 from app.operations.operational_activities.entities.operational_activity import (
+    OperationalActivity,
     OperationalActivitySource,
     OperationalActivityStatus,
 )
@@ -14,7 +16,7 @@ from app.operations.operational_activities.use_cases.create_operational_activity
 )
 
 
-def test_should_create_open_operational_activity_without_work_order():
+def create_use_case():
     repository = (
         InMemoryOperationalActivityRepository()
     )
@@ -22,6 +24,12 @@ def test_should_create_open_operational_activity_without_work_order():
     use_case = CreateOperationalActivity(
         repository=repository,
     )
+
+    return repository, use_case
+
+
+def test_should_create_open_operational_activity_without_work_order():
+    repository, use_case = create_use_case()
 
     started_at = datetime(
         2026,
@@ -32,23 +40,26 @@ def test_should_create_open_operational_activity_without_work_order():
     )
 
     activity = use_case.execute(
-        code="OP-ACT-007",
-        description="Revisi?n de alumbrado exterior",
+        description="Revision de alumbrado exterior",
         started_at=started_at,
         area="Exterior",
         created_by_person_code="SUP-001",
     )
 
     saved_activity = repository.get_by_code(
-        "OP-ACT-007"
+        activity.code
     )
 
     assert saved_activity is activity
 
-    assert activity.code == "OP-ACT-007"
-    assert activity.description == (
-        "Revisi?n de alumbrado exterior"
+    assert activity.code.startswith(
+        "OPA-"
     )
+
+    assert activity.description == (
+        "Revision de alumbrado exterior"
+    )
+
     assert activity.started_at == started_at
     assert activity.ended_at is None
     assert activity.area == "Exterior"
@@ -66,58 +77,6 @@ def test_should_create_open_operational_activity_without_work_order():
         "SUP-001"
     )
 
-def test_should_reject_duplicate_operational_activity_code():
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
-
-    first_activity = use_case.execute(
-        code="OP-ACT-008",
-        description="Primera actividad",
-        started_at=datetime(
-            2026,
-            9,
-            17,
-            8,
-            0,
-        ),
-        created_by_person_code="SUP-001",
-    )
-
-    try:
-        use_case.execute(
-            code="OP-ACT-008",
-            description="Segunda actividad",
-            started_at=datetime(
-                2026,
-                9,
-                17,
-                9,
-                0,
-            ),
-            created_by_person_code="SUP-001",
-        )
-    except ValueError as exc:
-        assert str(exc) == (
-            "operational activity code already exists"
-        )
-    else:
-        raise AssertionError(
-            "Expected ValueError for duplicate code"
-        )
-
-    saved_activity = repository.get_by_code(
-        "OP-ACT-008"
-    )
-
-    assert saved_activity is first_activity
-    assert saved_activity.description == (
-        "Primera actividad"
-    )
 
 @pytest.mark.parametrize(
     "description",
@@ -129,20 +88,13 @@ def test_should_reject_duplicate_operational_activity_code():
 def test_should_reject_blank_description(
     description,
 ):
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
+    repository, use_case = create_use_case()
 
     with pytest.raises(
         ValueError,
         match="^description is required$",
     ):
         use_case.execute(
-            code="OP-ACT-009",
             description=description,
             started_at=datetime(
                 2026,
@@ -154,23 +106,15 @@ def test_should_reject_blank_description(
             created_by_person_code="SUP-001",
         )
 
-    assert repository.get_by_code(
-        "OP-ACT-009"
-    ) is None
+    assert repository.list_all() == []
+
 
 def test_should_normalize_description():
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
+    repository, use_case = create_use_case()
 
     activity = use_case.execute(
-        code="OP-ACT-010",
         description=(
-            "   Revisi?n de alumbrado exterior   "
+            "   Revision de alumbrado exterior   "
         ),
         started_at=datetime(
             2026,
@@ -183,110 +127,19 @@ def test_should_normalize_description():
     )
 
     assert activity.description == (
-        "Revisi?n de alumbrado exterior"
+        "Revision de alumbrado exterior"
     )
 
     saved_activity = repository.get_by_code(
-        "OP-ACT-010"
+        activity.code
     )
 
     assert saved_activity is activity
+
     assert saved_activity.description == (
-        "Revisi?n de alumbrado exterior"
+        "Revision de alumbrado exterior"
     )
 
-@pytest.mark.parametrize(
-    "code",
-    [
-        "",
-        "   ",
-    ],
-)
-def test_should_reject_blank_code(
-    code,
-):
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
-
-    with pytest.raises(
-        ValueError,
-        match="^code is required$",
-    ):
-        use_case.execute(
-            code=code,
-            description="Revisi?n de alumbrado",
-            started_at=datetime(
-                2026,
-                9,
-                17,
-                12,
-                0,
-            ),
-            created_by_person_code="SUP-001",
-        )
-
-    assert repository.list_all() == []
-
-def test_should_reject_duplicate_code_after_normalization():
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
-
-    first_activity = use_case.execute(
-        code="OP-ACT-011",
-        description="Primera actividad",
-        started_at=datetime(
-            2026,
-            9,
-            17,
-            13,
-            0,
-        ),
-        created_by_person_code="SUP-001",
-    )
-
-    with pytest.raises(
-        ValueError,
-        match=(
-            "^operational activity code "
-            "already exists$"
-        ),
-    ):
-        use_case.execute(
-            code="   op-act-011   ",
-            description="Segunda actividad",
-            started_at=datetime(
-                2026,
-                9,
-                17,
-                14,
-                0,
-            ),
-            created_by_person_code="SUP-001",
-        )
-
-    activities = repository.list_all()
-
-    assert activities == [
-        first_activity,
-    ]
-
-    assert repository.get_by_code(
-        "OP-ACT-011"
-    ) is first_activity
-
-    assert first_activity.description == (
-        "Primera actividad"
-    )
 
 @pytest.mark.parametrize(
     "created_by_person_code",
@@ -298,13 +151,7 @@ def test_should_reject_duplicate_code_after_normalization():
 def test_should_reject_blank_created_by_person_code(
     created_by_person_code,
 ):
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
+    repository, use_case = create_use_case()
 
     with pytest.raises(
         ValueError,
@@ -313,8 +160,7 @@ def test_should_reject_blank_created_by_person_code(
         ),
     ):
         use_case.execute(
-            code="OP-ACT-012",
-            description="Revisi?n de alumbrado",
+            description="Revision de alumbrado",
             started_at=datetime(
                 2026,
                 9,
@@ -327,22 +173,14 @@ def test_should_reject_blank_created_by_person_code(
             ),
         )
 
-    assert repository.get_by_code(
-        "OP-ACT-012"
-    ) is None
+    assert repository.list_all() == []
+
 
 def test_should_normalize_created_by_person_code():
-    repository = (
-        InMemoryOperationalActivityRepository()
-    )
-
-    use_case = CreateOperationalActivity(
-        repository=repository,
-    )
+    repository, use_case = create_use_case()
 
     activity = use_case.execute(
-        code="OP-ACT-013",
-        description="Revisi?n de alumbrado",
+        description="Revision de alumbrado",
         started_at=datetime(
             2026,
             9,
@@ -358,11 +196,100 @@ def test_should_normalize_created_by_person_code():
     )
 
     saved_activity = repository.get_by_code(
-        "OP-ACT-013"
+        activity.code
     )
 
     assert saved_activity is activity
+
     assert saved_activity.created_by_person_code == (
         "SUP-001"
     )
 
+
+def test_should_retry_when_generated_code_already_exists(
+    monkeypatch,
+):
+    repository, use_case = create_use_case()
+
+    existing_activity = OperationalActivity(
+        code="OPA-AAAAAAAA",
+        description="Actividad existente",
+        started_at=datetime(
+            2026,
+            9,
+            17,
+            6,
+            0,
+        ),
+        source=OperationalActivitySource.MANUAL,
+        created_by_person_code="SUP-001",
+    )
+
+    repository.save(
+        existing_activity
+    )
+
+    class FakeUUID:
+        def __init__(
+            self,
+            hex_value,
+        ):
+            self.hex = hex_value
+
+    generated_values = iter(
+        [
+            FakeUUID(
+                "aaaaaaaa111111111111111111111111"
+            ),
+            FakeUUID(
+                "bbbbbbbb222222222222222222222222"
+            ),
+        ]
+    )
+
+    module = import_module(
+        "app.operations.operational_activities"
+        ".use_cases.create_operational_activity"
+    )
+
+    monkeypatch.setattr(
+        module,
+        "uuid4",
+        lambda: next(
+            generated_values
+        ),
+    )
+
+    activity = use_case.execute(
+        description="Nueva actividad",
+        started_at=datetime(
+            2026,
+            9,
+            17,
+            7,
+            0,
+        ),
+        created_by_person_code="SUP-001",
+    )
+
+    assert activity.code == (
+        "OPA-BBBBBBBB"
+    )
+
+    assert (
+        repository.get_by_code(
+            "OPA-AAAAAAAA"
+        )
+        is existing_activity
+    )
+
+    assert (
+        repository.get_by_code(
+            "OPA-BBBBBBBB"
+        )
+        is activity
+    )
+
+    assert len(
+        repository.list_all()
+    ) == 2
