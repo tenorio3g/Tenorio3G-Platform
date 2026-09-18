@@ -1,0 +1,141 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Finalizar actividad
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+                <p class="asset-workspace-card__eyebrow">
+                    Operaciones
+                </p>
+
+                <h3>
+                    Finalizar actividad
+                </h3>
+
+                <p>
+                    {{ activity.code }}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            <h4>
+                {{ activity.description }}
+            </h4>
+
+            <p>
+                Inicio:
+                <strong>
+                    {{ activity.started_at.strftime(
+                        '%d/%m/%Y %H:%M'
+                    ) }}
+                </strong>
+            </p>
+
+            {% if activity.area %}
+                <p>
+                    Area:
+                    {{ activity.area }}
+                </p>
+            {% endif %}
+
+            {% if activity.location_description %}
+                <p>
+                    Ubicacion:
+                    {{ activity.location_description }}
+                </p>
+            {% endif %}
+
+            {% if activity.asset_code %}
+                <p>
+                    Activo:
+                    {{ activity.asset_code }}
+                </p>
+            {% endif %}
+
+            {% if activity.work_order_code %}
+                <p>
+                    Orden:
+                    {{ activity.work_order_code }}
+                </p>
+            {% endif %}
+
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-group">
+
+                    <label for="ended_at">
+                        Fecha y hora de termino
+                    </label>
+
+                    <input
+                        id="ended_at"
+                        name="ended_at"
+                        type="datetime-local"
+                        value="{{ data.get('ended_at', '') if data else '' }}"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="result_notes">
+                        Resultado del trabajo
+                    </label>
+
+                    <textarea
+                        id="result_notes"
+                        name="result_notes"
+                        rows="5"
+                        placeholder="Describa el resultado del trabajo realizado"
+                    >{{ data.get('result_notes', '') if data else '' }}</textarea>
+
+                </div>
+
+                <div class="asset-workspace-actions">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Finalizar actividad
+                    </button>
+
+                    <a
+                        href="{{ url_for(
+                            'operations.today_operational_activities_route'
+                        ) }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

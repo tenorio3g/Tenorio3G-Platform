@@ -1,0 +1,67 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Actividad registrada
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Operaciones
+                </p>
+
+                <h3>
+                    Actividad registrada correctamente
+                </h3>
+
+                <p>
+                    La actividad operacional fue guardada
+                    correctamente en Tenorio3G.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            <div class="form-alert">
+                Codigo de actividad:
+                <strong>{{ activity_code }}</strong>
+            </div>
+
+            <div class="asset-workspace-actions">
+
+                <a
+                    href="{{ url_for(
+                        'operations.new_operational_activity_route'
+                    ) }}"
+                    class="btn btn-primary"
+                >
+                    Registrar otra actividad
+                </a>
+
+                <a
+                    href="{{ url_for('operations.index') }}"
+                    class="btn btn-secondary"
+                >
+                    Ir a Operaciones
+                </a>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

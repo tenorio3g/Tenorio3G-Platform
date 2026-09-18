@@ -1,0 +1,167 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Actividades de hoy
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+                <p class="asset-workspace-card__eyebrow">
+                    Operaciones
+                </p>
+
+                <h3>
+                    Actividades de hoy
+                </h3>
+
+                <p>
+                    {{ report_date.strftime('%d/%m/%Y') }}
+                </p>
+            </div>
+
+            <div>
+                <a
+                    href="{{ url_for(
+                        'operations.new_operational_activity_route'
+                    ) }}"
+                    class="btn btn-primary"
+                >
+                    + Nueva actividad
+                </a>
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if activities %}
+
+                {% for activity in activities %}
+
+                    <article class="asset-workspace-card">
+
+                        <div class="asset-workspace-card__body">
+
+                            <div>
+                                <strong>
+                                    {{ activity.started_at.strftime(
+                                        '%H:%M'
+                                    ) }}
+                                </strong>
+
+                                <span>
+                                    {{ activity.code }}
+                                </span>
+                            </div>
+
+                            <h4>
+                                {{ activity.description }}
+                            </h4>
+
+                            {% if activity.started_at.date() < report_date %}
+                                <p>
+                                    <strong>
+                                        Iniciada el
+                                        {{ activity.started_at.strftime(
+                                            '%d/%m/%Y'
+                                        ) }}
+                                    </strong>
+                                </p>
+                            {% endif %}
+
+                            {% if activity.area %}
+                                <p>
+                                    Area:
+                                    {{ activity.area }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.location_description %}
+                                <p>
+                                    Ubicacion:
+                                    {{
+                                        activity.location_description
+                                    }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.asset_code %}
+                                <p>
+                                    Activo:
+                                    {{ activity.asset_code }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.work_order_code %}
+                                <p>
+                                    Orden:
+                                    {{ activity.work_order_code }}
+                                </p>
+                            {% endif %}
+
+                            <p>
+                                Estado:
+
+                                {% if activity.status.value == 'IN_PROGRESS' %}
+                                    <strong>
+                                        En proceso
+                                    </strong>
+                                {% else %}
+                                    <strong>
+                                        Completada
+                                    </strong>
+                                {% endif %}
+                            </p>
+
+                            {% if activity.ended_at %}
+                                <p>
+                                    Fin:
+                                    {{ activity.ended_at.strftime(
+                                        '%H:%M'
+                                    ) }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.status.value == 'IN_PROGRESS' %}
+                                <div>
+                                    <a
+                                        href="{{ url_for(
+                                            'operations.complete_operational_activity_route',
+                                            code=activity.code
+                                        ) }}"
+                                        class="btn btn-primary"
+                                    >
+                                        Finalizar actividad
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>
+                    No hay actividades operacionales
+                    registradas para hoy.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

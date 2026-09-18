@@ -1,0 +1,172 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Nueva actividad operacional
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <article class="asset-workspace-card">
+
+        <div class="asset-workspace-card__header">
+
+            <div>
+
+                <p class="asset-workspace-card__eyebrow">
+                    Operaciones
+                </p>
+
+                <h3>
+                    Nueva actividad operacional
+                </h3>
+
+                <p>
+                    Registre trabajo operativo realizado dentro o fuera
+                    de una orden de trabajo.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="asset-workspace-card__body">
+
+            {% if error %}
+
+                <div class="form-alert form-alert-error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            <form method="post">
+
+                <div class="form-grid">
+
+                    <div class="form-field form-field-full">
+
+                        <label for="description">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                            required
+                            rows="4"
+                            placeholder="Ej. Revisión de alumbrado en producción"
+                        >{{ data.get('description', '') if data else '' }}</textarea>
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="started_at">
+                            Fecha y hora de inicio
+                        </label>
+
+                        <input
+                            id="started_at"
+                            name="started_at"
+                            type="datetime-local"
+                            required
+                            value="{{ data.get('started_at', '') if data else '' }}"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="area">
+                            Área
+                        </label>
+
+                        <input
+                            id="area"
+                            name="area"
+                            type="text"
+                            value="{{ data.get('area', '') if data else '' }}"
+                            placeholder="Ej. MD2"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="location_description">
+                            Ubicación
+                        </label>
+
+                        <input
+                            id="location_description"
+                            name="location_description"
+                            type="text"
+                            value="{{ data.get('location_description', '') if data else '' }}"
+                            placeholder="Ej. Producción"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="asset_code">
+                            Código de activo
+                        </label>
+
+                        <input
+                            id="asset_code"
+                            name="asset_code"
+                            type="text"
+                            value="{{ data.get('asset_code', '') if data else '' }}"
+                            placeholder="Opcional"
+                        >
+
+                    </div>
+
+                    <div class="form-field">
+
+                        <label for="work_order_code">
+                            Orden de trabajo
+                        </label>
+
+                        <input
+                            id="work_order_code"
+                            name="work_order_code"
+                            type="text"
+                            value="{{ data.get('work_order_code', '') if data else '' }}"
+                            placeholder="Opcional"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="asset-workspace-actions">
+
+                    <a
+                        href="{{ url_for('operations.index') }}"
+                        class="btn btn-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Registrar actividad
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </article>
+
+</div>
+
+{% endblock %}

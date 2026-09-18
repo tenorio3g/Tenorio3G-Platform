@@ -1,6 +1,21 @@
-from flask import render_template
+from datetime import date, datetime
+
+from flask import (
+    abort,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from . import operations
+from app.domains.identity.authentication import login_required
+from app.operations.operational_activities.bootstrap import (
+    complete_operational_activity,
+    create_operational_activity,
+    operational_activity_repository,
+)
 from app.operations.services.operations_service import OperationsService
 
 
@@ -23,3 +38,216 @@ def index():
         activos_en_riesgo=activos_en_riesgo,
         tecnicos=tecnicos
     )
+
+@operations.route(
+    "/operaciones/actividades/nueva",
+    methods=["GET", "POST"],
+)
+@login_required
+def new_operational_activity_route():
+
+    if request.method == "GET":
+        return render_template(
+            "pages/create_operational_activity.html",
+        )
+
+    person_code = str(
+        session.get(
+            "person_code",
+            "",
+        )
+    ).strip().upper()
+
+    if not person_code:
+        return (
+            "Usuario autenticado sin persona asociada",
+            400,
+        )
+
+    try:
+        started_at_raw = request.form.get(
+            "started_at",
+            "",
+        ).strip()
+
+        started_at = datetime.fromisoformat(
+            started_at_raw
+        )
+
+        activity = create_operational_activity.execute(
+            description=request.form.get(
+                "description",
+                "",
+            ),
+            started_at=started_at,
+            area=request.form.get(
+                "area",
+                "",
+            ),
+            location_description=request.form.get(
+                "location_description",
+                "",
+            ),
+            asset_code=request.form.get(
+                "asset_code",
+                "",
+            )
+            or None,
+            work_order_code=request.form.get(
+                "work_order_code",
+                "",
+            )
+            or None,
+            created_by_person_code=person_code,
+        )
+
+    except (ValueError, TypeError) as exc:
+        return render_template(
+            "pages/create_operational_activity.html",
+            error=str(exc),
+            data=request.form,
+        )
+
+    return redirect(
+        url_for(
+            "operations.operational_activity_created_route",
+            code=activity.code,
+        )
+    )
+
+
+
+@operations.get(
+    "/operaciones/actividades/<code>/registrada"
+)
+@login_required
+def operational_activity_created_route(code):
+
+    normalized_code = str(code).strip().upper()
+
+    return render_template(
+        "pages/operational_activity_created.html",
+        activity_code=normalized_code,
+    )
+
+
+def current_date() -> date:
+    return date.today()
+
+
+def current_datetime() -> datetime:
+    return datetime.now()
+
+
+@operations.get(
+    "/operaciones/actividades/hoy"
+)
+@login_required
+def today_operational_activities_route():
+
+    report_date = current_date()
+
+    activities = (
+        operational_activity_repository
+        .list_by_date(report_date)
+    )
+
+    return render_template(
+        "pages/today_operational_activities.html",
+        report_date=report_date,
+        activities=activities,
+    )
+
+
+@operations.route(
+    "/operaciones/actividades/<code>/finalizar",
+    methods=["GET", "POST"],
+)
+@login_required
+def complete_operational_activity_route(code):
+
+    normalized_code = str(
+        code
+    ).strip().upper()
+
+    activity = (
+        operational_activity_repository
+        .get_by_code(normalized_code)
+    )
+
+    if activity is None:
+        abort(404)
+
+    if activity.status.value == "COMPLETED":
+        abort(409)
+
+    if request.method == "POST":
+
+        person_code = str(
+            session.get(
+                "person_code",
+                "",
+            )
+        ).strip().upper()
+
+        if not person_code:
+            return (
+                "Usuario autenticado sin persona asociada",
+                400,
+            )
+
+        ended_at_raw = request.form.get(
+            "ended_at",
+            "",
+        ).strip()
+
+        result_notes = request.form.get(
+            "result_notes",
+            "",
+        )
+
+        try:
+            ended_at = datetime.fromisoformat(
+                ended_at_raw
+            )
+        except (ValueError, TypeError):
+            return (
+                render_template(
+                    "pages/complete_operational_activity.html",
+                    activity=activity,
+                    error="Fecha y hora de termino invalidas",
+                    data=request.form,
+                ),
+                400,
+            )
+
+        try:
+            complete_operational_activity.execute(
+                code=normalized_code,
+                ended_at=ended_at,
+                result_notes=result_notes,
+                completed_at=current_datetime(),
+                completed_by_person_code=person_code,
+            )
+        except ValueError as exc:
+            return (
+                render_template(
+                    "pages/complete_operational_activity.html",
+                    activity=activity,
+                    error=str(exc),
+                    data=request.form,
+                ),
+                400,
+            )
+
+        return redirect(
+            url_for(
+                "operations.today_operational_activities_route"
+            )
+        )
+
+    return render_template(
+        "pages/complete_operational_activity.html",
+        activity=activity,
+    )
+
