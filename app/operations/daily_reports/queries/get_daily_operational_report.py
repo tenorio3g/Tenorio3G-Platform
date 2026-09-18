@@ -6,6 +6,7 @@ from app.domains.work_orders.activities.value_objects import (
 )
 from app.operations.daily_reports.results import (
     DailyActivityResult,
+    DailyOperationalActivityResult,
     DailyOperationalReportResult,
     DailyTechnicianResult,
     DailyWorkOrderResult,
@@ -24,6 +25,7 @@ class GetDailyOperationalReport:
         work_order_repository,
         activity_repository,
         work_session_repository,
+        operational_activity_repository,
     ):
         self._work_order_repository = (
             work_order_repository
@@ -35,6 +37,10 @@ class GetDailyOperationalReport:
 
         self._work_session_repository = (
             work_session_repository
+        )
+
+        self._operational_activity_repository = (
+            operational_activity_repository
         )
 
     def execute(
@@ -53,6 +59,33 @@ class GetDailyOperationalReport:
         )
 
         daily_work_orders = []
+
+        operational_activities = (
+            self._operational_activity_repository
+            .list_by_date(
+                query.report_date
+            )
+        )
+
+        daily_operational_activities = [
+            DailyOperationalActivityResult(
+                code=activity.code,
+                description=activity.description,
+                started_at=activity.started_at,
+                ended_at=activity.ended_at,
+                result_notes=activity.result_notes,
+                area=activity.area,
+                location_description=(
+                    activity.location_description
+                ),
+                asset_code=activity.asset_code,
+                work_order_code=(
+                    activity.work_order_code
+                ),
+                status=activity.status.value,
+            )
+            for activity in operational_activities
+        ]
 
         total_activities = 0
         completed_activities = 0
@@ -312,6 +345,9 @@ class GetDailyOperationalReport:
         return DailyOperationalReportResult(
             report_date=query.report_date,
             work_orders=daily_work_orders,
+            operational_activities=(
+                daily_operational_activities
+            ),
             total_work_orders=len(
                 daily_work_orders
             ),

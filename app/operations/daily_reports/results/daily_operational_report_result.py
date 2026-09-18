@@ -23,6 +23,20 @@ class DailyActivityResult:
 
 
 @dataclass(frozen=True)
+class DailyOperationalActivityResult:
+    code: str
+    description: str
+    started_at: datetime
+    ended_at: datetime | None
+    result_notes: str
+    area: str
+    location_description: str
+    asset_code: str | None
+    work_order_code: str | None
+    status: str
+
+
+@dataclass(frozen=True)
 class DailyWorkOrderResult:
     work_order_code: str
     title: str
@@ -34,6 +48,9 @@ class DailyWorkOrderResult:
 class DailyOperationalReportResult:
     report_date: date
     work_orders: list[DailyWorkOrderResult]
+    operational_activities: list[
+        DailyOperationalActivityResult
+    ]
     total_work_orders: int
     total_activities: int
     completed_activities: int

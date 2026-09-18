@@ -104,6 +104,15 @@ from app.domains.work_orders.work_sessions.models.work_session_model import (
 )
 
 # ==========================================================
+# Operations
+# ==========================================================
+
+from app.operations.operational_activities.models import (
+    OperationalActivityModel,
+)
+
+
+# ==========================================================
 # Foundation Timeline
 # ==========================================================
 
@@ -160,6 +169,7 @@ __all__ = [
     "WorkOrderToolUsageModel",
     "WorkSessionAuditEntryModel",
     "WorkSessionModel",
+    "OperationalActivityModel",
     "TimelineEventModel",
     "PhysicalLocationModel",
     "MapLayer",

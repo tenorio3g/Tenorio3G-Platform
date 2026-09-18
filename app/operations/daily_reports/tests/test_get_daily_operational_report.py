@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
 
 from app.domains.work_orders.activities.entities import (
     WorkOrderActivity,
@@ -21,6 +21,10 @@ from app.domains.work_orders.work_sessions.value_objects import (
 from app.operations.daily_reports.queries import (
     GetDailyOperationalReport,
     GetDailyOperationalReportQuery,
+)
+from app.operations.operational_activities.entities import (
+    OperationalActivity,
+    OperationalActivitySource,
 )
 
 
@@ -86,10 +90,48 @@ class StubWorkSessionRepository:
         ]
 
 
+class StubOperationalActivityRepository:
+
+    def __init__(
+        self,
+        operational_activities=None,
+    ):
+        self._operational_activities = list(
+            operational_activities or []
+        )
+
+    def list_by_date(
+        self,
+        report_date,
+    ):
+        day_start = datetime.combine(
+            report_date,
+            time.min,
+        )
+
+        day_end = (
+            day_start
+            + timedelta(days=1)
+        )
+
+        return [
+            activity
+            for activity in self._operational_activities
+            if (
+                activity.started_at < day_end
+                and (
+                    activity.ended_at is None
+                    or activity.ended_at > day_start
+                )
+            )
+        ]
+
+
 def create_use_case(
     work_orders=None,
     activities=None,
     work_sessions=None,
+    operational_activities=None,
 ):
     return GetDailyOperationalReport(
         work_order_repository=(
@@ -105,6 +147,11 @@ def create_use_case(
         work_session_repository=(
             StubWorkSessionRepository(
                 work_sessions,
+            )
+        ),
+        operational_activity_repository=(
+            StubOperationalActivityRepository(
+                operational_activities,
             )
         ),
     )
@@ -1614,3 +1661,315 @@ def test_should_combine_closed_work_and_active_session_in_same_activity():
 
     assert technician_2.person_code == "TECH-002"
     assert technician_2.effective_seconds == 0
+
+
+
+def test_should_include_operational_activity_in_report():
+
+    operational_activity = OperationalActivity(
+        code="OP-ACT-001",
+        description=(
+            "Instalaci?n de m?dem y antenas "
+            "en gabinete de inversor"
+        ),
+        started_at=datetime(
+            2026,
+            9,
+            17,
+            7,
+            0,
+        ),
+        ended_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            30,
+        ),
+        result_notes=(
+            "Instalaci?n terminada"
+        ),
+        area="Subestaci?n 1",
+        location_description=(
+            "Gabinete de inversor"
+        ),
+        work_order_code=None,
+        source=(
+            OperationalActivitySource.MANUAL
+        ),
+        created_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            35,
+        ),
+        created_by_person_code="TECH-001",
+        completed_at=datetime(
+            2026,
+            9,
+            17,
+            8,
+            35,
+        ),
+        completed_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        operational_activities=[
+            operational_activity,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                17,
+            ),
+        )
+    )
+
+    assert len(
+        report.operational_activities
+    ) == 1
+
+    daily_activity = (
+        report.operational_activities[0]
+    )
+
+    assert daily_activity.code == "OP-ACT-001"
+
+    assert daily_activity.description == (
+        "Instalaci?n de m?dem y antenas "
+        "en gabinete de inversor"
+    )
+
+    assert daily_activity.started_at == datetime(
+        2026,
+        9,
+        17,
+        7,
+        0,
+    )
+
+    assert daily_activity.ended_at == datetime(
+        2026,
+        9,
+        17,
+        8,
+        30,
+    )
+
+    assert daily_activity.area == "Subestaci?n 1"
+
+    assert daily_activity.location_description == (
+        "Gabinete de inversor"
+    )
+
+    assert daily_activity.work_order_code is None
+
+    assert daily_activity.status == "COMPLETED"
+
+    assert daily_activity.result_notes == (
+        "Instalaci?n terminada"
+    )
+
+    # Los contadores existentes siguen representando
+    # ?nicamente actividades formales de Work Orders.
+    assert report.total_work_orders == 0
+    assert report.total_activities == 0
+    assert report.effective_seconds == 0
+
+
+
+def test_should_include_cross_midnight_operational_activity_in_both_report_days():
+
+    operational_activity = OperationalActivity(
+        code="OP-ACT-002",
+        description="Trabajo nocturno",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+        ended_at=datetime(
+            2026,
+            9,
+            17,
+            1,
+            0,
+        ),
+        source=OperationalActivitySource.MANUAL,
+        created_at=datetime(
+            2026,
+            9,
+            17,
+            1,
+            5,
+        ),
+        created_by_person_code="TECH-001",
+        completed_at=datetime(
+            2026,
+            9,
+            17,
+            1,
+            5,
+        ),
+        completed_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        operational_activities=[
+            operational_activity,
+        ],
+    )
+
+    report_day_1 = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                16,
+            ),
+        )
+    )
+
+    report_day_2 = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                17,
+            ),
+        )
+    )
+
+    assert [
+        item.code
+        for item
+        in report_day_1.operational_activities
+    ] == [
+        "OP-ACT-002",
+    ]
+
+    assert [
+        item.code
+        for item
+        in report_day_2.operational_activities
+    ] == [
+        "OP-ACT-002",
+    ]
+
+
+def test_should_include_open_operational_activity_carried_from_previous_day():
+
+    operational_activity = OperationalActivity(
+        code="OP-ACT-003",
+        description="Actividad operacional abierta",
+        started_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+        ended_at=None,
+        source=OperationalActivitySource.MANUAL,
+        created_at=datetime(
+            2026,
+            9,
+            16,
+            23,
+            30,
+        ),
+        created_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        operational_activities=[
+            operational_activity,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                17,
+            ),
+        )
+    )
+
+    assert len(
+        report.operational_activities
+    ) == 1
+
+    daily_activity = (
+        report.operational_activities[0]
+    )
+
+    assert daily_activity.code == "OP-ACT-003"
+    assert daily_activity.status == "IN_PROGRESS"
+    assert daily_activity.ended_at is None
+
+
+def test_should_exclude_operational_activity_outside_report_day():
+
+    operational_activity = OperationalActivity(
+        code="OP-ACT-004",
+        description="Actividad de otro d?a",
+        started_at=datetime(
+            2026,
+            9,
+            18,
+            8,
+            0,
+        ),
+        ended_at=datetime(
+            2026,
+            9,
+            18,
+            9,
+            0,
+        ),
+        source=OperationalActivitySource.MANUAL,
+        created_at=datetime(
+            2026,
+            9,
+            18,
+            9,
+            5,
+        ),
+        created_by_person_code="TECH-001",
+        completed_at=datetime(
+            2026,
+            9,
+            18,
+            9,
+            5,
+        ),
+        completed_by_person_code="TECH-001",
+    )
+
+    use_case = create_use_case(
+        operational_activities=[
+            operational_activity,
+        ],
+    )
+
+    report = use_case.execute(
+        GetDailyOperationalReportQuery(
+            report_date=date(
+                2026,
+                9,
+                17,
+            ),
+        )
+    )
+
+    assert report.operational_activities == []
