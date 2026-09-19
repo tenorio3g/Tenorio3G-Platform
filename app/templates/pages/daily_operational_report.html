@@ -1,0 +1,578 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Reporte diario de actividades
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Reporte diario de actividades</h1>
+
+            <p class="text-muted mb-0">
+                {{ report.report_date.strftime('%d/%m/%Y') }}
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{{ url_for(
+                    'operations.today_operational_activities_route'
+                ) }}"
+                class="btn btn-outline-secondary"
+            >
+                Actividades de hoy
+            </a>
+        </div>
+    </div>
+
+    <section class="mb-5">
+
+        <div class="mb-4">
+
+            <h2>Resumen de ordenes de trabajo</h2>
+
+            <div class="row g-3">
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                Ordenes atendidas
+                            </div>
+                            <strong>{{ report.total_work_orders }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                Actividades de OT
+                            </div>
+                            <strong>{{ report.total_activities }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                Completadas
+                            </div>
+                            <strong>{{ report.completed_activities }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                En proceso
+                            </div>
+                            <strong>{{ report.in_progress_activities }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                En espera
+                            </div>
+                            <strong>{{ report.on_hold_activities }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-lg-2">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="text-muted">
+                                Horas-hombre
+                            </div>
+                            <strong>{{ effective_time }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <h2>Ordenes de trabajo</h2>
+
+        {% if report.work_orders %}
+
+            {% for work_order in report.work_orders %}
+
+                <div class="card mb-4">
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <h3 class="h5 mb-1">
+                                {{ work_order.title }}
+                            </h3>
+
+                            <div class="text-muted">
+                                {{ work_order.work_order_code }}
+                            </div>
+
+                            {% if work_order.asset_code %}
+                                <div>
+                                    <strong>Activo:</strong>
+                                    {{ work_order.asset_code }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% for activity in work_order.activities %}
+
+                            <div class="border-top pt-3 mt-3">
+
+                                <div
+                                    class="d-flex justify-content-between
+                                           align-items-start gap-3"
+                                >
+                                    <div>
+                                        <h4 class="h6 mb-1">
+                                            {{ activity.title }}
+                                        </h4>
+
+                                        <div class="text-muted">
+                                            {{ activity.activity_code }}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        {% if activity.status == 'COMPLETED' %}
+                                            <span class="badge bg-success">
+                                                Completada
+                                            </span>
+                                        {% elif activity.status == 'ON_HOLD' %}
+                                            <span
+                                                class="badge bg-secondary"
+                                            >
+                                                En espera
+                                            </span>
+                                        {% else %}
+                                            <span
+                                                class="badge bg-warning
+                                                       text-dark"
+                                            >
+                                                En proceso
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <p class="mt-3">
+                                    <strong>Horario:</strong>
+
+                                    {% if activity.first_started_at %}
+                                        {{
+                                            activity.first_started_at
+                                            .strftime('%H:%M')
+                                        }}
+                                    {% else %}
+                                        Sin inicio registrado
+                                    {% endif %}
+
+                                    -
+
+                                    {% if activity.has_active_session %}
+                                        En proceso
+                                    {% elif activity.last_ended_at %}
+                                        {{
+                                            activity.last_ended_at
+                                            .strftime('%H:%M')
+                                        }}
+                                    {% else %}
+                                        Sin termino registrado
+                                    {% endif %}
+                                </p>
+
+                                {% if activity.technicians %}
+                                    <p>
+                                        <strong>Tecnicos:</strong>
+
+                                        {% for technician
+                                           in activity.technicians %}
+
+                                            {{ technician.person_code }}{% if not loop.last %}, {% endif %}
+
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+
+                                {% if activity.completion_notes %}
+                                    <p class="mb-0">
+                                        <strong>Resultado:</strong>
+                                        {{
+                                            activity.completion_notes
+                                        }}
+                                    </p>
+                                {% endif %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-secondary">
+                No hay ordenes de trabajo con actividad
+                registrada para esta fecha.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <section class="mb-5">
+
+        <h2>Actividades operacionales</h2>
+
+        {% if report.operational_activities %}
+
+            {% for activity in report.operational_activities %}
+
+                <div class="card mb-3">
+                    <div class="card-body">
+
+                        <div
+                            class="d-flex justify-content-between
+                                   align-items-start gap-3"
+                        >
+                            <div>
+                                <h3 class="h5 mb-1">
+                                    {{ activity.description }}
+                                </h3>
+
+                                <div class="text-muted">
+                                    {{ activity.code }}
+                                </div>
+                            </div>
+
+                            <div>
+                                {% if activity.status == 'COMPLETED' %}
+                                    <span class="badge bg-success">
+                                        Completada
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">
+                                        En proceso
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <p>
+                            <strong>Horario:</strong>
+
+                            {{ activity.started_at.strftime('%H:%M') }}
+
+                            -
+
+                            {% if activity.ended_at %}
+                                {{ activity.ended_at.strftime('%H:%M') }}
+                            {% else %}
+                                En proceso
+                            {% endif %}
+                        </p>
+
+                        {% if activity.area %}
+                            <p>
+                                <strong>Area:</strong>
+                                {{ activity.area }}
+                            </p>
+                        {% endif %}
+
+                        {% if activity.location_description %}
+                            <p>
+                                <strong>Ubicacion:</strong>
+                                {{ activity.location_description }}
+                            </p>
+                        {% endif %}
+
+                        {% if activity.asset_code %}
+                            <p>
+                                <strong>Activo:</strong>
+                                {{ activity.asset_code }}
+                            </p>
+                        {% endif %}
+
+                        {% if activity.work_order_code %}
+                            <p>
+                                <strong>Orden de trabajo:</strong>
+                                {{ activity.work_order_code }}
+                            </p>
+                        {% endif %}
+
+                        {% if activity.result_notes %}
+                            <p class="mb-0">
+                                <strong>Resultado:</strong>
+                                {{ activity.result_notes }}
+                            </p>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="alert alert-secondary">
+                No hay actividades operacionales registradas
+                para esta fecha.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <section class="mb-5">
+
+        <div class="card">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <div
+                        class="d-flex justify-content-between align-items-start gap-3"
+                    >
+                        <div>
+                            <h2 class="h4 mb-1">
+                                Reporte para compartir
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Texto preparado para copiar y enviar.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="copy-daily-report"
+                            class="btn btn-primary"
+                        >
+                            Copiar para WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    id="daily-report-preview"
+                    class="border rounded p-3"
+                >
+                    <p class="mb-1">
+                        <strong>REPORTE DE ACTIVIDADES</strong>
+                    </p>
+
+                    <p class="mb-4">
+                        <strong>
+                            {{ report.report_date.strftime("%d/%m/%Y") }}
+                        </strong>
+                    </p>
+
+                    {% for work_order in report.work_orders %}
+
+                        {% for activity in work_order.activities %}
+
+                            <div class="mb-4">
+
+                                <p class="mb-1">
+                                    <strong>
+                                        {% if activity.first_started_at %}
+                                            {{ activity.first_started_at.strftime("%H:%M") }}
+                                        {% else %}
+                                            Sin inicio registrado
+                                        {% endif %}
+                                        -
+                                        {% if activity.has_active_session %}
+                                            En proceso
+                                        {% elif activity.last_ended_at %}
+                                            {{ activity.last_ended_at.strftime("%H:%M") }}
+                                        {% else %}
+                                            Sin termino registrado
+                                        {% endif %}
+                                    </strong>
+                                </p>
+
+                                <p class="mb-1">
+                                    {{ activity.title }}
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>OT:</strong>
+                                    {{ work_order.work_order_code }}
+                                </p>
+
+                                {% if activity.technicians %}
+                                    <p class="mb-1">
+                                        <strong>Tecnicos:</strong>
+                                        {% for technician in activity.technicians %}
+                                            {{ technician.person_code }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+
+                                {% if activity.completion_notes %}
+                                    <p class="mb-0">
+                                        <strong>Resultado:</strong>
+                                        {{ activity.completion_notes }}
+                                    </p>
+                                {% endif %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% endfor %}
+
+                    {% for activity in report.operational_activities %}
+
+                        <div class="mb-4">
+
+                            <p class="mb-1">
+                                <strong>{{ activity.started_at.strftime("%H:%M") }} -
+                                {% if activity.ended_at %}
+                                    {{ activity.ended_at.strftime("%H:%M") }}
+                                {% else %}
+                                    En proceso
+                                {% endif %}</strong>
+                            </p>
+
+                            <p class="mb-1">
+                                {{ activity.description }}
+                            </p>
+
+                            {% if activity.area %}
+                                <p class="mb-1">
+                                    <strong>Area:</strong>
+                                    {{ activity.area }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.location_description %}
+                                <p class="mb-1">
+                                    <strong>Ubicacion:</strong>
+                                    {{ activity.location_description }}
+                                </p>
+                            {% endif %}
+
+                            {% if activity.result_notes %}
+                                <p class="mb-0">
+                                    <strong>Resultado:</strong>
+                                    {{ activity.result_notes }}
+                                </p>
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                    {% if (
+                        not report.work_orders
+                        and not report.operational_activities
+                    ) %}
+                        <p class="text-muted mb-0">
+                            No hay actividades registradas
+                            para esta fecha.
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                <pre
+                    id="shareable-daily-report"
+                    hidden
+                >{{ shareable_report }}</pre>
+
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        const button = document.getElementById(
+            "copy-daily-report"
+        );
+
+        const report = document.getElementById(
+            "shareable-daily-report"
+        );
+
+        if (!button || !report) {
+            return;
+        }
+
+        button.addEventListener(
+            "click",
+            async () => {
+                const text = report.textContent.trim();
+
+                if (!text) {
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(
+                        text
+                    );
+
+                    const originalText =
+                        button.textContent;
+
+                    button.textContent = "Copiado";
+                    button.disabled = true;
+
+                    window.setTimeout(
+                        () => {
+                            button.textContent =
+                                originalText;
+
+                            button.disabled = false;
+                        },
+                        1500
+                    );
+
+                } catch (error) {
+                    button.textContent =
+                        "No se pudo copiar";
+
+                    window.setTimeout(
+                        () => {
+                            button.textContent =
+                                "Copiar para WhatsApp";
+                        },
+                        2000
+                    );
+                }
+            }
+        );
+    }
+);
+</script>
+
+{% endblock %}

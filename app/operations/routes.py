@@ -11,6 +11,16 @@ from flask import (
 
 from . import operations
 from app.domains.identity.authentication import login_required
+from app.operations.daily_reports.bootstrap import (
+    get_daily_operational_report,
+)
+from app.operations.daily_reports.queries import (
+    GetDailyOperationalReportQuery,
+)
+from app.operations.daily_reports.presenters import (
+    DailyReportTextPresenter,
+)
+
 from app.operations.operational_activities.bootstrap import (
     complete_operational_activity,
     create_operational_activity,
@@ -128,6 +138,56 @@ def operational_activity_created_route(code):
     return render_template(
         "pages/operational_activity_created.html",
         activity_code=normalized_code,
+    )
+
+
+def format_duration(total_seconds: int) -> str:
+
+    total_minutes = total_seconds // 60
+
+    hours, minutes = divmod(
+        total_minutes,
+        60,
+    )
+
+    if hours and minutes:
+        return f"{hours} h {minutes} min"
+
+    if hours:
+        return f"{hours} h"
+
+    return f"{minutes} min"
+
+
+@operations.get(
+    "/operaciones/reporte-diario"
+)
+@login_required
+def daily_operational_report_route():
+
+    query = GetDailyOperationalReportQuery(
+        report_date=current_date(),
+    )
+
+    report = (
+        get_daily_operational_report.execute(
+            query
+        )
+    )
+
+    shareable_report = (
+        DailyReportTextPresenter.present(
+            report
+        )
+    )
+
+    return render_template(
+        "pages/daily_operational_report.html",
+        report=report,
+        effective_time=format_duration(
+            report.effective_seconds
+        ),
+        shareable_report=shareable_report,
     )
 
 
