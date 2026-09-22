@@ -128,16 +128,38 @@ Nueva actividad operacional
                     <div class="form-field">
 
                         <label for="work_order_code">
-                            Orden de trabajo
+                            Orden de trabajo relacionada (opcional)
                         </label>
 
-                        <input
+                        <select
                             id="work_order_code"
                             name="work_order_code"
-                            type="text"
-                            value="{{ data.get('work_order_code', '') if data else '' }}"
-                            placeholder="Opcional"
                         >
+                            <option value="">
+                                Sin orden relacionada
+                            </option>
+
+                            {% for work_order in work_orders %}
+
+                                <option
+                                    value="{{ work_order.code }}"
+                                    {% if data and data.get('work_order_code', '')|upper == work_order.code %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ work_order.code }} - {{ work_order.title }}
+                                    ({{ work_order.status.value if work_order.status.value is defined else work_order.status }})
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <small>
+                            Esta referencia relaciona la actividad con una
+                            orden existente. No crea una actividad formal
+                            dentro de la orden.
+                        </small>
 
                     </div>
 

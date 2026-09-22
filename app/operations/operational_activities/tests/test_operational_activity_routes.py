@@ -37,6 +37,156 @@ def test_new_operational_activity_should_render_for_authenticated_user():
     assert b"Nueva actividad operacional" in response.data
 
 
+
+def test_new_operational_activity_should_list_work_orders(
+    monkeypatch,
+):
+    app = build_test_app()
+    client = app.test_client()
+
+    class WorkOrderStub:
+
+        def __init__(
+            self,
+            code,
+            title,
+            status,
+        ):
+            self.code = code
+            self.title = title
+            self.status = status
+
+    class ListWorkOrdersResultStub:
+
+        def __init__(self):
+            self.work_orders = [
+                WorkOrderStub(
+                    code="WO-001",
+                    title="Revision de alumbrado",
+                    status="IN_PROGRESS",
+                ),
+                WorkOrderStub(
+                    code="WO-002",
+                    title="Mantenimiento de compresor",
+                    status="CLOSED",
+                ),
+            ]
+
+    class ListWorkOrdersStub:
+
+        def execute(self):
+            return ListWorkOrdersResultStub()
+
+    from importlib import import_module
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "list_work_orders",
+        ListWorkOrdersStub(),
+        raising=False,
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/operaciones/actividades/nueva",
+    )
+
+    assert response.status_code == 200
+
+    assert b"Sin orden relacionada" in response.data
+    assert b"WO-001" in response.data
+    assert b"Revision de alumbrado" in response.data
+    assert b"WO-002" in response.data
+    assert b"Mantenimiento de compresor" in response.data
+
+
+def test_create_operational_activity_should_reject_unknown_work_order(
+    monkeypatch,
+):
+    app = build_test_app()
+    client = app.test_client()
+
+    create_calls = []
+
+    class CreateOperationalActivityStub:
+
+        def execute(self, **kwargs):
+            create_calls.append(kwargs)
+            return object()
+
+    class GetWorkOrderStub:
+
+        def execute(self, query):
+            raise ValueError("work order not found")
+
+    class ListWorkOrdersResultStub:
+        work_orders = []
+
+    class ListWorkOrdersStub:
+
+        def execute(self):
+            return ListWorkOrdersResultStub()
+
+    from importlib import import_module
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "create_operational_activity",
+        CreateOperationalActivityStub(),
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_work_order",
+        GetWorkOrderStub(),
+        raising=False,
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "list_work_orders",
+        ListWorkOrdersStub(),
+        raising=False,
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.post(
+        "/operaciones/actividades/nueva",
+        data={
+            "description": "Revision de alumbrado",
+            "started_at": "2026-09-18T07:00",
+            "area": "MD2",
+            "work_order_code": "WO-NO-EXISTE",
+        },
+    )
+
+    assert response.status_code == 200
+
+    assert (
+        b"La orden de trabajo seleccionada no existe."
+        in response.data
+    )
+
+    assert create_calls == []
+
+
+
 def test_create_operational_activity_should_redirect_without_login():
     app = build_test_app()
     client = app.test_client()
@@ -71,6 +221,19 @@ def test_create_operational_activity_should_use_authenticated_person(
             captured.update(kwargs)
             return CreatedActivityStub()
 
+    class GetWorkOrderResultStub:
+
+        class WorkOrderStub:
+            code = "71589"
+
+        work_order = WorkOrderStub()
+
+    class GetWorkOrderStub:
+
+        def execute(self, query):
+            assert query.code == "71589"
+            return GetWorkOrderResultStub()
+
     from importlib import import_module
 
     routes_module = import_module(
@@ -81,6 +244,13 @@ def test_create_operational_activity_should_use_authenticated_person(
         routes_module,
         "create_operational_activity",
         CreateOperationalActivityStub(),
+        raising=False,
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_work_order",
+        GetWorkOrderStub(),
         raising=False,
     )
 

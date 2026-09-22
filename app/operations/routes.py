@@ -26,6 +26,13 @@ from app.operations.operational_activities.bootstrap import (
     create_operational_activity,
     operational_activity_repository,
 )
+from app.domains.work_orders.bootstrap import (
+    get_work_order,
+    list_work_orders,
+)
+from app.domains.work_orders.use_cases import (
+    GetWorkOrderQuery,
+)
 from app.operations.services.operations_service import OperationsService
 
 
@@ -57,8 +64,11 @@ def index():
 def new_operational_activity_route():
 
     if request.method == "GET":
+        work_orders_result = list_work_orders.execute()
+
         return render_template(
             "pages/create_operational_activity.html",
+            work_orders=work_orders_result.work_orders,
         )
 
     person_code = str(
@@ -84,6 +94,30 @@ def new_operational_activity_route():
             started_at_raw
         )
 
+        work_order_code = (
+            request.form.get(
+                "work_order_code",
+                "",
+            ).strip().upper()
+            or None
+        )
+
+        if work_order_code:
+            try:
+                get_work_order.execute(
+                    GetWorkOrderQuery(
+                        code=work_order_code,
+                    )
+                )
+            except ValueError as exc:
+                if str(exc) == "work order not found":
+                    raise ValueError(
+                        "La orden de trabajo seleccionada "
+                        "no existe."
+                    ) from exc
+
+                raise
+
         activity = create_operational_activity.execute(
             description=request.form.get(
                 "description",
@@ -103,19 +137,18 @@ def new_operational_activity_route():
                 "",
             )
             or None,
-            work_order_code=request.form.get(
-                "work_order_code",
-                "",
-            )
-            or None,
+            work_order_code=work_order_code,
             created_by_person_code=person_code,
         )
 
     except (ValueError, TypeError) as exc:
+        work_orders_result = list_work_orders.execute()
+
         return render_template(
             "pages/create_operational_activity.html",
             error=str(exc),
             data=request.form,
+            work_orders=work_orders_result.work_orders,
         )
 
     return redirect(
