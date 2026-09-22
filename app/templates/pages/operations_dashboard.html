@@ -13,8 +13,94 @@ Centro de Operaciones
     </p>
 
     <h1>
-        🏭 Resumen Operativo
+        Resumen Operativo
     </h1>
+
+    <hr>
+
+    <section class="dashboard-section">
+
+        <div class="dashboard-widget-header">
+
+            <div>
+
+                <p class="dashboard-widget-label">
+                    OPERACION DIARIA
+                </p>
+
+                <h2 class="dashboard-widget-title">
+                    Acciones operativas
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-module-grid">
+
+            <a
+                href="{{ url_for(
+                    'operations.new_operational_activity_route'
+                ) }}"
+                class="dashboard-module-card"
+            >
+                <span class="dashboard-module-icon">
+                    +
+                </span>
+
+                <strong>
+                    Registrar actividad
+                </strong>
+
+                <small>
+                    Capturar trabajo operativo
+                    actual o realizado anteriormente.
+                </small>
+            </a>
+
+            <a
+                href="{{ url_for(
+                    'operations.today_operational_activities_route'
+                ) }}"
+                class="dashboard-module-card"
+            >
+                <span class="dashboard-module-icon">
+                    &#9201;
+                </span>
+
+                <strong>
+                    Actividades de hoy
+                </strong>
+
+                <small>
+                    Consultar las actividades del dia
+                    y finalizar las que siguen abiertas.
+                </small>
+            </a>
+
+            <a
+                href="{{ url_for(
+                    'operations.daily_operational_report_route'
+                ) }}"
+                class="dashboard-module-card"
+            >
+                <span class="dashboard-module-icon">
+                    &#128196;
+                </span>
+
+                <strong>
+                    Reporte diario
+                </strong>
+
+                <small>
+                    Revisar el trabajo registrado
+                    y copiar el reporte para WhatsApp.
+                </small>
+            </a>
+
+        </div>
+
+    </section>
 
     <hr>
 
