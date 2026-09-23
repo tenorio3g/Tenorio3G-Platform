@@ -461,6 +461,7 @@ def test_daily_report_should_render_work_order_activity(
 def test_daily_report_should_render_work_order_summary(
     monkeypatch,
 ):
+    import re
     from datetime import date
     from importlib import import_module
     from types import SimpleNamespace
@@ -525,21 +526,37 @@ def test_daily_report_should_render_work_order_summary(
         as_text=True
     )
 
-    assert "Resumen de ordenes de trabajo" in html
+    compact_html = re.sub(
+        r"\s+",
+        " ",
+        html,
+    )
+    compact_html = re.sub(
+        r">\s+",
+        ">",
+        compact_html,
+    )
+    compact_html = re.sub(
+        r"\s+<",
+        "<",
+        compact_html,
+    )
+
+    assert "Resumen del dia" in html
     assert "Ordenes atendidas" in html
-    assert ">3<" in html
+    assert ">3<" in compact_html
 
     assert "Actividades de OT" in html
-    assert ">7<" in html
+    assert ">7<" in compact_html
 
     assert "Completadas" in html
-    assert ">4<" in html
+    assert ">4<" in compact_html
 
     assert "En proceso" in html
-    assert ">2<" in html
+    assert ">2<" in compact_html
 
     assert "En espera" in html
-    assert ">1<" in html
+    assert ">1<" in compact_html
 
     assert "10 h 30 min" in html
 

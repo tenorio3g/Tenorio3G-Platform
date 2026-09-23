@@ -4,48 +4,61 @@
 Reporte diario de actividades
 {% endblock %}
 
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'static',
+        filename='css/modules/daily_report.css'
+    ) }}"
+>
+{% endblock %}
+
 {% block content %}
 
-<div class="container py-4">
+<div class="container">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1>Reporte diario de actividades</h1>
+    <div class="daily-report">
 
-            <p class="text-muted mb-0">
-                {{ report.report_date.strftime('%d/%m/%Y') }}
-            </p>
-        </div>
+        <header class="daily-report-heading">
 
-        <div>
+            <div>
+                <h1>Reporte diario de actividades</h1>
+
+                <p class="daily-report-heading__subtitle">
+                    {{ report.report_date.strftime('%d/%m/%Y') }}
+                    &middot;
+                    Consulta y consolidacion de la operacion diaria
+                </p>
+            </div>
+
             <a
                 href="{{ url_for(
                     'operations.today_operational_activities_route'
                 ) }}"
-                class="btn btn-outline-secondary"
+                class="daily-report-button"
             >
                 Actividades de hoy
             </a>
-        </div>
-    </div>
 
-    <section class="mb-4">
+        </header>
 
-        <div class="card">
-            <div class="card-body">
+
+        <section class="daily-report-section">
+
+            <div class="daily-report-date-card">
 
                 <form
                     method="get"
                     action="{{ url_for(
                         'operations.daily_operational_report_route'
                     ) }}"
-                    class="row g-3 align-items-end"
+                    class="daily-report-date-form"
                 >
-                    <div class="col-md-4">
-                        <label
-                            for="daily-report-date"
-                            class="form-label"
-                        >
+
+                    <div class="daily-report-date-field">
+
+                        <label for="daily-report-date">
                             Fecha del reporte
                         </label>
 
@@ -53,39 +66,43 @@ Reporte diario de actividades
                             type="date"
                             id="daily-report-date"
                             name="fecha"
-                            class="form-control"
                             value="{{ report.report_date.isoformat() }}"
                             required
                         >
+
                     </div>
 
-                    <div class="col-md-auto">
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                        >
-                            Consultar
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        class="daily-report-button
+                               daily-report-button--primary"
+                    >
+                        Consultar
+                    </button>
+
                 </form>
 
-                <div class="d-flex flex-wrap gap-2 mt-3">
+                <nav
+                    class="daily-report-date-navigation"
+                    aria-label="Navegacion por fecha"
+                >
 
                     <a
                         href="{{ url_for(
                             'operations.daily_operational_report_route',
                             fecha=previous_date.isoformat()
                         ) }}"
-                        class="btn btn-outline-secondary"
+                        class="daily-report-button"
                     >
-                        Dia anterior
+                        &larr; Dia anterior
                     </a>
 
                     <a
                         href="{{ url_for(
                             'operations.daily_operational_report_route'
                         ) }}"
-                        class="btn btn-outline-primary"
+                        class="daily-report-button
+                               daily-report-button--today"
                     >
                         Hoy
                     </a>
@@ -95,374 +112,470 @@ Reporte diario de actividades
                             'operations.daily_operational_report_route',
                             fecha=next_date.isoformat()
                         ) }}"
-                        class="btn btn-outline-secondary"
+                        class="daily-report-button"
                     >
-                        Dia siguiente
+                        Dia siguiente &rarr;
                     </a>
 
-                </div>
-
-            </div>
-        </div>
-
-    </section>
-
-    <section class="mb-5">
-
-        <div class="mb-4">
-
-            <h2>Resumen de ordenes de trabajo</h2>
-
-            <div class="row g-3">
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                Ordenes atendidas
-                            </div>
-                            <strong>{{ report.total_work_orders }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                Actividades de OT
-                            </div>
-                            <strong>{{ report.total_activities }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                Completadas
-                            </div>
-                            <strong>{{ report.completed_activities }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                En proceso
-                            </div>
-                            <strong>{{ report.in_progress_activities }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                En espera
-                            </div>
-                            <strong>{{ report.on_hold_activities }}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-2">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="text-muted">
-                                Horas-hombre
-                            </div>
-                            <strong>{{ effective_time }}</strong>
-                        </div>
-                    </div>
-                </div>
+                </nav>
 
             </div>
 
-        </div>
+        </section>
 
-        <h2>Ordenes de trabajo</h2>
 
-        {% if report.work_orders %}
+        <section class="daily-report-section">
 
-            {% for work_order in report.work_orders %}
+            <div class="daily-report-section__heading">
+                <h2>Resumen del dia</h2>
 
-                <div class="card mb-4">
-                    <div class="card-body">
+                <p>
+                    Indicadores de ordenes de trabajo
+                    y tiempo registrado.
+                </p>
+            </div>
 
-                        <div class="mb-3">
-                            <h3 class="h5 mb-1">
-                                {{ work_order.title }}
-                            </h3>
+            <div class="metric-grid">
 
-                            <div class="text-muted">
-                                {{ work_order.work_order_code }}
-                            </div>
+                <article class="metric-card metric-card-blue">
+                    <div class="metric-value">
+                        {{ report.total_work_orders }}
+                    </div>
+                    <div class="metric-title">
+                        Ordenes atendidas
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-purple">
+                    <div class="metric-value">
+                        {{ report.total_activities }}
+                    </div>
+                    <div class="metric-title">
+                        Actividades de OT
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-green">
+                    <div class="metric-value">
+                        {{ report.completed_activities }}
+                    </div>
+                    <div class="metric-title">
+                        Completadas
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-orange">
+                    <div class="metric-value">
+                        {{ report.in_progress_activities }}
+                    </div>
+                    <div class="metric-title">
+                        En proceso
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-yellow">
+                    <div class="metric-value">
+                        {{ report.on_hold_activities }}
+                    </div>
+                    <div class="metric-title">
+                        En espera
+                    </div>
+                </article>
+
+                <article class="metric-card metric-card-gray">
+                    <div class="metric-value">
+                        {{ effective_time }}
+                    </div>
+                    <div class="metric-title">
+                        Horas-hombre
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <section class="daily-report-section">
+
+            <div class="daily-report-section__heading">
+                <h2>Ordenes de trabajo</h2>
+
+                <p>
+                    Actividades formales ejecutadas
+                    dentro de ordenes de trabajo.
+                </p>
+            </div>
+
+            {% if report.work_orders %}
+
+                <div class="daily-report-work-list">
+
+                    {% for work_order in report.work_orders %}
+
+                        <article class="daily-report-work-card">
+
+                            <header class="daily-report-work-card__header">
+
+                                <div>
+                                    <span class="daily-report-work-card__type">
+                                        Orden de trabajo
+                                    </span>
+
+                                    <h3>
+                                        {{ work_order.title }}
+                                    </h3>
+
+                                    <span class="daily-report-work-card__code">
+                                        {{ work_order.work_order_code }}
+                                    </span>
+                                </div>
+
+                            </header>
 
                             {% if work_order.asset_code %}
-                                <div>
-                                    <strong>Activo:</strong>
-                                    {{ work_order.asset_code }}
+
+                                <div class="daily-report-meta-grid">
+
+                                    <div class="daily-report-meta">
+                                        <span>Activo</span>
+                                        <strong>
+                                            {{ work_order.asset_code }}
+                                        </strong>
+                                    </div>
+
+                                    <div class="daily-report-meta">
+                                        <span>Actividades del dia</span>
+                                        <strong>
+                                            {{ work_order.activities|length }}
+                                        </strong>
+                                    </div>
+
                                 </div>
+
                             {% endif %}
-                        </div>
 
-                        {% for activity in work_order.activities %}
+                            <div class="daily-report-activity-list">
 
-                            <div class="border-top pt-3 mt-3">
+                                {% for activity in work_order.activities %}
 
-                                <div
-                                    class="d-flex justify-content-between
-                                           align-items-start gap-3"
-                                >
-                                    <div>
-                                        <h4 class="h6 mb-1">
-                                            {{ activity.title }}
-                                        </h4>
+                                    <div class="daily-report-activity">
 
-                                        <div class="text-muted">
-                                            {{ activity.activity_code }}
+                                        <div
+                                            class="daily-report-activity__header"
+                                        >
+
+                                            <div>
+                                                <h4>
+                                                    {{ activity.title }}
+                                                </h4>
+
+                                                <span
+                                                    class="
+                                                        daily-report-activity__code
+                                                    "
+                                                >
+                                                    {{ activity.activity_code }}
+                                                </span>
+                                            </div>
+
+                                            {% if activity.status == 'COMPLETED' %}
+
+                                                <span
+                                                    class="
+                                                        daily-report-status
+                                                        daily-report-status--completed
+                                                    "
+                                                >
+                                                    Completada
+                                                </span>
+
+                                            {% elif activity.status == 'ON_HOLD' %}
+
+                                                <span
+                                                    class="
+                                                        daily-report-status
+                                                        daily-report-status--hold
+                                                    "
+                                                >
+                                                    En espera
+                                                </span>
+
+                                            {% else %}
+
+                                                <span
+                                                    class="
+                                                        daily-report-status
+                                                        daily-report-status--progress
+                                                    "
+                                                >
+                                                    En proceso
+                                                </span>
+
+                                            {% endif %}
+
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        {% if activity.status == 'COMPLETED' %}
-                                            <span class="badge bg-success">
-                                                Completada
-                                            </span>
-                                        {% elif activity.status == 'ON_HOLD' %}
-                                            <span
-                                                class="badge bg-secondary"
-                                            >
-                                                En espera
-                                            </span>
-                                        {% else %}
-                                            <span
-                                                class="badge bg-warning
-                                                       text-dark"
-                                            >
-                                                En proceso
-                                            </span>
+                                        <div
+                                            class="
+                                                daily-report-activity__details
+                                            "
+                                        >
+
+                                            <div class="daily-report-meta">
+
+                                                <span>Horario</span>
+
+                                                <strong>
+                                                    {% if activity.first_started_at %}
+                                                        {{ activity.first_started_at.strftime('%H:%M') }}
+                                                    {% else %}
+                                                        Sin inicio registrado
+                                                    {% endif %}
+                                                    -
+                                                    {% if activity.has_active_session %}
+                                                        En proceso
+                                                    {% elif activity.last_ended_at %}
+                                                        {{ activity.last_ended_at.strftime('%H:%M') }}
+                                                    {% else %}
+                                                        Sin termino registrado
+                                                    {% endif %}
+                                                </strong>
+
+                                            </div>
+
+                                            {% if activity.technicians %}
+
+                                                <div
+                                                    class="daily-report-meta"
+                                                >
+
+                                                    <span>Tecnicos</span>
+
+                                                    <strong>
+                                                        {% for technician in activity.technicians %}
+                                                            {{ technician.person_code }}{% if not loop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </strong>
+
+                                                </div>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                        {% if activity.completion_notes %}
+
+                                            <div class="daily-report-result">
+                                                <span>Resultado</span>
+                                                <p>
+                                                    {{ activity.completion_notes }}
+                                                </p>
+                                            </div>
+
                                         {% endif %}
+
                                     </div>
-                                </div>
 
-                                <p class="mt-3">
-                                    <strong>Horario:</strong>
-
-                                    {% if activity.first_started_at %}
-                                        {{
-                                            activity.first_started_at
-                                            .strftime('%H:%M')
-                                        }}
-                                    {% else %}
-                                        Sin inicio registrado
-                                    {% endif %}
-
-                                    -
-
-                                    {% if activity.has_active_session %}
-                                        En proceso
-                                    {% elif activity.last_ended_at %}
-                                        {{
-                                            activity.last_ended_at
-                                            .strftime('%H:%M')
-                                        }}
-                                    {% else %}
-                                        Sin termino registrado
-                                    {% endif %}
-                                </p>
-
-                                {% if activity.technicians %}
-                                    <p>
-                                        <strong>Tecnicos:</strong>
-
-                                        {% for technician
-                                           in activity.technicians %}
-
-                                            {{ technician.person_code }}{% if not loop.last %}, {% endif %}
-
-                                        {% endfor %}
-                                    </p>
-                                {% endif %}
-
-                                {% if activity.completion_notes %}
-                                    <p class="mb-0">
-                                        <strong>Resultado:</strong>
-                                        {{
-                                            activity.completion_notes
-                                        }}
-                                    </p>
-                                {% endif %}
+                                {% endfor %}
 
                             </div>
 
-                        {% endfor %}
+                        </article>
 
-                    </div>
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% else %}
 
-        {% else %}
+                <div class="daily-report-empty">
+                    No hay ordenes de trabajo con actividad
+                    registrada para esta fecha.
+                </div>
 
-            <div class="alert alert-secondary">
-                No hay ordenes de trabajo con actividad
-                registrada para esta fecha.
+            {% endif %}
+
+        </section>
+
+
+        <section class="daily-report-section">
+
+            <div class="daily-report-section__heading">
+                <h2>Actividades operacionales</h2>
+
+                <p>
+                    Trabajos registrados fuera de una
+                    actividad formal de orden de trabajo.
+                </p>
             </div>
 
-        {% endif %}
+            {% if report.operational_activities %}
 
-    </section>
+                <div class="daily-report-work-list">
 
+                    {% for activity in report.operational_activities %}
 
-    <section class="mb-5">
+                        <article class="daily-report-work-card">
 
-        <h2>Actividades operacionales</h2>
+                            <header class="daily-report-work-card__header">
 
-        {% if report.operational_activities %}
+                                <div>
+                                    <span class="daily-report-work-card__type">
+                                        Actividad operacional
+                                    </span>
 
-            {% for activity in report.operational_activities %}
+                                    <h3>
+                                        {{ activity.description }}
+                                    </h3>
 
-                <div class="card mb-3">
-                    <div class="card-body">
-
-                        <div
-                            class="d-flex justify-content-between
-                                   align-items-start gap-3"
-                        >
-                            <div>
-                                <h3 class="h5 mb-1">
-                                    {{ activity.description }}
-                                </h3>
-
-                                <div class="text-muted">
-                                    {{ activity.code }}
+                                    <span class="daily-report-work-card__code">
+                                        {{ activity.code }}
+                                    </span>
                                 </div>
-                            </div>
 
-                            <div>
                                 {% if activity.status == 'COMPLETED' %}
-                                    <span class="badge bg-success">
+
+                                    <span
+                                        class="
+                                            daily-report-status
+                                            daily-report-status--completed
+                                        "
+                                    >
                                         Completada
                                     </span>
+
                                 {% else %}
-                                    <span class="badge bg-warning text-dark">
+
+                                    <span
+                                        class="
+                                            daily-report-status
+                                            daily-report-status--progress
+                                        "
+                                    >
                                         En proceso
                                     </span>
-                                {% endif %}
-                            </div>
-                        </div>
 
-                        <hr>
+                                {% endif %}
+
+                            </header>
+
+                            <div class="daily-report-meta-grid">
+
+                                <div class="daily-report-meta">
+                                    <span>Horario</span>
+                                    <strong>
+                                        {{ activity.started_at.strftime('%H:%M') }}
+                                        -
+                                        {% if activity.ended_at %}
+                                            {{ activity.ended_at.strftime('%H:%M') }}
+                                        {% else %}
+                                            En proceso
+                                        {% endif %}
+                                    </strong>
+                                </div>
+
+                                {% if activity.area %}
+                                    <div class="daily-report-meta">
+                                        <span>Area</span>
+                                        <strong>{{ activity.area }}</strong>
+                                    </div>
+                                {% endif %}
+
+                                {% if activity.location_description %}
+                                    <div class="daily-report-meta">
+                                        <span>Ubicacion</span>
+                                        <strong>
+                                            {{ activity.location_description }}
+                                        </strong>
+                                    </div>
+                                {% endif %}
+
+                                {% if activity.asset_code %}
+                                    <div class="daily-report-meta">
+                                        <span>Activo</span>
+                                        <strong>
+                                            {{ activity.asset_code }}
+                                        </strong>
+                                    </div>
+                                {% endif %}
+
+                                {% if activity.work_order_code %}
+                                    <div class="daily-report-meta">
+                                        <span>Orden relacionada</span>
+                                        <strong>
+                                            {{ activity.work_order_code }}
+                                        </strong>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                            {% if activity.result_notes %}
+
+                                <div class="daily-report-result">
+                                    <span>Resultado</span>
+                                    <p>{{ activity.result_notes }}</p>
+                                </div>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="daily-report-empty">
+                    No hay actividades operacionales registradas
+                    para esta fecha.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <section class="daily-report-section">
+
+            <div class="daily-report-share">
+
+                <header class="daily-report-share__header">
+
+                    <div>
+                        <h2>Reporte para compartir</h2>
 
                         <p>
-                            <strong>Horario:</strong>
-
-                            {{ activity.started_at.strftime('%H:%M') }}
-
-                            -
-
-                            {% if activity.ended_at %}
-                                {{ activity.ended_at.strftime('%H:%M') }}
-                            {% else %}
-                                En proceso
-                            {% endif %}
+                            Vista preparada para copiar
+                            y enviar por WhatsApp.
                         </p>
-
-                        {% if activity.area %}
-                            <p>
-                                <strong>Area:</strong>
-                                {{ activity.area }}
-                            </p>
-                        {% endif %}
-
-                        {% if activity.location_description %}
-                            <p>
-                                <strong>Ubicacion:</strong>
-                                {{ activity.location_description }}
-                            </p>
-                        {% endif %}
-
-                        {% if activity.asset_code %}
-                            <p>
-                                <strong>Activo:</strong>
-                                {{ activity.asset_code }}
-                            </p>
-                        {% endif %}
-
-                        {% if activity.work_order_code %}
-                            <p>
-                                <strong>Orden de trabajo:</strong>
-                                {{ activity.work_order_code }}
-                            </p>
-                        {% endif %}
-
-                        {% if activity.result_notes %}
-                            <p class="mb-0">
-                                <strong>Resultado:</strong>
-                                {{ activity.result_notes }}
-                            </p>
-                        {% endif %}
-
                     </div>
-                </div>
 
-            {% endfor %}
-
-        {% else %}
-
-            <div class="alert alert-secondary">
-                No hay actividades operacionales registradas
-                para esta fecha.
-            </div>
-
-        {% endif %}
-
-    </section>
-
-    <section class="mb-5">
-
-        <div class="card">
-            <div class="card-body">
-
-                <div class="mb-3">
-                    <div
-                        class="d-flex justify-content-between align-items-start gap-3"
+                    <button
+                        type="button"
+                        id="copy-daily-report"
+                        class="
+                            daily-report-button
+                            daily-report-button--primary
+                        "
                     >
-                        <div>
-                            <h2 class="h4 mb-1">
-                                Reporte para compartir
-                            </h2>
+                        Copiar para WhatsApp
+                    </button>
 
-                            <p class="text-muted mb-0">
-                                Texto preparado para copiar y enviar.
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            id="copy-daily-report"
-                            class="btn btn-primary"
-                        >
-                            Copiar para WhatsApp
-                        </button>
-                    </div>
-                </div>
+                </header>
 
                 <div
                     id="daily-report-preview"
-                    class="border rounded p-3"
+                    class="daily-report-preview"
                 >
-                    <p class="mb-1">
+
+                    <p>
                         <strong>REPORTE DE ACTIVIDADES</strong>
                     </p>
 
-                    <p class="mb-4">
+                    <p>
                         <strong>
                             {{ report.report_date.strftime("%d/%m/%Y") }}
                         </strong>
@@ -472,9 +585,9 @@ Reporte diario de actividades
 
                         {% for activity in work_order.activities %}
 
-                            <div class="mb-4">
+                            <div class="daily-report-preview__entry">
 
-                                <p class="mb-1">
+                                <p>
                                     <strong>
                                         {% if activity.first_started_at %}
                                             {{ activity.first_started_at.strftime("%H:%M") }}
@@ -492,17 +605,15 @@ Reporte diario de actividades
                                     </strong>
                                 </p>
 
-                                <p class="mb-1">
-                                    {{ activity.title }}
-                                </p>
+                                <p>{{ activity.title }}</p>
 
-                                <p class="mb-1">
+                                <p>
                                     <strong>OT:</strong>
                                     {{ work_order.work_order_code }}
                                 </p>
 
                                 {% if activity.technicians %}
-                                    <p class="mb-1">
+                                    <p>
                                         <strong>Tecnicos:</strong>
                                         {% for technician in activity.technicians %}
                                             {{ technician.person_code }}{% if not loop.last %}, {% endif %}
@@ -511,7 +622,7 @@ Reporte diario de actividades
                                 {% endif %}
 
                                 {% if activity.completion_notes %}
-                                    <p class="mb-0">
+                                    <p>
                                         <strong>Resultado:</strong>
                                         {{ activity.completion_notes }}
                                     </p>
@@ -523,39 +634,41 @@ Reporte diario de actividades
 
                     {% endfor %}
 
+
                     {% for activity in report.operational_activities %}
 
-                        <div class="mb-4">
+                        <div class="daily-report-preview__entry">
 
-                            <p class="mb-1">
-                                <strong>{{ activity.started_at.strftime("%H:%M") }} -
-                                {% if activity.ended_at %}
-                                    {{ activity.ended_at.strftime("%H:%M") }}
-                                {% else %}
-                                    En proceso
-                                {% endif %}</strong>
+                            <p>
+                                <strong>
+                                    {{ activity.started_at.strftime("%H:%M") }}
+                                    -
+                                    {% if activity.ended_at %}
+                                        {{ activity.ended_at.strftime("%H:%M") }}
+                                    {% else %}
+                                        En proceso
+                                    {% endif %}
+                                </strong>
                             </p>
 
-                            <p class="mb-1">
-                                {{ activity.description }}
-                            </p>
+                            <p>{{ activity.description }}</p>
 
                             {% if activity.area %}
-                                <p class="mb-1">
+                                <p>
                                     <strong>Area:</strong>
                                     {{ activity.area }}
                                 </p>
                             {% endif %}
 
                             {% if activity.location_description %}
-                                <p class="mb-1">
+                                <p>
                                     <strong>Ubicacion:</strong>
                                     {{ activity.location_description }}
                                 </p>
                             {% endif %}
 
                             {% if activity.result_notes %}
-                                <p class="mb-0">
+                                <p>
                                     <strong>Resultado:</strong>
                                     {{ activity.result_notes }}
                                 </p>
@@ -565,14 +678,17 @@ Reporte diario de actividades
 
                     {% endfor %}
 
+
                     {% if (
                         not report.work_orders
                         and not report.operational_activities
                     ) %}
-                        <p class="text-muted mb-0">
+
+                        <p>
                             No hay actividades registradas
                             para esta fecha.
                         </p>
+
                     {% endif %}
 
                 </div>
@@ -583,11 +699,13 @@ Reporte diario de actividades
                 >{{ shareable_report }}</pre>
 
             </div>
-        </div>
 
-    </section>
+        </section>
+
+    </div>
 
 </div>
+
 
 <script>
 document.addEventListener(
