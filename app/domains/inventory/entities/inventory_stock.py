@@ -8,9 +8,6 @@ class InventoryStock:
         spare_part_code: str,
         location_code: str,
         quantity: float = 0,
-        minimum_stock: float = 0,
-        maximum_stock: float = 0,
-        reorder_point: float = 0,
     ) -> None:
 
         self.spare_part_code = (
@@ -27,41 +24,12 @@ class InventoryStock:
             )
         )
 
-        self.quantity = self._validate_non_negative(
-            quantity,
-            "quantity",
-        )
-
-        self.minimum_stock = (
+        self.quantity = (
             self._validate_non_negative(
-                minimum_stock,
-                "minimum_stock",
+                quantity,
+                "quantity",
             )
         )
-
-        self.maximum_stock = (
-            self._validate_non_negative(
-                maximum_stock,
-                "maximum_stock",
-            )
-        )
-
-        self.reorder_point = (
-            self._validate_non_negative(
-                reorder_point,
-                "reorder_point",
-            )
-        )
-
-        if (
-            self.maximum_stock > 0
-            and self.maximum_stock
-            < self.minimum_stock
-        ):
-            raise ValueError(
-                "maximum_stock cannot be below "
-                "minimum_stock"
-            )
 
     @property
     def is_out_of_stock(
@@ -69,26 +37,6 @@ class InventoryStock:
     ) -> bool:
 
         return self.quantity == 0
-
-    @property
-    def is_below_minimum(
-        self,
-    ) -> bool:
-
-        return (
-            self.quantity
-            < self.minimum_stock
-        )
-
-    @property
-    def needs_reorder(
-        self,
-    ) -> bool:
-
-        return (
-            self.quantity
-            <= self.reorder_point
-        )
 
     @staticmethod
     def _normalize_required_code(

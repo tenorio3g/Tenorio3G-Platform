@@ -7,6 +7,9 @@ from .in_memory_inventory_movement_repository import (
 from .in_memory_inventory_stock_repository import (
     InMemoryInventoryStockRepository,
 )
+from .in_memory_inventory_stock_policy_repository import (
+    InMemoryInventoryStockPolicyRepository,
+)
 from .in_memory_warehouse_repository import (
     InMemoryWarehouseRepository,
 )
@@ -19,6 +22,9 @@ from .inventory_movement_repository import (
 from .inventory_stock_repository import (
     InventoryStockRepository,
 )
+from .inventory_stock_policy_repository import (
+    InventoryStockPolicyRepository,
+)
 from .warehouse_repository import (
     WarehouseRepository,
 )
@@ -27,9 +33,11 @@ __all__ = [
     "InMemoryInventoryLocationRepository",
     "InMemoryInventoryMovementRepository",
     "InMemoryInventoryStockRepository",
+    "InMemoryInventoryStockPolicyRepository",
     "InMemoryWarehouseRepository",
     "InventoryLocationRepository",
     "InventoryMovementRepository",
     "InventoryStockRepository",
+    "InventoryStockPolicyRepository",
     "WarehouseRepository",
 ]

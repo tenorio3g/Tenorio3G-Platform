@@ -10,17 +10,11 @@ def create_stock(
     spare_part_code="BRG-6206",
     location_code="LOC-001",
     quantity=10,
-    minimum_stock=2,
-    maximum_stock=20,
-    reorder_point=4,
 ):
     return InventoryStock(
         spare_part_code=spare_part_code,
         location_code=location_code,
         quantity=quantity,
-        minimum_stock=minimum_stock,
-        maximum_stock=maximum_stock,
-        reorder_point=reorder_point,
     )
 
 
