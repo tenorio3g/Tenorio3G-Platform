@@ -198,8 +198,25 @@ def format_duration(total_seconds: int) -> str:
 @login_required
 def daily_operational_report_route():
 
+    selected_date = (
+        request.args.get("fecha", "").strip()
+    )
+
+    if selected_date:
+        try:
+            report_date = date.fromisoformat(
+                selected_date
+            )
+        except ValueError:
+            return (
+                "La fecha seleccionada no es valida.",
+                400,
+            )
+    else:
+        report_date = current_date()
+
     query = GetDailyOperationalReportQuery(
-        report_date=current_date(),
+        report_date=report_date,
     )
 
     report = (

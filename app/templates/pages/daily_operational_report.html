@@ -29,6 +29,51 @@ Reporte diario de actividades
         </div>
     </div>
 
+    <section class="mb-4">
+
+        <div class="card">
+            <div class="card-body">
+
+                <form
+                    method="get"
+                    action="{{ url_for(
+                        'operations.daily_operational_report_route'
+                    ) }}"
+                    class="row g-3 align-items-end"
+                >
+                    <div class="col-md-4">
+                        <label
+                            for="daily-report-date"
+                            class="form-label"
+                        >
+                            Fecha del reporte
+                        </label>
+
+                        <input
+                            type="date"
+                            id="daily-report-date"
+                            name="fecha"
+                            class="form-control"
+                            value="{{ report.report_date.isoformat() }}"
+                            required
+                        >
+                    </div>
+
+                    <div class="col-md-auto">
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Consultar
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </section>
+
     <section class="mb-5">
 
         <div class="mb-4">

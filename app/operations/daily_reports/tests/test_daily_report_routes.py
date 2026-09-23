@@ -886,3 +886,184 @@ def test_daily_report_should_render_copy_report_control(
     )
 
     assert "Copiar para WhatsApp" in html
+
+
+def test_daily_report_should_execute_query_for_selected_date(
+    monkeypatch,
+):
+    from datetime import date
+    from importlib import import_module
+    from types import SimpleNamespace
+
+    app = build_test_app()
+    client = app.test_client()
+
+    calls = []
+
+    class DailyReportStub:
+
+        def execute(self, query):
+            calls.append(query)
+
+            return SimpleNamespace(
+                report_date=query.report_date,
+                work_orders=[],
+                operational_activities=[],
+                total_work_orders=0,
+                total_activities=0,
+                completed_activities=0,
+                in_progress_activities=0,
+                on_hold_activities=0,
+                effective_seconds=0,
+            )
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_daily_operational_report",
+        DailyReportStub(),
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "current_date",
+        lambda: date(2026, 9, 22),
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/operaciones/reporte-diario"
+        "?fecha=2026-09-18"
+    )
+
+    assert response.status_code == 200
+    assert len(calls) == 1
+
+    assert calls[0].report_date == date(
+        2026,
+        9,
+        18,
+    )
+
+
+def test_daily_report_should_render_date_selector(
+    monkeypatch,
+):
+    from datetime import date
+    from importlib import import_module
+    from types import SimpleNamespace
+
+    app = build_test_app()
+    client = app.test_client()
+
+    report_date = date(
+        2026,
+        9,
+        18,
+    )
+
+    class DailyReportStub:
+
+        def execute(self, query):
+            return SimpleNamespace(
+                report_date=query.report_date,
+                work_orders=[],
+                operational_activities=[],
+                total_work_orders=0,
+                total_activities=0,
+                completed_activities=0,
+                in_progress_activities=0,
+                on_hold_activities=0,
+                effective_seconds=0,
+            )
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_daily_operational_report",
+        DailyReportStub(),
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "current_date",
+        lambda: report_date,
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/operaciones/reporte-diario"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert 'name="fecha"' in html
+    assert 'type="date"' in html
+    assert 'value="2026-09-18"' in html
+    assert "Consultar" in html
+
+
+def test_daily_report_should_reject_invalid_selected_date(
+    monkeypatch,
+):
+    from importlib import import_module
+
+    app = build_test_app()
+    client = app.test_client()
+
+    calls = []
+
+    class DailyReportStub:
+
+        def execute(self, query):
+            calls.append(query)
+            raise AssertionError(
+                "El reporte no debe ejecutarse "
+                "con una fecha invalida."
+            )
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_daily_operational_report",
+        DailyReportStub(),
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/operaciones/reporte-diario"
+        "?fecha=fecha-invalida"
+    )
+
+    assert response.status_code == 400
+    assert calls == []
+
+    assert (
+        b"La fecha seleccionada no es valida."
+        in response.data
+    )
