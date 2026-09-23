@@ -1067,3 +1067,80 @@ def test_daily_report_should_reject_invalid_selected_date(
         b"La fecha seleccionada no es valida."
         in response.data
     )
+
+
+def test_daily_report_should_render_date_navigation(
+    monkeypatch,
+):
+    from datetime import date
+    from importlib import import_module
+    from types import SimpleNamespace
+
+    app = build_test_app()
+    client = app.test_client()
+
+    class DailyReportStub:
+
+        def execute(self, query):
+            return SimpleNamespace(
+                report_date=query.report_date,
+                work_orders=[],
+                operational_activities=[],
+                total_work_orders=0,
+                total_activities=0,
+                completed_activities=0,
+                in_progress_activities=0,
+                on_hold_activities=0,
+                effective_seconds=0,
+            )
+
+    routes_module = import_module(
+        "app.operations.routes"
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "get_daily_operational_report",
+        DailyReportStub(),
+    )
+
+    monkeypatch.setattr(
+        routes_module,
+        "current_date",
+        lambda: date(2026, 9, 22),
+    )
+
+    with client.session_transaction() as session:
+        session["username"] = "angel"
+        session["person_code"] = "TECH-001"
+        session["role_code"] = "TECHNICIAN"
+
+    response = client.get(
+        "/operaciones/reporte-diario"
+        "?fecha=2026-09-18"
+    )
+
+    assert response.status_code == 200
+
+    html = response.get_data(
+        as_text=True
+    )
+
+    assert "Dia anterior" in html
+    assert "Hoy" in html
+    assert "Dia siguiente" in html
+
+    assert (
+        "fecha=2026-09-17"
+        in html
+    )
+
+    assert (
+        "fecha=2026-09-19"
+        in html
+    )
+
+    assert (
+        'href="/operaciones/reporte-diario"'
+        in html
+    )

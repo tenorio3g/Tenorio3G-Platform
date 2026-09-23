@@ -69,6 +69,39 @@ Reporte diario de actividades
                     </div>
                 </form>
 
+                <div class="d-flex flex-wrap gap-2 mt-3">
+
+                    <a
+                        href="{{ url_for(
+                            'operations.daily_operational_report_route',
+                            fecha=previous_date.isoformat()
+                        ) }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Dia anterior
+                    </a>
+
+                    <a
+                        href="{{ url_for(
+                            'operations.daily_operational_report_route'
+                        ) }}"
+                        class="btn btn-outline-primary"
+                    >
+                        Hoy
+                    </a>
+
+                    <a
+                        href="{{ url_for(
+                            'operations.daily_operational_report_route',
+                            fecha=next_date.isoformat()
+                        ) }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Dia siguiente
+                    </a>
+
+                </div>
+
             </div>
         </div>
 

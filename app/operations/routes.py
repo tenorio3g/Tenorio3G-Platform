@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from flask import (
     abort,
@@ -231,6 +231,16 @@ def daily_operational_report_route():
         )
     )
 
+    previous_date = (
+        report.report_date
+        - timedelta(days=1)
+    )
+
+    next_date = (
+        report.report_date
+        + timedelta(days=1)
+    )
+
     return render_template(
         "pages/daily_operational_report.html",
         report=report,
@@ -238,6 +248,8 @@ def daily_operational_report_route():
             report.effective_seconds
         ),
         shareable_report=shareable_report,
+        previous_date=previous_date,
+        next_date=next_date,
     )
 
 
